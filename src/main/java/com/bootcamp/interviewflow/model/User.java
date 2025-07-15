@@ -13,7 +13,7 @@ public class User {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer id;
+    private Long id;
 
     @Column(nullable = false)
     private String name;
@@ -36,7 +36,7 @@ public class User {
     public User() {}
 
     // Constructor with all fields
-    public User(Integer id, String name, String email, String password, LocalDateTime createdAt, LocalDateTime updatedAt) {
+    public User(Long id, String name, String email, String password, LocalDateTime createdAt, LocalDateTime updatedAt) {
         this.id = id;
         this.name = name;
         this.email = email;
@@ -53,11 +53,11 @@ public class User {
     }
 
     // Getters and Setters
-    public Integer getId() {
+    public Long getId() {
         return id;
     }
 
-    public void setId(Integer id) {
+    public void setId(Long id) {
         this.id = id;
     }
 
