@@ -3,25 +3,25 @@ package com.bootcamp.interviewflow.dto;
 import java.time.LocalDateTime;
 
 public class UserResponseDto {
-    private Long id;
+    private Integer id;
     private String name;
     private String email;
     private LocalDateTime createdAt;
 
     public UserResponseDto() {}
 
-    public UserResponseDto(Long id, String name, String email, LocalDateTime createdAt) {
+    public UserResponseDto(Integer id, String name, String email, LocalDateTime createdAt) {
         this.id = id;
         this.name = name;
         this.email = email;
         this.createdAt = createdAt;
     }
 
-    public Long getId() {
+    public Integer getId() {
         return id;
     }
 
-    public void setId(Long id) {
+    public void setId(Integer id) {
         this.id = id;
     }
 
