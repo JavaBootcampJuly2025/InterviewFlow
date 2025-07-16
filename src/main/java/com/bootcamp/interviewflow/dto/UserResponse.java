@@ -2,21 +2,23 @@ package com.bootcamp.interviewflow.dto;
 
 import java.time.LocalDateTime;
 
-public class UserResponseDto {
+public class UserResponse {
+
     private Long id;
-    private String name;
+    private String userName;
     private String email;
     private LocalDateTime createdAt;
 
-    public UserResponseDto() {}
+    public UserResponse() {}
 
-    public UserResponseDto(Long id, String name, String email, LocalDateTime createdAt) {
+    public UserResponse(Long id, String userName, String email, LocalDateTime createdAt) {
         this.id = id;
-        this.name = name;
+        this.userName = userName;
         this.email = email;
         this.createdAt = createdAt;
     }
 
+    // Getters and setters
     public Long getId() {
         return id;
     }
@@ -25,12 +27,12 @@ public class UserResponseDto {
         this.id = id;
     }
 
-    public String getName() {
-        return name;
+    public String getUserName() {
+        return userName;
     }
 
-    public void setName(String name) {
-        this.name = name;
+    public void setUserName(String userName) {
+        this.userName = userName;
     }
 
     public String getEmail() {

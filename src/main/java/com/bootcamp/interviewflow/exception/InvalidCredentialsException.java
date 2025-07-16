@@ -1,7 +1,0 @@
-package com.bootcamp.interviewflow.exception;
-
-public class InvalidCredentialsException extends RuntimeException {
-    public InvalidCredentialsException(String message) {
-        super(message);
-    }
-}
