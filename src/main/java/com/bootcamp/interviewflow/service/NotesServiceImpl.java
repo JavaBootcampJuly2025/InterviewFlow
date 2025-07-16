@@ -46,8 +46,8 @@ public class NotesServiceImpl implements NotesService {
     }
 
     @Override
-    public List<NoteResponse> getAll() {
-        List<Note> notes = noteRepository.findAll();
+    public List<NoteResponse> getAllByApplicationId(Long applicationId) {
+        List<Note> notes = noteRepository.findAllByApplication_Id(applicationId);
         return notes.stream()
                 .map(note -> new NoteResponse(
                         note.getId(),

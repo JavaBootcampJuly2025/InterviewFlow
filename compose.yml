@@ -1,3 +1,5 @@
+version: "3.8"
+
 services:
   postgres:
     image: postgres:17.4-bookworm
@@ -7,7 +9,7 @@ services:
       POSTGRES_PASSWORD: ${DB_PASSWORD:-postgres}
       POSTGRES_DB: ${DB_NAME:-interview_flow_db}
     ports:
-      - "${DB_LOCAL_PORT:-5432}:5432"
+      - "${DB_LOCAL_PORT:-5432}:${DB_DOCKER_PORT:-5432}"
     volumes:
       - pgdata:/var/lib/postgresql/data
     restart: unless-stopped

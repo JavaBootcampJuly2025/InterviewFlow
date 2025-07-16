@@ -8,6 +8,6 @@ import java.util.List;
 public interface NotesService {
     NoteResponse create(NoteRequest request);
     NoteResponse getById(Long id);
-    List<NoteResponse> getAll();
+    List<NoteResponse> getAllByApplicationId(Long applicationId);
     void deleteById(Long id);
 }

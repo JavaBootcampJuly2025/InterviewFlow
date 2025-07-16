@@ -131,7 +131,7 @@ class NotesServiceTest {
     }
 
     @Test
-    void shouldReturnListOfNoteResponseWhenCalledGetAll() {
+    void shouldReturnListOfNoteResponseWhenCalledGetAllByApplicationId() {
         localDateTimeMocked = Mockito.mockStatic(LocalDateTime.class, Mockito.CALLS_REAL_METHODS);
         LocalDateTime now = LocalDateTime.of(2022, 10, 22, 10, 0);
         localDateTimeMocked.when(LocalDateTime::now).thenReturn(now);
@@ -170,15 +170,15 @@ class NotesServiceTest {
                 noteThree.getCreatedAt(),
                 noteThree.getUpdatedAt());
 
-        when(noteRepository.findAll()).thenReturn(notes);
+        when(noteRepository.findAllByApplication_Id(1L)).thenReturn(notes);
 
-        var actual = service.getAll();
+        var actual = service.getAllByApplicationId(1L);
 
         assertTrue(actual.contains(responseOne));
         assertTrue(actual.contains(responseTwo));
         assertTrue(actual.contains(responseThree));
 
-        verify(noteRepository, times(1)).findAll();
+        verify(noteRepository, times(1)).findAllByApplication_Id(1L);
 
         localDateTimeMocked.close();
     }
