@@ -1,28 +1,44 @@
 package com.bootcamp.interviewflow.service;
 
-import com.bootcamp.interviewflow.dto.CreateApplicationDTO;
+import com.bootcamp.interviewflow.dto.CreateApplicationRequest;
 import com.bootcamp.interviewflow.model.Application;
 import com.bootcamp.interviewflow.model.User;
 import com.bootcamp.interviewflow.model.ApplicationStatus;
 import com.bootcamp.interviewflow.repository.ApplicationRepository;
 import com.bootcamp.interviewflow.repository.UserRepository;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.verify;
 
 class ApplicationServiceTest {
 
+    @Mock
+    private ApplicationRepository applicationRepository;
+
+    @Mock
+    private UserRepository userRepository;
+
+    @InjectMocks
+    private ApplicationService service;
+
+    @BeforeEach
+    void setUp() {
+        MockitoAnnotations.openMocks(this);
+    }
+
     @Test
     void createFromDto_shouldSaveApplicationWithCorrectFields() {
-        ApplicationRepository applicationRepository = mock(ApplicationRepository.class);
-        UserRepository userRepository = mock(UserRepository.class);
-        ApplicationService service = new ApplicationService(applicationRepository, userRepository);
 
-        CreateApplicationDTO dto = new CreateApplicationDTO();
+        CreateApplicationRequest dto = new CreateApplicationRequest();
         dto.setCompanyName("TestCompany");
         dto.setCompanyLink("https://testcompany.com");
         dto.setPosition("Java Dev");
@@ -37,7 +53,7 @@ class ApplicationServiceTest {
         when(userRepository.findById(1L)).thenReturn(Optional.of(user));
         when(applicationRepository.save(any(Application.class))).thenAnswer(inv -> inv.getArgument(0));
 
-        Application app = service.createFromDto(dto);
+        Application app = service.create(dto);
 
         assertEquals("TestCompany", app.getCompanyName());
         assertEquals("https://testcompany.com", app.getCompanyLink());

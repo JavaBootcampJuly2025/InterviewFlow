@@ -1,6 +1,6 @@
 package com.bootcamp.interviewflow.controller;
 
-import com.bootcamp.interviewflow.dto.CreateApplicationDTO;
+import com.bootcamp.interviewflow.dto.CreateApplicationRequest;
 import com.bootcamp.interviewflow.model.Application;
 import com.bootcamp.interviewflow.service.ApplicationService;
 import jakarta.validation.Valid;
@@ -21,8 +21,8 @@ public class ApplicationController {
 
 
     @PostMapping
-    public ResponseEntity<Application> create(@RequestBody @Valid CreateApplicationDTO dto) {
-        Application created = service.createFromDto(dto);
+    public ResponseEntity<Application> create(@RequestBody @Valid CreateApplicationRequest dto) {
+        Application created = service.create(dto);
         return ResponseEntity.ok(created);
     }
 
@@ -34,8 +34,8 @@ public class ApplicationController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> delete(@PathVariable Long id) {
+    public ResponseEntity<String> delete(@PathVariable Long id) {
         service.delete(id);
-        return ResponseEntity.noContent().build();
+        return ResponseEntity.ok("Application with id " + id + " deleted");
     }
 }

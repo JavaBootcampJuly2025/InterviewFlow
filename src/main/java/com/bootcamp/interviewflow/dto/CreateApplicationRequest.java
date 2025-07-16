@@ -8,7 +8,7 @@ import lombok.Setter;
 
 @Setter
 @Getter
-public class CreateApplicationDTO {
+public class CreateApplicationRequest {
 
     @NotBlank(message = "Company name is required")
     @Size(max = 100, message = "Company name must not exceed 100 characters")

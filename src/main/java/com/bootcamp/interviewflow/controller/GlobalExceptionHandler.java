@@ -1,6 +1,7 @@
 package com.bootcamp.interviewflow.controller;
 
 import com.bootcamp.interviewflow.dto.ApiResponse;
+import com.bootcamp.interviewflow.exception.ApplicationNotFoundException;
 import com.bootcamp.interviewflow.exception.EmailAlreadyExistsException;
 import com.bootcamp.interviewflow.exception.UserNotFoundException;
 import org.slf4j.Logger;
@@ -57,5 +58,11 @@ public class GlobalExceptionHandler {
         logger.error("Unexpected error occurred: ", ex);
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                 .body(new ApiResponse(false, "An unexpected error occurred"));
+    }
+
+    @ExceptionHandler(ApplicationNotFoundException.class)
+    public ResponseEntity<ApiResponse> handleApplicationNotFoundException(ApplicationNotFoundException ex) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                .body(new ApiResponse(false, ex.getMessage()));
     }
 }

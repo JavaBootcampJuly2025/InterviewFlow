@@ -1,6 +1,7 @@
 package com.bootcamp.interviewflow.service;
 
-import com.bootcamp.interviewflow.dto.CreateApplicationDTO;
+import com.bootcamp.interviewflow.dto.CreateApplicationRequest;
+import com.bootcamp.interviewflow.exception.ApplicationNotFoundException;
 import com.bootcamp.interviewflow.model.Application;
 import com.bootcamp.interviewflow.model.ApplicationStatus;
 import com.bootcamp.interviewflow.model.User;
@@ -21,7 +22,7 @@ public class ApplicationService {
         this.userRepository = userRepository;
     }
 
-    public Application createFromDto(CreateApplicationDTO dto) {
+    public Application create(CreateApplicationRequest dto) {
         User user = userRepository.findById(dto.getUserId())
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
@@ -40,6 +41,9 @@ public class ApplicationService {
     }
 
     public void delete(Long id) {
+        if (!applicationRepository.existsById(id)) {
+            throw new ApplicationNotFoundException("Application with id " + id + " not found");
+        }
         applicationRepository.deleteById(id);
     }
 }
