@@ -1,6 +1,7 @@
 package com.bootcamp.interviewflow.dto;
 
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import lombok.Getter;
@@ -28,6 +29,7 @@ public class CreateApplicationRequest {
     )
     private String status;
 
+    @NotNull(message = "User ID is required")
     private Long userId;
 
 }
