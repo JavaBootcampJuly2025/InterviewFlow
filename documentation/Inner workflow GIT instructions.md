@@ -7,7 +7,7 @@
 ## 1. Clone the Repository (First Time Only)
 
 ```bash
-git clone https://github.com/yourusername/interviewflow.git
+git clone https://github.com/JavaBootcampJuly2025/InterviewFlow.git
 cd interviewflow
 ```
 
