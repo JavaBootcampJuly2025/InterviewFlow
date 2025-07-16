@@ -34,7 +34,6 @@ public class User {
     @Column(unique = true, nullable = false)
     private String email;
 
-    @CreationTimestamp
     @Column(nullable = false, updatable = false)
     private String password;
 
