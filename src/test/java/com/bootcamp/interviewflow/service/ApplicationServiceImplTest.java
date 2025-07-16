@@ -1,6 +1,7 @@
 package com.bootcamp.interviewflow.service;
 
 import com.bootcamp.interviewflow.dto.CreateApplicationRequest;
+import com.bootcamp.interviewflow.exception.UserNotFoundException;
 import com.bootcamp.interviewflow.model.Application;
 import com.bootcamp.interviewflow.model.User;
 import com.bootcamp.interviewflow.model.ApplicationStatus;
@@ -15,11 +16,13 @@ import org.mockito.MockitoAnnotations;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 import static org.mockito.Mockito.verify;
 
-class ApplicationServiceTest {
+class ApplicationServiceImplTest {
 
     @Mock
     private ApplicationRepository applicationRepository;
@@ -28,7 +31,7 @@ class ApplicationServiceTest {
     private UserRepository userRepository;
 
     @InjectMocks
-    private ApplicationService service;
+    private ApplicationServiceImpl service;
 
     @BeforeEach
     void setUp() {
@@ -36,7 +39,7 @@ class ApplicationServiceTest {
     }
 
     @Test
-    void createFromDto_shouldSaveApplicationWithCorrectFields() {
+    void create_shouldSaveApplicationWithCorrectFields() {
 
         CreateApplicationRequest dto = new CreateApplicationRequest();
         dto.setCompanyName("TestCompany");
@@ -63,5 +66,20 @@ class ApplicationServiceTest {
 
         verify(userRepository).findById(1L);
         verify(applicationRepository).save(any(Application.class));
+    }
+
+    @Test
+    void create_shouldThrowUserNotFoundException_whenUserDoesNotExist() {
+        CreateApplicationRequest dto = new CreateApplicationRequest();
+        dto.setUserId(99L);
+        when(userRepository.findById(99L)).thenReturn(Optional.empty());
+
+        UserNotFoundException exception = assertThrows(
+                UserNotFoundException.class,
+                () -> service.create(dto)
+        );
+        assertEquals("User with id 99 not found", exception.getMessage());
+        verify(userRepository).findById(99L);
+        verifyNoInteractions(applicationRepository);
     }
 }

@@ -2,7 +2,7 @@ package com.bootcamp.interviewflow.controller;
 
 import com.bootcamp.interviewflow.dto.CreateApplicationRequest;
 import com.bootcamp.interviewflow.model.Application;
-import com.bootcamp.interviewflow.service.ApplicationService;
+import com.bootcamp.interviewflow.service.ApplicationServiceImpl;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -13,9 +13,9 @@ import java.util.List;
 @RequestMapping("/api/applications")
 public class ApplicationController {
 
-    private final ApplicationService service;
+    private final ApplicationServiceImpl service;
 
-    public ApplicationController(ApplicationService service) {
+    public ApplicationController(ApplicationServiceImpl service) {
         this.service = service;
     }
 
