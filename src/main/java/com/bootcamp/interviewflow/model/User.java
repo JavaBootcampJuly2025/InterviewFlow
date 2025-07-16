@@ -38,6 +38,11 @@ public class User {
 
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)
+  
+    private String password;
+
+    @CreationTimestamp
+    @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;
 
     @UpdateTimestamp
@@ -52,3 +57,4 @@ public class User {
         this.updatedAt = updatedAt;
     }
 }
+
