@@ -37,7 +37,7 @@ public class UserServiceImplementation implements UserService {
 
         // Create new user
         User user = new User();
-        user.setUserName(registerRequest.getUsername());
+        user.setUsername(registerRequest.getUsername());
         user.setEmail(registerRequest.getEmail());
         user.setPassword(passwordEncoder.encode(registerRequest.getPassword()));
 
@@ -65,7 +65,7 @@ public class UserServiceImplementation implements UserService {
     private UserResponse convertToResponse(User user) {
         return new UserResponse(
                 user.getId(),
-                user.getUserName(),
+                user.getUsername(),
                 user.getEmail(),
                 user.getCreatedAt()
         );
