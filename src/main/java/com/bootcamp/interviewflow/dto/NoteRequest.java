@@ -1,4 +1,4 @@
 package com.bootcamp.interviewflow.dto;
 
-public record NoteRequest(String content) {
+public record NoteRequest(Long applicationId, String content) {
 }
