@@ -1,6 +1,6 @@
 package com.bootcamp.interviewflow.service;
 
-import com.bootcamp.interviewflow.dto.ApplicationListDTO;
+import com.bootcamp.interviewflow.dto.ApplicationListResponse;
 import com.bootcamp.interviewflow.dto.CreateApplicationRequest;
 import com.bootcamp.interviewflow.model.Application;
 
@@ -14,5 +14,5 @@ public interface ApplicationService {
 
     void delete(Long id);
 
-    List<ApplicationListDTO> findAllByUserId(Long userId);
+    List<ApplicationListResponse> findAllByUserId(Long userId);
 }

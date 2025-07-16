@@ -3,7 +3,7 @@ package com.bootcamp.interviewflow.dto;
 import lombok.Data;
 
 @Data
-public class ApplicationListDTO {
+public class ApplicationListResponse {
     private Long id;
     private String companyName;
     private String position;
