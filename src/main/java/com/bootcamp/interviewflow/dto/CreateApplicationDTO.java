@@ -6,8 +6,8 @@ import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.Setter;
 
-@Getter
 @Setter
+@Getter
 public class CreateApplicationDTO {
 
     @NotBlank(message = "Company name is required")
@@ -27,5 +27,7 @@ public class CreateApplicationDTO {
             message = "Status must be one of: APPLIED, HR_SCREEN, TECHNICAL_INTERVIEW, FINAL_INTERVIEW, OFFERED, ACCEPTED, REJECTED, WITHDRAWN"
     )
     private String status;
+
+    private Long userId;
 
 }
