@@ -1,5 +1,6 @@
 package com.bootcamp.interviewflow.model;
 
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -33,12 +34,7 @@ public class User {
     @Column(unique = true, nullable = false)
     private String email;
 
-    @Column(nullable = false)
-    private String password;
-
-    @CreationTimestamp
-    @Column(name = "created_at", nullable = false, updatable = false)
-  
+    @Column(nullable = false, updatable = false)
     private String password;
 
     @CreationTimestamp
