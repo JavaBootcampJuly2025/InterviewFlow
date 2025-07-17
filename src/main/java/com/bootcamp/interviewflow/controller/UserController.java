@@ -8,6 +8,8 @@ import com.bootcamp.interviewflow.service.UserService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -39,7 +41,12 @@ public class UserController {
 
     @GetMapping("/dashboard")
     public ResponseEntity<ApiResponse> dashboard() {
-        // This is a placeholder for dashboard endpoint
-        return ResponseEntity.ok(new ApiResponse(true, "Welcome to dashboard", null));
+        // This endpoint requires Authorization header: Basic base64(email:password)
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String currentUserEmail = authentication.getName();
+
+        return ResponseEntity.ok(new ApiResponse(true,
+                "Welcome to dashboard, " + currentUserEmail,
+                null));
     }
 }

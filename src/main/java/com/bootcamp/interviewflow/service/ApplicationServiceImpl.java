@@ -1,10 +1,11 @@
 package com.bootcamp.interviewflow.service;
 
-import com.bootcamp.interviewflow.dto.ApplicationListResponse;
+import com.bootcamp.interviewflow.dto.ApplicationListDTO;
 import com.bootcamp.interviewflow.dto.CreateApplicationRequest;
 import com.bootcamp.interviewflow.dto.UpdateApplicationRequest;
 import com.bootcamp.interviewflow.exception.ApplicationNotFoundException;
 import com.bootcamp.interviewflow.exception.UserNotFoundException;
+import com.bootcamp.interviewflow.mapper.ApplicationListMapper;
 import com.bootcamp.interviewflow.model.Application;
 import com.bootcamp.interviewflow.model.ApplicationStatus;
 import com.bootcamp.interviewflow.model.User;
@@ -24,6 +25,7 @@ public class ApplicationServiceImpl implements ApplicationService {
     private static final Logger log = LoggerFactory.getLogger(ApplicationServiceImpl.class);
 
     private final ApplicationRepository applicationRepository;
+    private final ApplicationListMapper applicationListMapper;
     private final UserRepository userRepository;
 
     @Override
@@ -42,6 +44,14 @@ public class ApplicationServiceImpl implements ApplicationService {
     }
 
     @Override
+    public List<ApplicationListDTO> findAllByUserId(Long userId) {
+        log.info("Fetching applications for user ID: {}", userId);
+        List<Application> applications = applicationRepository.findAllByUserId(userId);
+        log.info("Found {} applications for user ID: {}", applications.size(), userId);
+        return applicationListMapper.toApplicationListDTOs(applications);
+    }
+
+    @Override
     public List<Application> findAll() {
         return applicationRepository.findAll();
     }
@@ -55,10 +65,6 @@ public class ApplicationServiceImpl implements ApplicationService {
     }
 
     @Override
-    public List<ApplicationListResponse> findAllByUserId(Long userId) {
-        return List.of();
-    }
-
     public Application partialUpdate(Long id, UpdateApplicationRequest dto) {
         Application app = applicationRepository.findById(id)
                 .orElseThrow(() -> new ApplicationNotFoundException("Not found"));
