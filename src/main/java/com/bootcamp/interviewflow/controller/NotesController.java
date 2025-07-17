@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
@@ -32,13 +33,13 @@ public class NotesController {
     }
 
     @GetMapping( "/{id}")
-    public ResponseEntity<NoteResponse> getById(@PathVariable Long id) {
+    public ResponseEntity<NoteResponse> getById(@NotNull @PathVariable Long id) {
         var response = notesService.getById(id);
         return ResponseEntity.ok(response);
     }
 
-    @GetMapping("/{applicationId}")
-    public ResponseEntity<List<NoteResponse>> getAll(@NotNull @PathVariable Long applicationId) {
+    @GetMapping
+    public ResponseEntity<List<NoteResponse>> getAll(@NotNull @RequestParam Long applicationId) {
         var response = notesService.getAllByApplicationId(applicationId);
         return ResponseEntity.ok(response);
     }
