@@ -2,6 +2,7 @@ package com.bootcamp.interviewflow.service;
 
 import com.bootcamp.interviewflow.dto.ApplicationListResponse;
 import com.bootcamp.interviewflow.dto.CreateApplicationRequest;
+import com.bootcamp.interviewflow.dto.UpdateApplicationRequest;
 import com.bootcamp.interviewflow.exception.ApplicationNotFoundException;
 import com.bootcamp.interviewflow.exception.UserNotFoundException;
 import com.bootcamp.interviewflow.model.Application;
@@ -56,5 +57,15 @@ public class ApplicationServiceImpl implements ApplicationService {
     @Override
     public List<ApplicationListResponse> findAllByUserId(Long userId) {
         return List.of();
+    }
+
+    public Application partialUpdate(Long id, UpdateApplicationRequest dto) {
+        Application app = applicationRepository.findById(id)
+                .orElseThrow(() -> new ApplicationNotFoundException("Not found"));
+        if (dto.getCompanyName() != null) app.setCompanyName(dto.getCompanyName());
+        if (dto.getCompanyLink() != null) app.setCompanyLink(dto.getCompanyLink());
+        if (dto.getPosition() != null) app.setPosition(dto.getPosition());
+        if (dto.getStatus() != null) app.setStatus(dto.getStatus());
+        return applicationRepository.save(app);
     }
 }

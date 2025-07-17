@@ -1,6 +1,7 @@
 package com.bootcamp.interviewflow.controller;
 
 import com.bootcamp.interviewflow.dto.CreateApplicationRequest;
+import com.bootcamp.interviewflow.dto.UpdateApplicationRequest;
 import com.bootcamp.interviewflow.model.Application;
 import com.bootcamp.interviewflow.service.ApplicationServiceImpl;
 import jakarta.validation.Valid;
@@ -33,5 +34,13 @@ public class ApplicationController {
     public ResponseEntity<String> delete(@PathVariable Long id) {
         service.delete(id);
         return ResponseEntity.ok("Application with id " + id + " deleted");
+    }
+
+    @PatchMapping("/{id}")
+    public ResponseEntity<Application> partialUpdate(
+            @PathVariable Long id,
+            @RequestBody UpdateApplicationRequest dto) {
+        Application updated = service.partialUpdate(id, dto);
+        return ResponseEntity.ok(updated);
     }
 }
