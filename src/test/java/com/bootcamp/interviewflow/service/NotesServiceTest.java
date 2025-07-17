@@ -83,7 +83,7 @@ class NotesServiceTest {
 
         var thrown = assertThrows(ApplicationNotFoundException.class,
                 () -> service.create(new NoteRequest(100L, "Test note")));
-        assertTrue(thrown.getMessage().contains("Application with Id 100 not found"));
+        assertTrue(thrown.getMessage().contains("Application with id 100 not found"));
 
         verify(applicationRepository, times(1)).findById(100L);
     }

@@ -25,8 +25,8 @@ public class NotesServiceImpl implements NotesService {
 
     @Override
     public NoteResponse create(NoteRequest request) {
-        var application = applicationRepository.findById(request.applicationId())
-                .orElseThrow(() -> new ApplicationNotFoundException(request.applicationId()));
+        var application = applicationRepository.findById(request.applicationId()).orElseThrow(
+                () -> new ApplicationNotFoundException("Application with id " + request.applicationId() + " not found"));
         var savedNote = noteRepository.save(new Note(application, request.content()));
         return new NoteResponse(savedNote.getId(),
                 application.getId(),
