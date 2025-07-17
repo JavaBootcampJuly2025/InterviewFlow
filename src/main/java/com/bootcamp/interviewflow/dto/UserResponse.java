@@ -1,12 +1,19 @@
 package com.bootcamp.interviewflow.dto;
 
+import io.swagger.v3.oas.annotations.media.Schema;
+
 import java.time.LocalDateTime;
 
+@Schema(description = "User response payload")
 public class UserResponse {
 
+    @Schema(description = "User's unique identifier", example = "42")
     private Long id;
+    @Schema(description = "User's username", example = "John Doe")
     private String userName;
+    @Schema(description = "User's email address", example = "johndoe@example.com")
     private String email;
+    @Schema(description = "Account creation timestamp", example = "2024-07-17T14:33:22")
     private LocalDateTime createdAt;
 
     public UserResponse() {}
