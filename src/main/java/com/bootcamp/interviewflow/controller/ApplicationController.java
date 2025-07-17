@@ -1,6 +1,7 @@
 package com.bootcamp.interviewflow.controller;
 
 import com.bootcamp.interviewflow.dto.ApplicationListDTO;
+import com.bootcamp.interviewflow.dto.ApplicationResponse;
 import com.bootcamp.interviewflow.dto.CreateApplicationRequest;
 import com.bootcamp.interviewflow.dto.UpdateApplicationRequest;
 import com.bootcamp.interviewflow.model.Application;
@@ -36,8 +37,8 @@ public class ApplicationController {
     }
 
     @GetMapping("/applications")
-    public ResponseEntity<List<Application>> findAll() {
-        List<Application> all = applicationService.findAll();
+    public ResponseEntity<List<ApplicationListDTO>> findAll() {
+        List<ApplicationListDTO> all = applicationService.findAll();
         return ResponseEntity.ok(all);
     }
 
@@ -52,11 +53,10 @@ public class ApplicationController {
         return ResponseEntity.ok("Application with id " + id + " deleted");
     }
 
-    @PatchMapping("/{id}")
-    public ResponseEntity<Application> partialUpdate(
+    @PatchMapping("/applications/{id}")
+    public ResponseEntity<ApplicationResponse> partialUpdate(
             @PathVariable Long id,
             @RequestBody UpdateApplicationRequest dto) {
-        Application updated = applicationService.partialUpdate(id, dto);
-        return ResponseEntity.ok(updated);
+        return ResponseEntity.ok(applicationService.partialUpdate(id, dto));
     }
 }

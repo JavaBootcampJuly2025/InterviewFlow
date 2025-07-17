@@ -1,11 +1,13 @@
 package com.bootcamp.interviewflow.service;
 
 import com.bootcamp.interviewflow.dto.ApplicationListDTO;
+import com.bootcamp.interviewflow.dto.ApplicationResponse;
 import com.bootcamp.interviewflow.dto.CreateApplicationRequest;
 import com.bootcamp.interviewflow.dto.UpdateApplicationRequest;
 import com.bootcamp.interviewflow.exception.ApplicationNotFoundException;
 import com.bootcamp.interviewflow.exception.UserNotFoundException;
 import com.bootcamp.interviewflow.mapper.ApplicationListMapper;
+import com.bootcamp.interviewflow.mapper.ApplicationMapper;
 import com.bootcamp.interviewflow.model.Application;
 import com.bootcamp.interviewflow.model.ApplicationStatus;
 import com.bootcamp.interviewflow.model.User;
@@ -26,6 +28,7 @@ public class ApplicationServiceImpl implements ApplicationService {
 
     private final ApplicationRepository applicationRepository;
     private final ApplicationListMapper applicationListMapper;
+    private final ApplicationMapper applicationMapper;
     private final UserRepository userRepository;
 
     @Override
@@ -52,8 +55,11 @@ public class ApplicationServiceImpl implements ApplicationService {
     }
 
     @Override
-    public List<Application> findAll() {
-        return applicationRepository.findAll();
+    public List<ApplicationListDTO> findAll() {
+        log.info("Fetching applications:");
+        List<Application> applications = applicationRepository.findAll();
+        return applicationListMapper.toApplicationListDTOs(applications);
+
     }
 
     @Override
@@ -65,13 +71,11 @@ public class ApplicationServiceImpl implements ApplicationService {
     }
 
     @Override
-    public Application partialUpdate(Long id, UpdateApplicationRequest dto) {
+    public ApplicationResponse partialUpdate(Long id, UpdateApplicationRequest dto) {
         Application app = applicationRepository.findById(id)
                 .orElseThrow(() -> new ApplicationNotFoundException("Not found"));
-        if (dto.getCompanyName() != null) app.setCompanyName(dto.getCompanyName());
-        if (dto.getCompanyLink() != null) app.setCompanyLink(dto.getCompanyLink());
-        if (dto.getPosition() != null) app.setPosition(dto.getPosition());
-        if (dto.getStatus() != null) app.setStatus(dto.getStatus());
-        return applicationRepository.save(app);
+        Application updatedApp = applicationMapper.updateEntityFromDto(dto, app);
+        log.info("Application partially updated: {}", updatedApp);
+        return applicationMapper.toResponse(applicationRepository.save(updatedApp));
     }
 }
