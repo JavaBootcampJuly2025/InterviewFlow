@@ -1,6 +1,7 @@
 package com.bootcamp.interviewflow.service;
 
 import com.bootcamp.interviewflow.dto.ApplicationListDTO;
+import com.bootcamp.interviewflow.dto.ApplicationResponse;
 import com.bootcamp.interviewflow.dto.CreateApplicationRequest;
 import com.bootcamp.interviewflow.dto.UpdateApplicationRequest;
 import com.bootcamp.interviewflow.model.Application;
@@ -17,5 +18,5 @@ public interface ApplicationService {
 
     void delete(Long id);
 
-    Application partialUpdate(Long id, UpdateApplicationRequest dto);
+    ApplicationResponse partialUpdate(Long id, UpdateApplicationRequest dto);
 }
