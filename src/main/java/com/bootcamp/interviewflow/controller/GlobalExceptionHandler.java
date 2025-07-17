@@ -3,6 +3,7 @@ package com.bootcamp.interviewflow.controller;
 import com.bootcamp.interviewflow.dto.ApiResponse;
 import com.bootcamp.interviewflow.exception.ApplicationNotFoundException;
 import com.bootcamp.interviewflow.exception.EmailAlreadyExistsException;
+import com.bootcamp.interviewflow.exception.NoteNotFoundException;
 import com.bootcamp.interviewflow.exception.UserNotFoundException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,24 +32,35 @@ public class GlobalExceptionHandler {
             errors.put(fieldName, errorMessage);
         });
 
+        logger.warn("Validation failed: {}", errors);
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                 .body(new ApiResponse(false, "Validation failed", errors));
     }
 
     @ExceptionHandler(EmailAlreadyExistsException.class)
     public ResponseEntity<ApiResponse> handleEmailAlreadyExistsException(EmailAlreadyExistsException ex) {
+        logger.warn("Email already exists: {}", ex.getMessage());
         return ResponseEntity.status(HttpStatus.CONFLICT)
                 .body(new ApiResponse(false, ex.getMessage()));
     }
 
     @ExceptionHandler(BadCredentialsException.class)
     public ResponseEntity<ApiResponse> handleBadCredentialsException(BadCredentialsException ex) {
+        logger.warn("Bad credentials: {}", ex.getMessage());
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
                 .body(new ApiResponse(false, "Invalid email or password"));
     }
 
     @ExceptionHandler(UserNotFoundException.class)
     public ResponseEntity<ApiResponse> handleUserNotFoundException(UserNotFoundException ex) {
+        logger.warn("User not found: {}", ex.getMessage());
+        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                .body(new ApiResponse(false, ex.getMessage()));
+    }
+
+    @ExceptionHandler(NoteNotFoundException.class)
+    public ResponseEntity<ApiResponse> handleNoteNotFoundException(NoteNotFoundException ex) {
+        logger.warn("Note not found: {}", ex.getMessage());
         return ResponseEntity.status(HttpStatus.NOT_FOUND)
                 .body(new ApiResponse(false, ex.getMessage()));
     }
@@ -62,6 +74,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(ApplicationNotFoundException.class)
     public ResponseEntity<ApiResponse> handleApplicationNotFoundException(ApplicationNotFoundException ex) {
+        logger.warn("Application not found: {}", ex.getMessage());
         return ResponseEntity.status(HttpStatus.NOT_FOUND)
                 .body(new ApiResponse(false, ex.getMessage()));
     }
