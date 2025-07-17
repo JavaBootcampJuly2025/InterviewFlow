@@ -54,4 +54,12 @@ public class Application {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
+
+    public Application(ApplicationStatus status, String companyName, String companyLink, String position, User user) {
+        this.status = status;
+        this.companyName = companyName;
+        this.companyLink = companyLink;
+        this.position = position;
+        this.user = user;
+    }
 }
