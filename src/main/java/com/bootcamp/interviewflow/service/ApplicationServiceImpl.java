@@ -52,8 +52,11 @@ public class ApplicationServiceImpl implements ApplicationService {
     }
 
     @Override
-    public List<Application> findAll() {
-        return applicationRepository.findAll();
+    public List<ApplicationListDTO> findAll() {
+        log.info("Fetching applications:");
+        List<Application> applications = applicationRepository.findAll();
+        return applicationListMapper.toApplicationListDTOs(applications);
+
     }
 
     @Override

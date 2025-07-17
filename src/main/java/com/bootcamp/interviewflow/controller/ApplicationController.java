@@ -36,8 +36,8 @@ public class ApplicationController {
     }
 
     @GetMapping("/applications")
-    public ResponseEntity<List<Application>> findAll() {
-        List<Application> all = applicationService.findAll();
+    public ResponseEntity<List<ApplicationListDTO>> findAll() {
+        List<ApplicationListDTO> all = applicationService.findAll();
         return ResponseEntity.ok(all);
     }
 

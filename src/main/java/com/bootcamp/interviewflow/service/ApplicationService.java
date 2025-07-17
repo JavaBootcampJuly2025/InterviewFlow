@@ -13,7 +13,7 @@ public interface ApplicationService {
 
     Application create(CreateApplicationRequest dto);
 
-    List<Application> findAll();
+    List<ApplicationListDTO> findAll();
 
     void delete(Long id);
 
