@@ -1,6 +1,7 @@
 package com.bootcamp.interviewflow.service;
 
 import com.bootcamp.interviewflow.dto.CreateApplicationRequest;
+import com.bootcamp.interviewflow.exception.ApplicationNotFoundException;
 import com.bootcamp.interviewflow.exception.UserNotFoundException;
 import com.bootcamp.interviewflow.model.Application;
 import com.bootcamp.interviewflow.model.User;
@@ -81,5 +82,33 @@ class ApplicationServiceImplTest {
         assertEquals("User with id 99 not found", exception.getMessage());
         verify(userRepository).findById(99L);
         verifyNoInteractions(applicationRepository);
+    }
+
+    @Test
+    void delete_shouldDeleteWhenApplicationExists() {
+        Long applicationId = 1L;
+
+        when(applicationRepository.existsById(applicationId)).thenReturn(true);
+
+        service.delete(applicationId);
+
+        verify(applicationRepository).existsById(applicationId);
+        verify(applicationRepository).deleteById(applicationId);
+    }
+
+    @Test
+    void delete_shouldThrowExceptionWhenApplicationNotExists() {
+        Long applicationId = 42L;
+
+        when(applicationRepository.existsById(applicationId)).thenReturn(false);
+
+        ApplicationNotFoundException exception = assertThrows(
+                ApplicationNotFoundException.class,
+                () -> service.delete(applicationId)
+        );
+        assertEquals("Application with id 42 not found", exception.getMessage());
+        verify(applicationRepository).existsById(applicationId);
+
+        verify(applicationRepository).existsById(applicationId);
     }
 }
