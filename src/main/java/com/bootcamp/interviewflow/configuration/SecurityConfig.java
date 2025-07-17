@@ -25,7 +25,8 @@ public class SecurityConfig {
                         .requestMatchers("/api/auth/register", "/api/auth/login").permitAll()
                         .anyRequest().authenticated()
                 )
-                .httpBasic(httpBasic -> {})
+                .httpBasic(httpBasic -> {
+                })
                 .formLogin(formLogin -> formLogin.disable());
 
         return http.build();

@@ -2,6 +2,7 @@ package com.bootcamp.interviewflow.service;
 
 import com.bootcamp.interviewflow.dto.ApplicationListDTO;
 import com.bootcamp.interviewflow.dto.CreateApplicationRequest;
+import com.bootcamp.interviewflow.dto.UpdateApplicationRequest;
 import com.bootcamp.interviewflow.exception.ApplicationNotFoundException;
 import com.bootcamp.interviewflow.exception.UserNotFoundException;
 import com.bootcamp.interviewflow.mapper.ApplicationListMapper;
@@ -22,7 +23,6 @@ import java.util.List;
 public class ApplicationServiceImpl implements ApplicationService {
 
     private static final Logger log = LoggerFactory.getLogger(ApplicationServiceImpl.class);
-
 
     private final ApplicationRepository applicationRepository;
     private final ApplicationListMapper applicationListMapper;
@@ -64,4 +64,14 @@ public class ApplicationServiceImpl implements ApplicationService {
         applicationRepository.deleteById(id);
     }
 
+    @Override
+    public Application partialUpdate(Long id, UpdateApplicationRequest dto) {
+        Application app = applicationRepository.findById(id)
+                .orElseThrow(() -> new ApplicationNotFoundException("Not found"));
+        if (dto.getCompanyName() != null) app.setCompanyName(dto.getCompanyName());
+        if (dto.getCompanyLink() != null) app.setCompanyLink(dto.getCompanyLink());
+        if (dto.getPosition() != null) app.setPosition(dto.getPosition());
+        if (dto.getStatus() != null) app.setStatus(dto.getStatus());
+        return applicationRepository.save(app);
+    }
 }
