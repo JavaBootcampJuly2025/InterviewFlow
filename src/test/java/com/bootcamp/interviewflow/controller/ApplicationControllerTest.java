@@ -37,7 +37,7 @@ class ApplicationControllerTest {
         Long userId = 42L;
         LocalDateTime now = LocalDateTime.of(2025, 7, 16, 12, 0);
         var dto = new ApplicationListDTO(
-                1L, ApplicationStatus.APPLIED, "Acme", "https://acme", "Eng", now, now
+                1L, ApplicationStatus.APPLIED, "Acme", "https://acme", "Eng",now, now, now
         );
         when(service.findAllByUserId(userId)).thenReturn(List.of(dto));
 
