@@ -26,4 +26,5 @@ public record ApplicationListDTO(
         @Schema(description = "Timestamp when the application was last updated", example = "2025-07-18 12:15:00")
         @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")
         LocalDateTime updatedAt
-) {}
+) {
+}

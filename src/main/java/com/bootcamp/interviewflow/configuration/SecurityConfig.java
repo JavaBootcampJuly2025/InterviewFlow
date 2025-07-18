@@ -26,7 +26,8 @@ public class SecurityConfig {
                         .requestMatchers("/swagger-ui/**", "/v3/api-docs/**", "/swagger-ui.html").permitAll()
                         .anyRequest().authenticated()
                 )
-                .httpBasic(httpBasic -> {})
+                .httpBasic(httpBasic -> {
+                })
                 .formLogin(formLogin -> formLogin.disable());
 
         return http.build();
