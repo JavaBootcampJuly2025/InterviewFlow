@@ -127,20 +127,36 @@ class ApplicationServiceImplTest {
         user.setUsername("testuser");
         user.setEmail("testuser@example.com");
 
+        Application testApp = new Application();
+        testApp.setCompanyName(dto.getCompanyName());
+        testApp.setCompanyLink(dto.getCompanyLink());
+        testApp.setPosition(dto.getPosition());
+        testApp.setStatus(ApplicationStatus.valueOf(dto.getStatus()));
+        testApp.setUser(user);
+
+        ApplicationResponse appResponse = new ApplicationResponse(
+                testApp.getId(),
+                testApp.getStatus(),
+                testApp.getCompanyName(),
+                testApp.getCompanyLink(),
+                testApp.getPosition(),
+                testApp.getCreatedAt(),
+                testApp.getUpdatedAt());
+
         when(userRepository.findById(userId)).thenReturn(Optional.of(user));
-        when(applicationRepository.save(any(Application.class)))
-                .thenAnswer(inv -> inv.getArgument(0));
+        when(applicationRepository.save(testApp)).thenReturn(testApp);
+        when(applicationMapper.toResponse(testApp)).thenReturn(appResponse);
 
-        Application saved = service.create(dto);
+        ApplicationResponse saved = service.create(dto);
 
-        assertEquals("TestCompany", saved.getCompanyName());
-        assertEquals("https://testcompany.com", saved.getCompanyLink());
-        assertEquals("Java Dev", saved.getPosition());
-        assertEquals(ApplicationStatus.APPLIED, saved.getStatus());
-        assertEquals(user, saved.getUser());
+        assertEquals("TestCompany", saved.companyName());
+        assertEquals("https://testcompany.com", saved.companyLink());
+        assertEquals("Java Dev", saved.position());
+        assertEquals(ApplicationStatus.APPLIED, saved.status());
 
         verify(userRepository).findById(userId);
         verify(applicationRepository).save(any(Application.class));
+        verify(applicationMapper).toResponse(testApp);
     }
 
     @Test
