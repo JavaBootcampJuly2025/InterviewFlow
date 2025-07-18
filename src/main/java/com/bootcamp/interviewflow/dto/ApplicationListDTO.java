@@ -12,9 +12,9 @@ public record ApplicationListDTO(
         Long id,
         @Schema(description = "Current status of the application", example = "APPLIED")
         ApplicationStatus status,
-        @Schema(description = "Name of the company", example = "DHL")
+        @Schema(description = "Name of the company", example = "InterviewFlow")
         String companyName,
-        @Schema(description = "Link to the company's website", example = "https://dhl.com")
+        @Schema(description = "Link to the company's website", example = "https://interviewflow.com")
         String companyLink,
         @Schema(description = "Position applied for", example = "Backend Engineer")
         String position,

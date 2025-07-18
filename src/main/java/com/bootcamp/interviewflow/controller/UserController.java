@@ -67,7 +67,8 @@ public class UserController {
                     responseCode = "200", description = "Dashboard",
                     content = @Content(schema = @Schema(implementation = ApiResponse.class))),
             @io.swagger.v3.oas.annotations.responses.ApiResponse(
-                    responseCode = "401", description = "Unauthorized", content = @Content)
+                    responseCode = "401", description = "Unauthorized",
+                    content = @Content(schema = @Schema(implementation = ApiResponse.class)))
     })
     @GetMapping("/dashboard")
     public ResponseEntity<ApiResponse> dashboard() {

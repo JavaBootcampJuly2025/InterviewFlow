@@ -15,11 +15,11 @@ public class CreateApplicationRequest {
 
     @NotBlank(message = "Company name is required")
     @Size(max = 100, message = "Company name must not exceed 100 characters")
-    @Schema(description = "Name of the company", example = "DHL", requiredMode = Schema.RequiredMode.REQUIRED)
+    @Schema(description = "Name of the company", example = "InterviewFlow", requiredMode = Schema.RequiredMode.REQUIRED)
     private String companyName;
 
     @Size(max = 255, message = "Company link must not exceed 255 characters")
-    @Schema(description = "Link to the company website", example = "https://dhl.com")
+    @Schema(description = "Link to the company website", example = "https://interviewflow.com")
     private String companyLink;
 
     @NotBlank(message = "Position is required")

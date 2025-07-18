@@ -4,7 +4,6 @@ import com.bootcamp.interviewflow.dto.ApplicationListDTO;
 import com.bootcamp.interviewflow.dto.ApplicationResponse;
 import com.bootcamp.interviewflow.dto.CreateApplicationRequest;
 import com.bootcamp.interviewflow.dto.UpdateApplicationRequest;
-import com.bootcamp.interviewflow.model.Application;
 import com.bootcamp.interviewflow.service.ApplicationService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
@@ -39,13 +38,15 @@ public class ApplicationController {
     @Operation(summary = "Create a new job application")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "201", description = "Application created",
-                    content = @Content(schema = @Schema(implementation = Application.class))),
-            @ApiResponse(responseCode = "400", description = "Invalid input", content = @Content),
-            @ApiResponse(responseCode = "401", description = "Unauthorized", content = @Content)
+                    content = @Content(schema = @Schema(implementation = ApplicationResponse.class))),
+            @ApiResponse(responseCode = "400", description = "Invalid input",
+                    content = @Content(schema = @Schema(implementation = com.bootcamp.interviewflow.dto.ApiResponse.class))),
+            @ApiResponse(responseCode = "401", description = "Unauthorized",
+                    content = @Content(schema = @Schema(implementation = com.bootcamp.interviewflow.dto.ApiResponse.class))),
     })
     @PostMapping("/applications")
-    public ResponseEntity<Application> create(@RequestBody @Valid CreateApplicationRequest dto) {
-        Application created = applicationService.create(dto);
+    public ResponseEntity<ApplicationResponse> create(@RequestBody @Valid CreateApplicationRequest dto) {
+        ApplicationResponse created = applicationService.create(dto);
         return ResponseEntity
                 .status(HttpStatus.CREATED)
                 .body(created);
@@ -54,8 +55,9 @@ public class ApplicationController {
     @Operation(summary = "Get all job applications")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "List of applications",
-                    content = @Content(array = @ArraySchema(schema = @Schema(implementation = Application.class)))),
-            @ApiResponse(responseCode = "401", description = "Unauthorized", content = @Content)
+                    content = @Content(array = @ArraySchema(schema = @Schema(implementation = ApplicationListDTO.class)))),
+            @ApiResponse(responseCode = "401", description = "Unauthorized",
+                    content = @Content(schema = @Schema(implementation = com.bootcamp.interviewflow.dto.ApiResponse.class))),
     })
     @GetMapping("/applications")
     public ResponseEntity<List<ApplicationListDTO>> findAll() {
@@ -67,8 +69,10 @@ public class ApplicationController {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "User's job applications",
                     content = @Content(array = @ArraySchema(schema = @Schema(implementation = ApplicationListDTO.class)))),
-            @ApiResponse(responseCode = "401", description = "Unauthorized", content = @Content),
-            @ApiResponse(responseCode = "404", description = "User not found", content = @Content)
+            @ApiResponse(responseCode = "401", description = "Unauthorized",
+                    content = @Content(schema = @Schema(implementation = com.bootcamp.interviewflow.dto.ApiResponse.class))),
+            @ApiResponse(responseCode = "404", description = "User not found",
+                    content = @Content(schema = @Schema(implementation = com.bootcamp.interviewflow.dto.ApiResponse.class)))
     })
     @GetMapping(path = "/users/{userId}/applications")
     public ResponseEntity<List<ApplicationListDTO>> getUserApplications(@PathVariable Long userId) {
@@ -77,9 +81,12 @@ public class ApplicationController {
 
     @Operation(summary = "Delete a job application by ID")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Application deleted"),
-            @ApiResponse(responseCode = "401", description = "Unauthorized", content = @Content),
-            @ApiResponse(responseCode = "404", description = "Application not found", content = @Content)
+            @ApiResponse(responseCode = "200", description = "Application deleted",
+                    content = @Content(schema = @Schema(example = "Application with id 1001 deleted"))),
+            @ApiResponse(responseCode = "401", description = "Unauthorized",
+                    content = @Content(schema = @Schema(implementation = com.bootcamp.interviewflow.dto.ApiResponse.class))),
+            @ApiResponse(responseCode = "404", description = "User not found",
+                    content = @Content(schema = @Schema(implementation = com.bootcamp.interviewflow.dto.ApiResponse.class)))
     })
     @DeleteMapping("/applications/{id}")
     public ResponseEntity<String> delete(@PathVariable Long id) {
@@ -87,6 +94,17 @@ public class ApplicationController {
         return ResponseEntity.ok("Application with id " + id + " deleted");
     }
 
+    @Operation(summary = "Partially update a job application")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Application updated successfully",
+                    content = @Content(schema = @Schema(implementation = ApplicationResponse.class))),
+            @ApiResponse(responseCode = "400", description = "Invalid update data",
+                    content = @Content(schema = @Schema(implementation = com.bootcamp.interviewflow.dto.ApiResponse.class))),
+            @ApiResponse(responseCode = "401", description = "Unauthorized",
+                    content = @Content(schema = @Schema(implementation = com.bootcamp.interviewflow.dto.ApiResponse.class))),
+            @ApiResponse(responseCode = "404", description = "Application not found",
+                    content = @Content(schema = @Schema(implementation = com.bootcamp.interviewflow.dto.ApiResponse.class)))
+    })
     @PatchMapping("/applications/{id}")
     public ResponseEntity<ApplicationResponse> partialUpdate(
             @PathVariable Long id,

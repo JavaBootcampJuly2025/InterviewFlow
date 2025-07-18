@@ -38,8 +38,10 @@ public class NotesController {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "201", description = "Note created",
                     content = @Content(schema = @Schema(implementation = NoteResponse.class))),
-            @ApiResponse(responseCode = "400", description = "Invalid request", content = @Content),
-            @ApiResponse(responseCode = "401", description = "Unauthorized", content = @Content)
+            @ApiResponse(responseCode = "400", description = "Invalid request",
+                    content = @Content(schema = @Schema(implementation = com.bootcamp.interviewflow.dto.ApiResponse.class))),
+            @ApiResponse(responseCode = "401", description = "Unauthorized",
+                    content = @Content(schema = @Schema(implementation = com.bootcamp.interviewflow.dto.ApiResponse.class)))
     })
     @PostMapping
     public ResponseEntity<NoteResponse> create(@RequestBody NoteRequest request) {
@@ -51,10 +53,12 @@ public class NotesController {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Note found",
                     content = @Content(schema = @Schema(implementation = NoteResponse.class))),
-            @ApiResponse(responseCode = "401", description = "Unauthorized", content = @Content),
-            @ApiResponse(responseCode = "404", description = "Note not found", content = @Content)
+            @ApiResponse(responseCode = "401", description = "Unauthorized",
+                    content = @Content(schema = @Schema(implementation = com.bootcamp.interviewflow.dto.ApiResponse.class))),
+            @ApiResponse(responseCode = "404", description = "Note not found",
+                    content = @Content(schema = @Schema(implementation = com.bootcamp.interviewflow.dto.ApiResponse.class)))
     })
-    @GetMapping( "/{id}")
+    @GetMapping("/{id}")
     public ResponseEntity<NoteResponse> getById(@NotNull @PathVariable Long id) {
         var response = notesService.getById(id);
         return ResponseEntity.ok(response);
@@ -64,9 +68,10 @@ public class NotesController {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "List of notes",
                     content = @Content(array = @ArraySchema(schema = @Schema(implementation = NoteResponse.class)))),
-            @ApiResponse(responseCode = "400", description = "Missing or invalid application ID", content = @Content),
-            @ApiResponse(responseCode = "401", description = "Unauthorized", content = @Content)
-
+            @ApiResponse(responseCode = "400", description = "Missing or invalid application ID",
+                    content = @Content(schema = @Schema(implementation = com.bootcamp.interviewflow.dto.ApiResponse.class))),
+            @ApiResponse(responseCode = "401", description = "Unauthorized",
+                    content = @Content(schema = @Schema(implementation = com.bootcamp.interviewflow.dto.ApiResponse.class)))
     })
     @GetMapping
     public ResponseEntity<List<NoteResponse>> getAllByApplicationId(@NotNull @RequestParam Long applicationId) {
@@ -76,9 +81,12 @@ public class NotesController {
 
     @Operation(summary = "Delete a note by its ID")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "204", description = "Note deleted"),
-            @ApiResponse(responseCode = "401", description = "Unauthorized", content = @Content),
-            @ApiResponse(responseCode = "404", description = "Note not found", content = @Content)
+            @ApiResponse(responseCode = "204", description = "Note deleted",
+                    content = @Content(schema = @Schema(example = "Note with id 1001 deleted"))),
+            @ApiResponse(responseCode = "401", description = "Unauthorized",
+                    content = @Content(schema = @Schema(implementation = com.bootcamp.interviewflow.dto.ApiResponse.class))),
+            @ApiResponse(responseCode = "404", description = "Note not found",
+                    content = @Content(schema = @Schema(implementation = com.bootcamp.interviewflow.dto.ApiResponse.class)))
     })
     @DeleteMapping("/{id}")
     public ResponseEntity<String> delete(@PathVariable Long id) {
