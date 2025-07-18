@@ -32,7 +32,7 @@ public class ApplicationServiceImpl implements ApplicationService {
     private final UserRepository userRepository;
 
     @Override
-    public Application create(CreateApplicationRequest dto) {
+    public ApplicationResponse create(CreateApplicationRequest dto) {
         User user = userRepository.findById(dto.getUserId())
                 .orElseThrow(() -> new UserNotFoundException("User with id " + dto.getUserId() + " not found"));
 
@@ -43,7 +43,7 @@ public class ApplicationServiceImpl implements ApplicationService {
         app.setStatus(ApplicationStatus.valueOf(dto.getStatus()));
         app.setUser(user);
 
-        return applicationRepository.save(app);
+        return applicationMapper.toResponse(applicationRepository.save(app));
     }
 
     @Override

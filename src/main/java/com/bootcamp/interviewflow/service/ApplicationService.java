@@ -12,7 +12,7 @@ public interface ApplicationService {
 
     List<ApplicationListDTO> findAllByUserId(Long userId);
 
-    Application create(CreateApplicationRequest dto);
+    ApplicationResponse create(CreateApplicationRequest dto);
 
     List<ApplicationListDTO> findAll();
 

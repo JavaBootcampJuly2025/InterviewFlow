@@ -1,0 +1,25 @@
+databaseChangeLog:
+  - changeSet:
+      id: 004-insert-test-users
+      author: alex
+      changes:
+        - insert:
+            tableName: users
+            columns:
+              - column: { name: id, valueNumeric: 1 }
+              - column: { name: username, value: john_doe }
+              - column: { name: email, value: john@example.com }
+              - column: { name: password, value: hashed_password_123 }
+
+        - insert:
+            tableName: users
+            columns:
+              - column: { name: id, valueNumeric: 2 }
+              - column: { name: username, value: jane_smith }
+              - column: { name: email, value: jane@example.com }
+              - column: { name: password, value: hashed_password_456 }
+
+      rollback:
+        - delete:
+            tableName: users
+            where: "id IN (1, 2)"
