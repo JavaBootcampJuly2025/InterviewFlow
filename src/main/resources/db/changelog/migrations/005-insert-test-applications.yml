@@ -8,7 +8,7 @@ databaseChangeLog:
             columns:
               - column: { name: id, valueNumeric: 1 }
               - column: { name: user_id, valueNumeric: 1 }
-              - column: { name: status, value: PENDING }
+              - column: { name: status, value: APPLIED }
               - column: { name: company_name, value: Acme Corp }
               - column: { name: company_link, value: https://acme.example.com }
               - column: { name: position, value: Backend Developer }

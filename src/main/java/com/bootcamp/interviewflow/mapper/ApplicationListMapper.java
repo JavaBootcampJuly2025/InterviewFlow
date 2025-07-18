@@ -16,6 +16,7 @@ public class ApplicationListMapper {
                 application.getCompanyName(),
                 application.getCompanyLink(),
                 application.getPosition(),
+                application.getApplyDate(),
                 application.getCreatedAt(),
                 application.getUpdatedAt()
         );

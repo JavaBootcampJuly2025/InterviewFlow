@@ -40,6 +40,7 @@ public class ApplicationServiceImpl implements ApplicationService {
         app.setCompanyName(dto.getCompanyName());
         app.setCompanyLink(dto.getCompanyLink());
         app.setPosition(dto.getPosition());
+        app.setApplyDate(dto.getApplyDate());
         app.setStatus(ApplicationStatus.valueOf(dto.getStatus()));
         app.setUser(user);
 

@@ -55,7 +55,9 @@ class NotesServiceTest {
                 "TestPosition",
                 now,
                 now,
+                now,
                 new User());
+
         Note note = new Note(1L, "Test note", application, now, now);
         Note testNote = new Note(application, "Test note");
 
@@ -101,6 +103,7 @@ class NotesServiceTest {
                 "TestPosition",
                 now,
                 now,
+                now,
                 new User());
         Note note = new Note(100L, "Test note", application, now, now);
 
@@ -141,6 +144,7 @@ class NotesServiceTest {
                 "TestCompany",
                 "Link",
                 "TestPosition",
+                now,
                 now,
                 now,
                 new User());

@@ -43,6 +43,9 @@ public class Application {
     @Column(length = 255)
     private String position;
 
+    @Column(name = "apply_date", nullable = false)
+    private LocalDateTime applyDate;
+
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
@@ -55,11 +58,12 @@ public class Application {
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
-    public Application(ApplicationStatus status, String companyName, String companyLink, String position, User user) {
+    public Application(ApplicationStatus status, String companyName, String companyLink, String position, LocalDateTime applyDate, User user) {
         this.status = status;
         this.companyName = companyName;
         this.companyLink = companyLink;
         this.position = position;
+        this.applyDate = applyDate;
         this.user = user;
     }
 }
