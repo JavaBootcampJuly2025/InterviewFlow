@@ -1,0 +1,23 @@
+databaseChangeLog:
+  - changeSet:
+      id: 006-insert-test-notes
+      author: alex
+      changes:
+        - insert:
+            tableName: notes
+            columns:
+              - column: { name: id, valueNumeric: 1 }
+              - column: { name: application_id, valueNumeric: 1 }
+              - column: { name: content, value: Sent resume via email. }
+
+        - insert:
+            tableName: notes
+            columns:
+              - column: { name: id, valueNumeric: 2 }
+              - column: { name: application_id, valueNumeric: 2 }
+              - column: { name: content, value: No response after interview. }
+
+      rollback:
+        - delete:
+            tableName: notes
+            where: "id IN (1, 2)"

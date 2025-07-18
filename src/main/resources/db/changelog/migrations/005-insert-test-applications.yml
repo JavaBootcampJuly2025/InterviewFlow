@@ -1,0 +1,29 @@
+databaseChangeLog:
+  - changeSet:
+      id: 005-insert-test-applications
+      author: alex
+      changes:
+        - insert:
+            tableName: applications
+            columns:
+              - column: { name: id, valueNumeric: 1 }
+              - column: { name: user_id, valueNumeric: 1 }
+              - column: { name: status, value: PENDING }
+              - column: { name: company_name, value: Acme Corp }
+              - column: { name: company_link, value: https://acme.example.com }
+              - column: { name: position, value: Backend Developer }
+
+        - insert:
+            tableName: applications
+            columns:
+              - column: { name: id, valueNumeric: 2 }
+              - column: { name: user_id, valueNumeric: 2 }
+              - column: { name: status, value: REJECTED }
+              - column: { name: company_name, value: Globex Inc. }
+              - column: { name: company_link, value: https://globex.example.com }
+              - column: { name: position, value: Frontend Developer }
+
+      rollback:
+        - delete:
+            tableName: applications
+            where: "id IN (1, 2)"
