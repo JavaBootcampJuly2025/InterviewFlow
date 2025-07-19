@@ -46,15 +46,26 @@ The InterviewFlow created with the following main dependencies:
 - JUnit5
 - Mockito
 - PostgreSQL
+- Liquibase (for DB migrations)
 
-- Set up schema migrations using Liquibase. (To be implemented)
+### Project Profiles and Configuration
+
+The project comes with two profiles:
+
+* **`dev`** – used for local development and testing
+* **`prod`** – intended for deployment on AWS
+
+By default, the `dev` profile is active, so you can start coding and testing right away without any extra setup.
+
+To keep things clean and centralized, the project uses a **`.env` file** for storing all service configuration values. Both `docker-compose.yml` and `application.properties` automatically pull their settings from this file, so there’s no need to duplicate or hardcode anything.
 
 ## 💾 Data Model
 
 To be confirmed
 
-- **`users` table**: `id`, `username`, `password`, `email`, `role`.
-- **`applications` table**: `id`, `username`, ...
+- **`users` table**: `id`, `username`, `password`, `email`, `created_at`, `updated_at`
+- **`applications` table**: `id`, `user_id`, `status`, `company_name`, `company_link`, `position`, `applied_at`, `created_at`, `updated_at`
+- **`notes` table**: `id`, `application_id`, `content`, `created_at`, `updated_at`
 
 ## 🔐 Security
 
@@ -71,7 +82,8 @@ Clone the repo and follow the setup instructions:
 git clone https://github.com/JavaBootcampJuly2025/InterviewFlow.git
 cd interviewflow
 mvn package
-java -cp target/InterviewFlow-0.0.1-SNAPSHOT.jar com.bootcamp.interviewflow
+# Запуск с профилем dev
+java -Dspring.profiles.active=dev -jar target/InterviewFlow-0.0.1-SNAPSHOT.jar
 ```
 
 ---
