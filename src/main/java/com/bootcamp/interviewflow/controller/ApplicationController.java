@@ -108,7 +108,7 @@ public class ApplicationController {
     @PatchMapping("/applications/{id}")
     public ResponseEntity<ApplicationResponse> partialUpdate(
             @PathVariable Long id,
-            @RequestBody UpdateApplicationRequest dto) {
+            @RequestBody @Valid UpdateApplicationRequest dto) {
         return ResponseEntity.ok(applicationService.partialUpdate(id, dto));
     }
 }
