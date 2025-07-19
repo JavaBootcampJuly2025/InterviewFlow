@@ -1,4 +1,4 @@
-package com.bootcamp.interviewflow.controller;
+package com.bootcamp.interviewflow.configuration;
 
 import com.bootcamp.interviewflow.dto.ApiResponse;
 import com.bootcamp.interviewflow.exception.ApplicationNotFoundException;
