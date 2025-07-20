@@ -56,7 +56,8 @@ class NotesServiceTest {
                 now,
                 now,
                 now,
-                new User());
+                new User(),
+                null);
 
         Note note = new Note(1L, "Test note", application, now, now);
         Note testNote = new Note(application, "Test note");
@@ -104,7 +105,8 @@ class NotesServiceTest {
                 now,
                 now,
                 now,
-                new User());
+                new User(),
+                null);
         Note note = new Note(100L, "Test note", application, now, now);
 
         when(noteRepository.findById(100L)).thenReturn(Optional.of(note));
@@ -147,7 +149,8 @@ class NotesServiceTest {
                 now,
                 now,
                 now,
-                new User());
+                new User(),
+                null);
         Note noteOne = new Note(100L, "Test note one", application, now, now);
         Note noteTwo = new Note(100L, "Test note two", application, now, now);
         Note noteThree = new Note(100L, "Test note three", application, now, now);

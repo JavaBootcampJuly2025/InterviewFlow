@@ -30,7 +30,10 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class ApplicationServiceImplTest {
@@ -138,7 +141,11 @@ class ApplicationServiceImplTest {
                 testApp.getPosition(),
                 testApp.getApplyDate(),
                 testApp.getCreatedAt(),
-                testApp.getUpdatedAt());
+                testApp.getUpdatedAt(),
+                null,
+                null,
+                null
+        );
 
         when(userRepository.findById(userId)).thenReturn(Optional.of(user));
         when(applicationRepository.save(any(Application.class))).thenReturn(testApp);
@@ -203,12 +210,16 @@ class ApplicationServiceImplTest {
         UpdateApplicationRequest dto = new UpdateApplicationRequest();
         dto.setCompanyName("New Name");
 
+        User user = new User();
+        user.setId(userId);
+
         Application existing = new Application();
         existing.setId(appId);
         existing.setCompanyName("Old Name");
         existing.setCompanyLink("oldlink.com");
         existing.setPosition("Old Position");
         existing.setStatus(APPLIED);
+        existing.setUser(user);
 
         Application patched = new Application();
         patched.setId(appId);
@@ -216,6 +227,7 @@ class ApplicationServiceImplTest {
         patched.setCompanyLink("oldlink.com");
         patched.setPosition("Old Position");
         patched.setStatus(APPLIED);
+        patched.setUser(user);
 
         ApplicationResponse respDto = new ApplicationResponse(
                 appId,
@@ -223,6 +235,9 @@ class ApplicationServiceImplTest {
                 "New Name",
                 "oldlink.com",
                 "Old Position",
+                null,
+                null,
+                null,
                 null,
                 null,
                 null
@@ -254,12 +269,16 @@ class ApplicationServiceImplTest {
         dto.setPosition("NewPosition");
         dto.setStatus(ApplicationStatus.ACCEPTED);
 
+        User user = new User();
+        user.setId(userId);
+
         Application existing = new Application();
         existing.setId(appId);
         existing.setCompanyName("Old");
         existing.setCompanyLink("old.com");
         existing.setPosition("Old");
         existing.setStatus(APPLIED);
+        existing.setUser(user);
 
         Application patched = new Application();
         patched.setId(appId);
@@ -267,6 +286,7 @@ class ApplicationServiceImplTest {
         patched.setCompanyLink("old.com");
         patched.setPosition("NewPosition");
         patched.setStatus(ApplicationStatus.ACCEPTED);
+        patched.setUser(user);
 
         ApplicationResponse respDto = new ApplicationResponse(
                 appId,
@@ -274,6 +294,9 @@ class ApplicationServiceImplTest {
                 "New",
                 "old.com",
                 "NewPosition",
+                null,
+                null,
+                null,
                 null,
                 null,
                 null
@@ -318,12 +341,16 @@ class ApplicationServiceImplTest {
         Long appId = 4L;
         UpdateApplicationRequest dto = new UpdateApplicationRequest();
 
+        User user = new User();
+        user.setId(userId);
+
         Application existing = new Application();
         existing.setId(appId);
         existing.setCompanyName("OldName");
         existing.setCompanyLink("oldlink.com");
         existing.setPosition("OldPosition");
         existing.setStatus(REJECTED);
+        existing.setUser(user);
 
         Application patched = new Application();
         patched.setId(appId);
@@ -331,6 +358,7 @@ class ApplicationServiceImplTest {
         patched.setCompanyLink("oldlink.com");
         patched.setPosition("OldPosition");
         patched.setStatus(REJECTED);
+        patched.setUser(user);
 
         ApplicationResponse respDto = new ApplicationResponse(
                 appId,
@@ -338,6 +366,9 @@ class ApplicationServiceImplTest {
                 "OldName",
                 "oldlink.com",
                 "OldPosition",
+                null,
+                null,
+                null,
                 null,
                 null,
                 null
