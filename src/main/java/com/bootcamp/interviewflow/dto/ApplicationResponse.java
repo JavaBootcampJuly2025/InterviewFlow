@@ -38,6 +38,15 @@ public record ApplicationResponse(
 
         @Schema(description = "Timestamp when the application was last updated", example = "2025-07-18 15:00:00")
         @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")
-        LocalDateTime updatedAt
+        LocalDateTime updatedAt,
+
+        @Schema(description = "ID of the linked resume", example = "12345")
+        Long resumeId,
+
+        @Schema(description = "Original file name of the resume", example = "my_resume.pdf")
+        String resumeFileName,
+
+        @Schema(description = "URL to download the resume PDF", example = "/api/resumes/12345/download")
+        String resumeUrl
 
 ) {}

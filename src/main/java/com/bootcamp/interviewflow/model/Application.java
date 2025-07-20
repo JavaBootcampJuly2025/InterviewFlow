@@ -58,6 +58,10 @@ public class Application {
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "resume_id")
+    private Resume resume;
+
     public Application(ApplicationStatus status, String companyName, String companyLink, String position, LocalDateTime applyDate, User user) {
         this.status = status;
         this.companyName = companyName;

@@ -24,6 +24,7 @@ public class UpdateApplicationRequest {
 
     private ApplicationStatus status;
 
+    private Long resumeId;
     private LocalDateTime applyDate;
 }
 
