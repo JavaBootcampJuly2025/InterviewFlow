@@ -110,6 +110,11 @@ mvn package
 java -Dspring.profiles.active=dev -jar target/InterviewFlow-0.0.1-SNAPSHOT.jar
 ```
 
+Once the application has been launched for the first time, it is necessary to initiate the creation of default bucket for the S3 service to work, this only needs to be done once
+
+```bash
+docker-compose -f docker-compose.yml -f docker-compose.init.yml up minio-init
+```
 ---
 
 ## 💡 Contributing
