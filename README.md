@@ -1,6 +1,7 @@
 # InterviewFlow
 
-**InterviewFlow** is a Backend API for simple and effective application designed to help jobseekers organize and manage all their job
+**InterviewFlow** is a Backend API for simple and effective application designed to help jobseekers organize and manage
+all their job
 applications in one place.
 
 ---
@@ -34,6 +35,7 @@ applications in one place.
    steps).
 
 ---
+
 ## ✈️ Project Setup
 
 The InterviewFlow created with the following main dependencies:
@@ -57,14 +59,34 @@ The project comes with two profiles:
 
 By default, the `dev` profile is active, so you can start coding and testing right away without any extra setup.
 
-To keep things clean and centralized, the project uses a **`.env` file** for storing all service configuration values. Both `docker-compose.yml` and `application.properties` automatically pull their settings from this file, so there’s no need to duplicate or hardcode anything.
+To keep things clean and centralized, the project uses a **`.env` file** for storing all service configuration values.
+
+To fill up `application.properties` values run in terminal
+
+```bash
+POSTGRES_HOST=localhost \
+POSTGRES_PORT=5432 \
+POSTGRES_DB=interview_flow_db \
+POSTGRES_USER=postgres \
+POSTGRES_PASSWORD=postgres \
+./mvnw spring-boot:run
+```
+
+or obviously put following in "Edit Configuration" → "Environment Variables" if you use IntelliJ IDEA
+
+```text 
+POSTGRES_DB=interview_flow_db;POSTGRES_USER=postgres;POSTGRES_PASSWORD=postgres;POSTGRES_HOST=localhost;POSTGRES_PORT=5432
+```
+
+`docker-compose.yml` automatically pulls settings from `.env` file.
 
 ## 💾 Data Model
 
 To be confirmed
 
 - **`users` table**: `id`, `username`, `password`, `email`, `created_at`, `updated_at`
-- **`applications` table**: `id`, `user_id`, `status`, `company_name`, `company_link`, `position`, `applied_at`, `created_at`, `updated_at`
+- **`applications` table**: `id`, `user_id`, `status`, `company_name`, `company_link`, `position`, `applied_at`,
+  `created_at`, `updated_at`
 - **`notes` table**: `id`, `application_id`, `content`, `created_at`, `updated_at`
 
 ## 🔐 Security
@@ -72,6 +94,7 @@ To be confirmed
 - Spring Security configured for authentication and authorization.
 - Basic type of Authentication.
 - BCrypt is used for password hashing.
+
 ---
 
 ## 📦 Installation
