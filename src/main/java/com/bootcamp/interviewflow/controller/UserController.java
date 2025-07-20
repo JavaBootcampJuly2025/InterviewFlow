@@ -54,7 +54,7 @@ public class UserController {
                     content = @Content(schema = @Schema(implementation = ApiResponse.class))),
             @io.swagger.v3.oas.annotations.responses.ApiResponse(
                     responseCode = "400", description = "Invalid input data - validation errors",
-                    content = @Content(schema = @Schema(implementation = com.bootcamp.interviewflow.dto.ValidationErrorResponse.class))),
+                    content = @Content(schema = @Schema(implementation = com.bootcamp.interviewflow.dto.ApiResponse.class))),
             @io.swagger.v3.oas.annotations.responses.ApiResponse(
                     responseCode = "401", description = "Invalid credentials", content = @Content)
     })

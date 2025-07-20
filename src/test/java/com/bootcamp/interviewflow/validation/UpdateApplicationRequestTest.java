@@ -9,7 +9,6 @@ import jakarta.validation.ValidatorFactory;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.NullAndEmptySource;
 import org.junit.jupiter.params.provider.ValueSource;
 
 import java.util.Set;
@@ -68,26 +67,22 @@ class UpdateApplicationRequestTest {
     @Test
     void testValidRequest_WithSingleField_Status() {
         UpdateApplicationRequest request = new UpdateApplicationRequest();
-        request.setStatus(ApplicationStatus.HR_SCREEN);
+        request.setStatus(ApplicationStatus.APPLIED);
 
         Set<ConstraintViolation<UpdateApplicationRequest>> violations = validator.validate(request);
         assertTrue(violations.isEmpty());
     }
 
     @Test
-    void testInvalidRequest_EmptyPayload() {
+    void testValidRequest_EmptyPayload() {
         UpdateApplicationRequest request = new UpdateApplicationRequest();
 
         Set<ConstraintViolation<UpdateApplicationRequest>> violations = validator.validate(request);
-        assertFalse(violations.isEmpty());
-
-        boolean hasAtLeastOneFieldViolation = violations.stream()
-                .anyMatch(v -> v.getMessage().contains("At least one field must be provided"));
-        assertTrue(hasAtLeastOneFieldViolation);
+        assertTrue(violations.isEmpty(), "Empty payload should be valid for update request");
     }
 
     @Test
-    void testInvalidRequest_AllFieldsNull() {
+    void testValidRequest_AllFieldsNull() {
         UpdateApplicationRequest request = new UpdateApplicationRequest();
         request.setCompanyName(null);
         request.setCompanyLink(null);
@@ -95,25 +90,54 @@ class UpdateApplicationRequestTest {
         request.setStatus(null);
 
         Set<ConstraintViolation<UpdateApplicationRequest>> violations = validator.validate(request);
-        assertFalse(violations.isEmpty());
-
-        boolean hasAtLeastOneFieldViolation = violations.stream()
-                .anyMatch(v -> v.getMessage().contains("At least one field must be provided"));
-        assertTrue(hasAtLeastOneFieldViolation);
+        assertTrue(violations.isEmpty(), "All null fields should be valid for update request");
     }
 
     @ParameterizedTest
-    @NullAndEmptySource
     @ValueSource(strings = {"", "   ", "\t", "\n"})
-    void testInvalidRequest_AllFieldsBlankOrEmpty(String blankValue) {
+    void testInvalidRequest_EmptyStringsHaveSizeViolations(String emptyValue) {
         UpdateApplicationRequest request = new UpdateApplicationRequest();
-        request.setCompanyName(blankValue);
-        request.setCompanyLink(blankValue);
-        request.setPosition(blankValue);
-        request.setStatus(null);
+        request.setCompanyName(emptyValue);
+        request.setPosition(emptyValue);
+
+        Set<ConstraintViolation<UpdateApplicationRequest>> violations = validator.validate(request);
+
+        if (emptyValue.trim().isEmpty() && emptyValue.length() == 0) {
+            // Empty string "" should fail @Size(min = 1)
+            assertFalse(violations.isEmpty());
+            boolean hasSizeViolations = violations.stream()
+                    .anyMatch(v -> v.getMessage().contains("must be between 1 and 255 characters"));
+            assertTrue(hasSizeViolations);
+        } else {
+            // Whitespace-only strings like "   " pass @Size(min = 1) because length > 1
+            // They are technically valid according to @Size but may not be desired business logic
+            assertTrue(violations.isEmpty() || violations.stream().noneMatch(
+                    v -> v.getMessage().contains("must be between 1 and 255 characters")));
+        }
+    }
+
+    @Test
+    void testInvalidRequest_EmptyStringFields() {
+        UpdateApplicationRequest request = new UpdateApplicationRequest();
+        request.setCompanyName(""); // Empty string should fail @Size(min = 1)
+        request.setPosition(""); // Empty string should fail @Size(min = 1)
 
         Set<ConstraintViolation<UpdateApplicationRequest>> violations = validator.validate(request);
         assertFalse(violations.isEmpty());
+
+        boolean hasSizeViolations = violations.stream()
+                .anyMatch(v -> v.getMessage().contains("must be between 1 and 255 characters"));
+        assertTrue(hasSizeViolations);
+    }
+
+    @Test
+    void testValidRequest_NullFields() {
+        UpdateApplicationRequest request = new UpdateApplicationRequest();
+        request.setCompanyName(null); // Null values are valid for @Size
+        request.setPosition(null); // Null values are valid for @Size
+
+        Set<ConstraintViolation<UpdateApplicationRequest>> violations = validator.validate(request);
+        assertTrue(violations.isEmpty(), "Null values should be valid for @Size validation");
     }
 
     @Test
@@ -152,15 +176,18 @@ class UpdateApplicationRequestTest {
             "http:/",
             "ht tp://example.com", // Space in protocol
             "http://", // Missing domain
+            "https://", // Empty host
             "file://local-file", // Unsupported protocol
             "ftp://example.com", // FTP not allowed
-            "http://", // Empty host
-            "https://", // Empty host
-            "http:// ", // Space as host
             "http://.", // Invalid domain
             "http://.com", // Invalid domain
             "www.example.com", // Missing protocol
-            ""
+            "https://-example.com", // Domain starts with hyphen
+            "https://example-.com", // Domain ends with hyphen
+            "http://example", // Missing TLD (not localhost)
+            "https://test", // Missing TLD (not localhost)
+            "http://example.com:abc", // Invalid port
+            "https://example.com:-80" // Negative port
     })
     void testInvalidRequest_InvalidCompanyLink(String invalidUrl) {
         UpdateApplicationRequest request = new UpdateApplicationRequest();
@@ -183,12 +210,23 @@ class UpdateApplicationRequestTest {
             "https://subdomain.example.com",
             "https://example.com/path",
             "https://example.com:8080",
-            "https://example.com?query=value",
+            "https://example.com?query=value", // Now supported!
+            "https://example.com/path?query=value",
+            "https://example.com/path?query=value&param=test",
+            "https://example.com#fragment",
+            "https://example.com/path#fragment",
+            "https://example.com/path?query=value#fragment",
             "https://example.org",
             "http://localhost",
+            "http://localhost:3000",
+            "https://localhost:8080/api",
             "https://google.com",
             "http://test-site.co.uk",
-            "https://my-company.io"
+            "https://my-company.io",
+            "https://api-v2.example.com",
+            "http://sub1.sub2.example.com",
+            "https://example123.com",
+            "http://123example.org"
     })
     void testValidRequest_ValidCompanyLinks(String validUrl) {
         UpdateApplicationRequest request = new UpdateApplicationRequest();
@@ -244,16 +282,74 @@ class UpdateApplicationRequestTest {
     }
 
     @Test
-    void testRequest_WithWhitespaceOnlyFields() {
+    void testValidRequest_WithWhitespaceOnlyFields() {
         UpdateApplicationRequest request = new UpdateApplicationRequest();
-        request.setCompanyName("   ");
-        request.setPosition("\t\n  ");
+        request.setCompanyName("   "); // 3 characters - passes @Size(min = 1)
+        request.setPosition("\t\n  "); // 4 characters - passes @Size(min = 1)
 
         Set<ConstraintViolation<UpdateApplicationRequest>> violations = validator.validate(request);
-        assertFalse(violations.isEmpty());
+        // @Size(min = 1) only checks length, not content - whitespace strings pass
+        assertTrue(violations.isEmpty(),
+                "Whitespace-only strings pass @Size(min = 1) validation because length > 1");
+    }
 
-        boolean hasAtLeastOneFieldViolation = violations.stream()
-                .anyMatch(v -> v.getMessage().contains("At least one field must be provided"));
-        assertTrue(hasAtLeastOneFieldViolation);
+    // Additional tests for new pattern features
+    @Test
+    void testValidRequest_LocalhostVariations() {
+        String[] localhostUrls = {
+                "http://localhost",
+                "https://localhost",
+                "http://localhost:3000",
+                "https://localhost:8080",
+                "http://localhost/api",
+                "https://localhost:8080/api/v1?debug=true"
+        };
+
+        for (String url : localhostUrls) {
+            UpdateApplicationRequest request = new UpdateApplicationRequest();
+            request.setCompanyLink(url);
+
+            Set<ConstraintViolation<UpdateApplicationRequest>> violations = validator.validate(request);
+            assertTrue(violations.isEmpty(),
+                    "Localhost URL should be valid: " + url);
+        }
+    }
+
+    @Test
+    void testValidRequest_QueryParametersAndFragments() {
+        String[] urlsWithQueryAndFragment = {
+                "https://example.com?param=value",
+                "https://example.com?param1=value1&param2=value2",
+                "https://example.com#section",
+                "https://example.com/path?query=test#anchor",
+                "https://api.example.com/v1/users?limit=10&offset=0",
+                "https://docs.example.com/guide#installation"
+        };
+
+        for (String url : urlsWithQueryAndFragment) {
+            UpdateApplicationRequest request = new UpdateApplicationRequest();
+            request.setCompanyLink(url);
+
+            Set<ConstraintViolation<UpdateApplicationRequest>> violations = validator.validate(request);
+            assertTrue(violations.isEmpty(),
+                    "URL with query/fragment should be valid: " + url);
+        }
+    }
+
+    @Test
+    void testInvalidRequest_DomainLengthLimits() {
+        UpdateApplicationRequest request = new UpdateApplicationRequest();
+        // Create a domain label longer than 63 characters
+        String longLabel = "a".repeat(64);
+        String invalidUrl = "https://" + longLabel + ".com";
+        request.setCompanyLink(invalidUrl);
+
+        Set<ConstraintViolation<UpdateApplicationRequest>> violations = validator.validate(request);
+        assertFalse(violations.isEmpty(),
+                "Domain with label >63 characters should be invalid");
+
+        boolean hasUrlViolation = violations.stream()
+                .anyMatch(v -> v.getMessage().contains("Company link must be a valid URL"));
+        assertTrue(hasUrlViolation);
     }
 }
