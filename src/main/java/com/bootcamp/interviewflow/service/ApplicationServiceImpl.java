@@ -5,6 +5,7 @@ import com.bootcamp.interviewflow.dto.ApplicationResponse;
 import com.bootcamp.interviewflow.dto.CreateApplicationRequest;
 import com.bootcamp.interviewflow.dto.UpdateApplicationRequest;
 import com.bootcamp.interviewflow.exception.ApplicationNotFoundException;
+import com.bootcamp.interviewflow.exception.ResumeNotFoundException;
 import com.bootcamp.interviewflow.exception.UserNotFoundException;
 import com.bootcamp.interviewflow.mapper.ApplicationListMapper;
 import com.bootcamp.interviewflow.mapper.ApplicationMapper;
@@ -12,6 +13,7 @@ import com.bootcamp.interviewflow.model.Application;
 import com.bootcamp.interviewflow.model.ApplicationStatus;
 import com.bootcamp.interviewflow.model.User;
 import com.bootcamp.interviewflow.repository.ApplicationRepository;
+import com.bootcamp.interviewflow.repository.ResumeRepository;
 import com.bootcamp.interviewflow.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
@@ -30,6 +32,7 @@ public class ApplicationServiceImpl implements ApplicationService {
     private final ApplicationListMapper applicationListMapper;
     private final ApplicationMapper applicationMapper;
     private final UserRepository userRepository;
+    private final ResumeRepository resumeRepository;
 
     @Override
     public ApplicationResponse create(CreateApplicationRequest dto, Long userId) {
@@ -44,7 +47,16 @@ public class ApplicationServiceImpl implements ApplicationService {
         app.setStatus(ApplicationStatus.valueOf(dto.getStatus()));
         app.setUser(user);
 
-        return applicationMapper.toResponse(applicationRepository.save(app));
+        if (dto.getResumeId() != null) {
+            var resume = resumeRepository.findById(dto.getResumeId())
+                    .orElseThrow(() -> new ResumeNotFoundException("Resume not found with id " + dto.getResumeId()));
+            app.setResume(resume);
+            log.info("Attached resume {} to new application for user {}", resume.getId(), user.getId());
+        }
+        Application saved = applicationRepository.save(app);
+        log.info("Created application {} for user {} (company: {}, position: {})",
+                saved.getId(), user.getId(), saved.getCompanyName(), saved.getPosition());
+        return applicationMapper.toResponse(saved);
     }
 
     @Override
@@ -73,6 +85,16 @@ public class ApplicationServiceImpl implements ApplicationService {
     public ApplicationResponse partialUpdate(Long id, Long userId, UpdateApplicationRequest dto) {
         Application application = findAndValidateOwnership(id, userId);
         Application updatedApp = applicationMapper.updateEntityFromDto(dto, application);
+
+        if (dto.getResumeId() != null && resumeRepository != null) {
+            var resume = resumeRepository.findById(dto.getResumeId())
+                    .orElseThrow(() -> new ResumeNotFoundException("Resume not found with id " + dto.getResumeId()));
+            updatedApp.setResume(resume);
+            log.info("Attached resume {} to application {}", resume.getId(), id);
+        } else if (dto.getResumeId() == null && resumeRepository != null) {
+            updatedApp.setResume(null);
+            log.info("Detached resume from application {}", id);
+        }
 
         log.info("Application partially updated: {}", updatedApp);
         return applicationMapper.toResponse(applicationRepository.save(updatedApp));

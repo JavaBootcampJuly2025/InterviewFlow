@@ -36,7 +36,10 @@ public class ApplicationMapper {
                 app.getPosition(),
                 app.getApplyDate(),
                 app.getCreatedAt(),
-                app.getUpdatedAt()
+                app.getUpdatedAt(),
+                app.getResume() != null ? app.getResume().getId() : null,
+                app.getResume() != null ? app.getResume().getFileName() : null,
+                app.getResume() != null ? app.getResume().getFileUrl() : null
         );
     }
 }

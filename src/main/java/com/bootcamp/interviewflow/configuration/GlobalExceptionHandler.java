@@ -4,7 +4,10 @@ import com.bootcamp.interviewflow.dto.ApiResponse;
 import com.bootcamp.interviewflow.exception.ApplicationNotFoundException;
 import com.bootcamp.interviewflow.exception.EmailAlreadyExistsException;
 import com.bootcamp.interviewflow.exception.NoteNotFoundException;
+import com.bootcamp.interviewflow.exception.ResumeNotFoundException;
 import com.bootcamp.interviewflow.exception.UserNotFoundException;
+import jakarta.validation.ConstraintViolation;
+import jakarta.validation.ConstraintViolationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
@@ -16,8 +19,6 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
-import jakarta.validation.ConstraintViolation;
-import jakarta.validation.ConstraintViolationException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -107,6 +108,12 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(ApplicationNotFoundException.class)
     public ResponseEntity<ApiResponse> handleApplicationNotFoundException(ApplicationNotFoundException ex) {
         logger.warn("Application not found: {}", ex.getMessage());
+        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                .body(new ApiResponse(false, ex.getMessage()));
+    }
+
+    @ExceptionHandler(ResumeNotFoundException.class)
+    public ResponseEntity<ApiResponse> handleResumeNotFoundException(ResumeNotFoundException ex) {
         return ResponseEntity.status(HttpStatus.NOT_FOUND)
                 .body(new ApiResponse(false, ex.getMessage()));
     }
