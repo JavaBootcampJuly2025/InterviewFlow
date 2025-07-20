@@ -1,6 +1,5 @@
 package com.bootcamp.interviewflow.validation;
 
-
 import com.bootcamp.interviewflow.dto.LoginRequest;
 import com.bootcamp.interviewflow.dto.RegisterRequest;
 import org.junit.jupiter.api.BeforeEach;
@@ -20,15 +19,11 @@ import static org.junit.jupiter.api.Assertions.*;
 class ValidationTest {
 
     private Validator validator;
-    private ValidUsernameImpl usernameImpl;
-    private StrongPasswordImpl passwordImpl;
 
     @BeforeEach
     void setUp() {
         ValidatorFactory factory = Validation.buildDefaultValidatorFactory();
         validator = factory.getValidator();
-        usernameImpl = new ValidUsernameImpl();
-        passwordImpl = new StrongPasswordImpl();
     }
 
     @Test
@@ -56,7 +51,10 @@ class ValidationTest {
     @ValueSource(strings = {"John", "Jane Doe", "Mary Ann Smith", "A B", "abcd efgh"})
     @DisplayName("Valid usernames should pass validation")
     void testValidUsernames(String username) {
-        assertTrue(usernameImpl.isValid(username, null),
+        RegisterRequest request = new RegisterRequest(username, "test@example.com", "StrongPass123!");
+        Set<ConstraintViolation<RegisterRequest>> violations = validator.validate(request);
+
+        assertTrue(violations.stream().noneMatch(v -> v.getPropertyPath().toString().equals("username")),
                 "Username '" + username + "' should be valid");
     }
 
@@ -64,7 +62,10 @@ class ValidationTest {
     @ValueSource(strings = {"John123", "Jane-Doe", "Mary@Ann", "user_name", "John.Doe", "user!name"})
     @DisplayName("Invalid usernames should fail validation")
     void testInvalidUsernames(String username) {
-        assertFalse(usernameImpl.isValid(username, null),
+        RegisterRequest request = new RegisterRequest(username, "test@example.com", "StrongPass123!");
+        Set<ConstraintViolation<RegisterRequest>> violations = validator.validate(request);
+
+        assertTrue(violations.stream().anyMatch(v -> v.getPropertyPath().toString().equals("username")),
                 "Username '" + username + "' should be invalid");
     }
 
@@ -123,10 +124,13 @@ class ValidationTest {
 
     // Password validation tests
     @ParameterizedTest
-    @ValueSource(strings = {"StrongPass123!", "MyP@ssw0rd", "Secure123$", "Valid1@"})
+    @ValueSource(strings = {"StrongPass123!", "MyP@ssw0rd", "Secure123$", "Valid123@"})
     @DisplayName("Valid strong passwords should pass validation")
     void testValidStrongPasswords(String password) {
-        assertTrue(passwordImpl.isValid(password, null),
+        RegisterRequest request = new RegisterRequest("John Doe", "test@example.com", password);
+        Set<ConstraintViolation<RegisterRequest>> violations = validator.validate(request);
+
+        assertTrue(violations.stream().noneMatch(v -> v.getPropertyPath().toString().equals("password")),
                 "Password '" + password + "' should be valid");
     }
 
@@ -134,7 +138,10 @@ class ValidationTest {
     @ValueSource(strings = {"weak", "password", "PASSWORD", "12345678", "Pass123", "strongpass!", "STRONGPASS123!"})
     @DisplayName("Weak passwords should fail validation")
     void testWeakPasswords(String password) {
-        assertFalse(passwordImpl.isValid(password, null),
+        RegisterRequest request = new RegisterRequest("John Doe", "test@example.com", password);
+        Set<ConstraintViolation<RegisterRequest>> violations = validator.validate(request);
+
+        assertTrue(violations.stream().anyMatch(v -> v.getPropertyPath().toString().equals("password")),
                 "Password '" + password + "' should be invalid");
     }
 
@@ -202,15 +209,6 @@ class ValidationTest {
         RegisterRequest request = new RegisterRequest("John Doe", email, "StrongPass123!");
 
         Set<ConstraintViolation<RegisterRequest>> violations = validator.validate(request);
-
-        System.out.println("Number of violations: " + violations.size());
-
-        for (ConstraintViolation<RegisterRequest> violation : violations) {
-            System.out.println("Field: " + violation.getPropertyPath());
-            System.out.println("Message: " + violation.getMessage());
-            System.out.println("Invalid value: " + violation.getInvalidValue());
-            System.out.println("---");
-        }
     }
 
     @Test
