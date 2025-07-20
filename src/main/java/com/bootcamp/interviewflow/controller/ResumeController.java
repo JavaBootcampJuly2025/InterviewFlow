@@ -2,6 +2,7 @@ package com.bootcamp.interviewflow.controller;
 
 import com.bootcamp.interviewflow.dto.ResumeResponse;
 import com.bootcamp.interviewflow.service.ResumeService;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -15,16 +16,18 @@ import org.springframework.web.multipart.MultipartFile;
 @RestController
 @RequestMapping("/api/resumes")
 @RequiredArgsConstructor
+@Tag(name = "Resumes", description = "Resume upload/download")
 public class ResumeController {
 
     private final ResumeService resumeService;
 
-    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+
+    @PostMapping(value = "/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<ResumeResponse> uploadResume(
             @RequestParam("userId") Long userId,
             @RequestParam("file") MultipartFile file) {
 
-        ResumeResponse response = resumeService.storeResume(userId, file);
+        ResumeResponse response = resumeService.uploadResume(userId, file);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 }
