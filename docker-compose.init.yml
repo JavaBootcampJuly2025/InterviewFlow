@@ -1,0 +1,28 @@
+services:
+  minio-init:
+    image: minio/mc
+    container_name: minio-init
+    restart: "no"
+    depends_on:
+      minio:
+        condition: service_healthy
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
+      MINIO_URL: minio
+      MINIO_PORT: ${MINIO_PORT}
+      MINIO_TLS_ON: ${MINIO_TLS_ON}
+      MINIO_BUCKET: ${MINIO_BUCKET}
+    entrypoint: >
+      sh -c '
+        echo "⏳ Waiting for MinIO..." &&
+        PROTOCOL=$([ "$$MINIO_TLS_ON" = "true" ] && echo "https" || echo "http") &&
+        mc alias set local "$$PROTOCOL://$$MINIO_URL:$$MINIO_PORT" "$$MINIO_ROOT_USER" "$$MINIO_ROOT_PASSWORD" &&
+        if mc stat "local/$$MINIO_BUCKET" >/dev/null 2>&1; then
+        echo "⚠️  Bucket \"$$MINIO_BUCKET\" already exists. Skipping creation.";
+        else
+        mc mb -p "local/$$MINIO_BUCKET" &&
+        echo "✅ Bucket \"$$MINIO_BUCKET\" created.";
+        fi &&
+        echo "Init completed successfully"
+      '
