@@ -1,6 +1,7 @@
 # InterviewFlow
 
-**InterviewFlow** is a Backend API for simple and effective application designed to help jobseekers organize and manage all their job
+**InterviewFlow** is a Backend API for simple and effective application designed to help jobseekers organize and manage
+all their job
 applications in one place.
 
 ---
@@ -34,6 +35,7 @@ applications in one place.
    steps).
 
 ---
+
 ## ✈️ Project Setup
 
 The InterviewFlow created with the following main dependencies:
@@ -46,21 +48,54 @@ The InterviewFlow created with the following main dependencies:
 - JUnit5
 - Mockito
 - PostgreSQL
+- Liquibase (for DB migrations)
 
-- Set up schema migrations using Liquibase. (To be implemented)
+### Project Profiles and Configuration
+
+The project comes with two profiles:
+
+* **`dev`** – used for local development and testing
+* **`prod`** – intended for deployment on AWS
+
+By default, the `dev` profile is active, so you can start coding and testing right away without any extra setup.
+
+To keep things clean and centralized, the project uses a **`.env` file** for storing all service configuration values. 
+Now `.env` file contains default settings, just for local development.
+
+To fill up `application.properties` values run in terminal
+
+```bash
+POSTGRES_HOST=localhost \
+POSTGRES_PORT=5432 \
+POSTGRES_DB=interview_flow_db \
+POSTGRES_USER=postgres \
+POSTGRES_PASSWORD=postgres \
+./mvnw spring-boot:run
+```
+
+or obviously put following in "Edit Configuration" → "Environment Variables" if you use IntelliJ IDEA
+
+```text 
+POSTGRES_DB=interview_flow_db;POSTGRES_USER=postgres;POSTGRES_PASSWORD=postgres;POSTGRES_HOST=localhost;POSTGRES_PORT=5432
+```
+
+`docker-compose.yml` automatically pulls settings from `.env` file.
 
 ## 💾 Data Model
 
 To be confirmed
 
-- **`users` table**: `id`, `username`, `password`, `email`, `role`.
-- **`applications` table**: `id`, `username`, ...
+- **`users` table**: `id`, `username`, `password`, `email`, `created_at`, `updated_at`
+- **`applications` table**: `id`, `user_id`, `status`, `company_name`, `company_link`, `position`, `applied_at`,
+  `created_at`, `updated_at`
+- **`notes` table**: `id`, `application_id`, `content`, `created_at`, `updated_at`
 
 ## 🔐 Security
 
 - Spring Security configured for authentication and authorization.
 - Basic type of Authentication.
 - BCrypt is used for password hashing.
+
 ---
 
 ## 📦 Installation
@@ -71,7 +106,8 @@ Clone the repo and follow the setup instructions:
 git clone https://github.com/JavaBootcampJuly2025/InterviewFlow.git
 cd interviewflow
 mvn package
-java -cp target/InterviewFlow-0.0.1-SNAPSHOT.jar com.bootcamp.interviewflow
+# Launch with dev profile
+java -Dspring.profiles.active=dev -jar target/InterviewFlow-0.0.1-SNAPSHOT.jar
 ```
 
 ---
