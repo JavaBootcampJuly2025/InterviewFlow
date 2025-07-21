@@ -1,7 +1,7 @@
 # InterviewFlow
 
-**InterviewFlow** is a Backend API for simple and effective application designed to help jobseekers organize and manage all their job
-applications in one place.
+**InterviewFlow** is a Backend API for simple and effective application designed to help jobseekers organize and manage
+all their job applications in one place.
 
 ---
 
@@ -34,6 +34,7 @@ applications in one place.
    steps).
 
 ---
+
 ## ✈️ Project Setup
 
 The InterviewFlow created with the following main dependencies:
@@ -55,9 +56,34 @@ The project comes with two profiles:
 * **`dev`** – used for local development and testing
 * **`prod`** – intended for deployment on AWS
 
+The project comes with two profiles:
+
+* **`dev`** – used for local development and testing
+* **`prod`** – intended for deployment on AWS
+
 By default, the `dev` profile is active, so you can start coding and testing right away without any extra setup.
 
-To keep things clean and centralized, the project uses a **`.env` file** for storing all service configuration values. Both `docker-compose.yml` and `application.properties` automatically pull their settings from this file, so there’s no need to duplicate or hardcode anything.
+To keep things clean and centralized, the project uses a **`.env` file** for storing all service configuration values. 
+Now `.env` file contains default settings, just for local development.
+
+To fill up `application.properties` values run in terminal
+
+```bash
+POSTGRES_HOST=localhost \
+POSTGRES_PORT=5432 \
+POSTGRES_DB=interview_flow_db \
+POSTGRES_USER=postgres \
+POSTGRES_PASSWORD=postgres \
+./mvnw spring-boot:run
+```
+
+or obviously put following in "Edit Configuration" → "Environment Variables" if you use IntelliJ IDEA
+
+```text 
+POSTGRES_DB=interview_flow_db;POSTGRES_USER=postgres;POSTGRES_PASSWORD=postgres;POSTGRES_HOST=localhost;POSTGRES_PORT=5432
+```
+
+`docker-compose.yml` automatically pulls settings from `.env` file.
 
 ## 💾 Data Model
 
@@ -82,6 +108,7 @@ Uploading files of various extensions is supported, and uploading files without 
 - Spring Security configured for authentication and authorization.
 - Basic type of Authentication.
 - BCrypt is used for password hashing.
+
 ---
 
 ## 📦 Installation
@@ -92,7 +119,7 @@ Clone the repo and follow the setup instructions:
 git clone https://github.com/JavaBootcampJuly2025/InterviewFlow.git
 cd interviewflow
 mvn package
-# Запуск с профилем dev
+# Launch with dev profile
 java -Dspring.profiles.active=dev -jar target/InterviewFlow-0.0.1-SNAPSHOT.jar
 ```
 
