@@ -85,10 +85,20 @@ POSTGRES_DB=interview_flow_db;POSTGRES_USER=postgres;POSTGRES_PASSWORD=postgres;
 
 To be confirmed
 
+### SQL Database
+
 - **`users` table**: `id`, `username`, `password`, `email`, `created_at`, `updated_at`
 - **`applications` table**: `id`, `user_id`, `status`, `company_name`, `company_link`, `position`, `applied_at`,
   `created_at`, `updated_at`
 - **`notes` table**: `id`, `application_id`, `content`, `created_at`, `updated_at`
+
+### Object Storage (S3)
+
+All files uploaded by users are saved to the following path
+
+`/{bucket}/{userId}/{uuid}.{ext}`
+
+Uploading files of various extensions is supported, and uploading files without extensions is also possible.
 
 ## 🔐 Security
 
@@ -110,11 +120,8 @@ mvn package
 java -Dspring.profiles.active=dev -jar target/InterviewFlow-0.0.1-SNAPSHOT.jar
 ```
 
-Once the application has been launched for the first time, it is necessary to initiate the creation of default bucket for the S3 service to work, this only needs to be done once
+Once the application has been launched for the first time, it creates bucket with name `if-bucket` if such doesn't exist. 
 
-```bash
-docker-compose -f docker-compose.yml -f docker-compose.init.yml up minio-init
-```
 ---
 
 ## 💡 Contributing
