@@ -2,19 +2,20 @@ package com.bootcamp.interviewflow.validation;
 
 import com.bootcamp.interviewflow.dto.LoginRequest;
 import com.bootcamp.interviewflow.dto.RegisterRequest;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.ValueSource;
-
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.Validation;
 import jakarta.validation.Validator;
 import jakarta.validation.ValidatorFactory;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
+
 import java.util.Set;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class ValidationTest {
 
@@ -128,7 +129,6 @@ class ValidationTest {
     @DisplayName("Valid strong passwords should pass validation")
     void testValidStrongPasswords(String password) {
         RegisterRequest request = new RegisterRequest("User123", "test@example.com", password);
-        RegisterRequest request = new RegisterRequest("John Doe", "test@example.com", password);
         Set<ConstraintViolation<RegisterRequest>> violations = validator.validate(request);
 
         assertTrue(violations.stream().noneMatch(v -> v.getPropertyPath().toString().equals("password")),
@@ -140,7 +140,6 @@ class ValidationTest {
     @DisplayName("Weak passwords should fail validation")
     void testWeakPasswords(String password) {
         RegisterRequest request = new RegisterRequest("User123", "test@example.com", password);
-        RegisterRequest request = new RegisterRequest("John Doe", "test@example.com", password);
         Set<ConstraintViolation<RegisterRequest>> violations = validator.validate(request);
 
         assertTrue(violations.stream().anyMatch(v -> v.getPropertyPath().toString().equals("password")),
