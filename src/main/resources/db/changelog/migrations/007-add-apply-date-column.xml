@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="
+           http://www.liquibase.org/xml/ns/dbchangelog
+           http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.20.xsd"
+        logicalFilePath="migrations/003-add-applied-at-column.xml">
+
+    <changeSet id="007-add-apply-date-column" author="karolig">
+        <addColumn tableName="applications">
+            <column name="apply_date" type="TIMESTAMP" defaultValueComputed="CURRENT_TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+
+        <rollback>
+            <dropColumn tableName="applications" columnName="apply_date"/>
+        </rollback>
+    </changeSet>
+</databaseChangeLog>

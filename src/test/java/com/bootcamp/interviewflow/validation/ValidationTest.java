@@ -128,6 +128,7 @@ class ValidationTest {
     @DisplayName("Valid strong passwords should pass validation")
     void testValidStrongPasswords(String password) {
         RegisterRequest request = new RegisterRequest("User123", "test@example.com", password);
+        RegisterRequest request = new RegisterRequest("John Doe", "test@example.com", password);
         Set<ConstraintViolation<RegisterRequest>> violations = validator.validate(request);
 
         assertTrue(violations.stream().noneMatch(v -> v.getPropertyPath().toString().equals("password")),
@@ -139,6 +140,7 @@ class ValidationTest {
     @DisplayName("Weak passwords should fail validation")
     void testWeakPasswords(String password) {
         RegisterRequest request = new RegisterRequest("User123", "test@example.com", password);
+        RegisterRequest request = new RegisterRequest("John Doe", "test@example.com", password);
         Set<ConstraintViolation<RegisterRequest>> violations = validator.validate(request);
 
         assertTrue(violations.stream().anyMatch(v -> v.getPropertyPath().toString().equals("password")),
@@ -209,15 +211,6 @@ class ValidationTest {
         RegisterRequest request = new RegisterRequest("User123", email, "StrongPass123!");
 
         Set<ConstraintViolation<RegisterRequest>> violations = validator.validate(request);
-
-        System.out.println("Number of violations: " + violations.size());
-
-        for (ConstraintViolation<RegisterRequest> violation : violations) {
-            System.out.println("Field: " + violation.getPropertyPath());
-            System.out.println("Message: " + violation.getMessage());
-            System.out.println("Invalid value: " + violation.getInvalidValue());
-            System.out.println("---");
-        }
     }
 
     @Test

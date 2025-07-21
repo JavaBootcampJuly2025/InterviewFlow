@@ -5,6 +5,8 @@ import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import lombok.Data;
 
+import java.time.LocalDateTime;
+
 @Data
 public class UpdateApplicationRequest {
 
@@ -21,4 +23,7 @@ public class UpdateApplicationRequest {
     private String position;
 
     private ApplicationStatus status;
+
+    private LocalDateTime applyDate;
 }
+
