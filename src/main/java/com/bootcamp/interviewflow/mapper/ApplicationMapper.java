@@ -24,6 +24,14 @@ public class ApplicationMapper {
         if (dto.getApplyDate() != null) {
             app.setApplyDate(dto.getApplyDate());
         }
+        if (dto.getInterviewDate() != null) {
+            app.setInterviewDate(dto.getInterviewDate());
+        }
+        if (dto.getEmailNotificationsEnabled() != null) {
+            app.setEmailNotificationsEnabled(dto.getEmailNotificationsEnabled());
+        }
+
+
         return app;
     }
 
@@ -36,7 +44,9 @@ public class ApplicationMapper {
                 app.getPosition(),
                 app.getApplyDate(),
                 app.getCreatedAt(),
-                app.getUpdatedAt()
+                app.getUpdatedAt(),
+                app.getInterviewDate(),
+                app.getEmailNotificationsEnabled()
         );
     }
 }

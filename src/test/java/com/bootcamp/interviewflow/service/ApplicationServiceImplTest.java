@@ -84,8 +84,8 @@ class ApplicationServiceImplTest {
         applications = List.of(app1, app2);
 
         dtos = List.of(
-                new ApplicationListDTO(1L, APPLIED, "Acme Corp", "https://acme.example", "Software Engineer", now,now, now),
-                new ApplicationListDTO(2L, REJECTED, "Globex", "https://globex.example", "Business Analyst", now,now, now)
+                new ApplicationListDTO(1L, APPLIED, "Acme Corp", "https://acme.example", "Software Engineer", now, now, now, true, now),
+                new ApplicationListDTO(2L, REJECTED, "Globex", "https://globex.example", "Business Analyst", now, now, now, true, now)
         );
     }
 
@@ -142,7 +142,9 @@ class ApplicationServiceImplTest {
                 testApp.getPosition(),
                 testApp.getApplyDate(),
                 testApp.getCreatedAt(),
-                testApp.getUpdatedAt());
+                testApp.getUpdatedAt(),
+                testApp.getInterviewDate(),
+                testApp.getEmailNotificationsEnabled());
 
         when(userRepository.findById(userId)).thenReturn(Optional.of(user));
         when(applicationRepository.save(testApp)).thenReturn(testApp);
@@ -232,7 +234,9 @@ class ApplicationServiceImplTest {
                 "Old Position",
                 null,
                 null,
-                null
+                null,
+                null,
+                true
         );
 
         when(applicationRepository.findById(appId)).thenReturn(Optional.of(existing));
@@ -283,7 +287,9 @@ class ApplicationServiceImplTest {
                 "NewPosition",
                 null,
                 null,
-                null
+                null,
+                null,
+                true
         );
 
         when(applicationRepository.findById(appId)).thenReturn(Optional.of(existing));
@@ -346,7 +352,9 @@ class ApplicationServiceImplTest {
                 "OldPosition",
                 null,
                 null,
-                null
+                null,
+                null,
+                true
         );
 
         when(applicationRepository.findById(appId)).thenReturn(Optional.of(existing));

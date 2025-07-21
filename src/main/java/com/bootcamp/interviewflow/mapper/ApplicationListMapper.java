@@ -18,6 +18,8 @@ public class ApplicationListMapper {
                 application.getPosition(),
                 application.getApplyDate(),
                 application.getCreatedAt(),
+                application.getInterviewDate(),
+                application.getEmailNotificationsEnabled(),
                 application.getUpdatedAt()
         );
     }

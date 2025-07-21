@@ -1,0 +1,27 @@
+databaseChangeLog:
+  - logicalFilePath: migrations/004-add-interview-fields.yml
+  - changeSet:
+      id: 008-add-interview-fields
+      author: karolig
+      changes:
+        - addColumn:
+            tableName: applications
+            columns:
+              - column:
+                  name: interview_date
+                  type: TIMESTAMP
+                  constraints:
+                    nullable: true
+              - column:
+                  name: email_notifications_enabled
+                  type: BOOLEAN
+                  defaultValueBoolean: false
+                  constraints:
+                    nullable: false
+      rollback:
+        - dropColumn:
+            tableName: applications
+            columnName: interview_date
+        - dropColumn:
+            tableName: applications
+            columnName: email_notifications_enabled
