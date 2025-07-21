@@ -59,7 +59,8 @@ The project comes with two profiles:
 
 By default, the `dev` profile is active, so you can start coding and testing right away without any extra setup.
 
-To keep things clean and centralized, the project uses a **`.env` file** for storing all service configuration values.
+To keep things clean and centralized, the project uses a **`.env` file** for storing all service configuration values. 
+Now `.env` file contains default settings, just for local development.
 
 To fill up `application.properties` values run in terminal
 
@@ -105,7 +106,7 @@ Clone the repo and follow the setup instructions:
 git clone https://github.com/JavaBootcampJuly2025/InterviewFlow.git
 cd interviewflow
 mvn package
-# Запуск с профилем dev
+# Launch with dev profile
 java -Dspring.profiles.active=dev -jar target/InterviewFlow-0.0.1-SNAPSHOT.jar
 ```
 
