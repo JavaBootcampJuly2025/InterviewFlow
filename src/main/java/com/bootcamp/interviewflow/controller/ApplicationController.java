@@ -11,7 +11,9 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -31,6 +33,7 @@ import java.util.List;
 @RequestMapping("/api")
 @RequiredArgsConstructor
 @Tag(name = "Applications", description = "User job applications for employment")
+@SecurityRequirement(name = "bearerAuth")
 public class ApplicationController {
 
     private final ApplicationService applicationService;
@@ -45,7 +48,9 @@ public class ApplicationController {
                     content = @Content(schema = @Schema(implementation = com.bootcamp.interviewflow.dto.ApiResponse.class))),
     })
     @PostMapping("/applications")
-    public ResponseEntity<ApplicationResponse> create(@RequestBody @Valid CreateApplicationRequest dto) {
+    public ResponseEntity<ApplicationResponse> create(@RequestBody @Valid CreateApplicationRequest dto,
+                                                      HttpServletRequest request) {
+        //request
         ApplicationResponse created = applicationService.create(dto);
         return ResponseEntity
                 .status(HttpStatus.CREATED)
@@ -60,7 +65,9 @@ public class ApplicationController {
                     content = @Content(schema = @Schema(implementation = com.bootcamp.interviewflow.dto.ApiResponse.class))),
     })
     @GetMapping("/applications")
-    public ResponseEntity<List<ApplicationListDTO>> findAll() {
+    public ResponseEntity<List<ApplicationListDTO>> findAll(HttpServletRequest request) {
+        //request
+
         List<ApplicationListDTO> all = applicationService.findAll();
         return ResponseEntity.ok(all);
     }
@@ -75,7 +82,10 @@ public class ApplicationController {
                     content = @Content(schema = @Schema(implementation = com.bootcamp.interviewflow.dto.ApiResponse.class)))
     })
     @GetMapping(path = "/users/{userId}/applications")
-    public ResponseEntity<List<ApplicationListDTO>> getUserApplications(@PathVariable Long userId) {
+    public ResponseEntity<List<ApplicationListDTO>> getUserApplications(@PathVariable Long userId,
+                                                                        HttpServletRequest request) {
+        //request
+
         return ResponseEntity.ok(applicationService.findAllByUserId(userId));
     }
 
@@ -89,7 +99,9 @@ public class ApplicationController {
                     content = @Content(schema = @Schema(implementation = com.bootcamp.interviewflow.dto.ApiResponse.class)))
     })
     @DeleteMapping("/applications/{id}")
-    public ResponseEntity<String> delete(@PathVariable Long id) {
+    public ResponseEntity<String> delete(@PathVariable Long id, HttpServletRequest request) {
+        //request
+
         applicationService.delete(id);
         return ResponseEntity.ok("Application with id " + id + " deleted");
     }
@@ -108,7 +120,10 @@ public class ApplicationController {
     @PatchMapping("/applications/{id}")
     public ResponseEntity<ApplicationResponse> partialUpdate(
             @PathVariable Long id,
-            @RequestBody @Valid UpdateApplicationRequest dto) {
+            @RequestBody @Valid UpdateApplicationRequest dto,
+            HttpServletRequest request) {
+       //request
+
         return ResponseEntity.ok(applicationService.partialUpdate(id, dto));
     }
 }

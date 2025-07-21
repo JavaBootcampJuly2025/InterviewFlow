@@ -10,6 +10,8 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -64,7 +66,7 @@ public class UserController {
         return ResponseEntity.ok(new ApiResponse(true, "Login successful", userResponse));
     }
 
-    @Operation(summary = "User dashboard")
+    @Operation(summary = "User dashboard", security = @SecurityRequirement(name = "bearerAuth"))
     @ApiResponses(value = {
             @io.swagger.v3.oas.annotations.responses.ApiResponse(
                     responseCode = "200", description = "Dashboard",
@@ -74,10 +76,9 @@ public class UserController {
                     content = @Content(schema = @Schema(implementation = ApiResponse.class)))
     })
     @GetMapping("/dashboard")
-    public ResponseEntity<ApiResponse> dashboard() {
-        // This endpoint requires Authorization header: Basic base64(email:password)
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        String currentUserEmail = authentication.getName();
+    public ResponseEntity<ApiResponse> dashboard(HttpServletRequest request) {
+        // Get user information from JWT token (set by JwtAuthenticationFilter)
+        String currentUserEmail = (String) request.getAttribute("email");
 
         return ResponseEntity.ok(new ApiResponse(true,
                 "Welcome to dashboard, " + currentUserEmail,
