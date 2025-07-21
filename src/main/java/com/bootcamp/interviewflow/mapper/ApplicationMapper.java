@@ -21,6 +21,9 @@ public class ApplicationMapper {
         if (dto.getPosition() != null) {
             app.setPosition(dto.getPosition());
         }
+        if (dto.getApplyDate() != null) {
+            app.setApplyDate(dto.getApplyDate());
+        }
         return app;
     }
 
@@ -31,6 +34,7 @@ public class ApplicationMapper {
                 app.getCompanyName(),
                 app.getCompanyLink(),
                 app.getPosition(),
+                app.getApplyDate(),
                 app.getCreatedAt(),
                 app.getUpdatedAt()
         );
