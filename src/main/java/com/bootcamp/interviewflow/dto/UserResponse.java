@@ -1,6 +1,8 @@
 package com.bootcamp.interviewflow.dto;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.v3.oas.annotations.media.Schema;
+import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.LocalDateTime;
 
@@ -13,8 +15,14 @@ public class UserResponse {
     private String userName;
     @Schema(description = "User's email address", example = "johndoe@example.com")
     private String email;
+    @CreationTimestamp
     @Schema(description = "Account creation timestamp", example = "2024-07-17T14:33:22")
     private LocalDateTime createdAt;
+    @JsonProperty("access_token")
+    private String accessToken;
+
+    @JsonProperty("token_type")
+    private String tokenType = "Bearer";
 
     public UserResponse() {}
 
@@ -23,6 +31,12 @@ public class UserResponse {
         this.userName = userName;
         this.email = email;
         this.createdAt = createdAt;
+    }
+    public UserResponse(Long id, String userName, String email, String accessToken) {
+        this.id = id;
+        this.userName = userName;
+        this.email = email;
+        this.accessToken = accessToken;
     }
 
     // Getters and setters
@@ -56,5 +70,21 @@ public class UserResponse {
 
     public void setCreatedAt(LocalDateTime createdAt) {
         this.createdAt = createdAt;
+    }
+
+    public String getAccessToken() {
+        return accessToken;
+    }
+
+    public void setAccessToken(String accessToken) {
+        this.accessToken = accessToken;
+    }
+
+    public String getTokenType() {
+        return tokenType;
+    }
+
+    public void setTokenType(String tokenType) {
+        this.tokenType = tokenType;
     }
 }
