@@ -3,7 +3,6 @@ package com.bootcamp.interviewflow.dto;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import lombok.Getter;
@@ -50,9 +49,4 @@ public class CreateApplicationRequest {
             }
     )
     private String status;
-
-    @NotNull(message = "User ID is required")
-    @Schema(description = "ID of the user applying for the job", example = "42", requiredMode = Schema.RequiredMode.REQUIRED)
-    private Long userId;
-
 }
