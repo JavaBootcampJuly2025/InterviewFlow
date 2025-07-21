@@ -1,5 +1,6 @@
 package com.bootcamp.interviewflow.service;
 
+import com.bootcamp.interviewflow.dto.FileMetadataResponse;
 import com.bootcamp.interviewflow.dto.FileResponse;
 import com.bootcamp.interviewflow.model.FileMetadata;
 import com.bootcamp.interviewflow.repository.FileMetadataRepository;
@@ -10,6 +11,7 @@ import io.minio.MinioClient;
 import io.minio.PutObjectArgs;
 import io.minio.RemoveObjectArgs;
 import jakarta.annotation.PostConstruct;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FilenameUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Profile;
@@ -18,11 +20,14 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.FileNotFoundException;
 import java.io.InputStream;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Profile("dev")
+@Slf4j
 @Service
 public class MinioStorageService implements ObjectStorageService {
     protected static final String NO_ACCESS_OR_FILE = "No access or file";
@@ -44,6 +49,7 @@ public class MinioStorageService implements ObjectStorageService {
         boolean exists = minioClient.bucketExists(BucketExistsArgs.builder().bucket(bucket).build());
         if (!exists) {
             minioClient.makeBucket(MakeBucketArgs.builder().bucket(bucket).build());
+            log.info("Bucket with name {} created", bucket);
         }
     }
 
@@ -97,7 +103,15 @@ public class MinioStorageService implements ObjectStorageService {
     }
 
     @Override
-    public List<FileMetadata> findAllByUserId(Long userId) {
-        return metadataRepo.findAllByUserId(userId);
+    public List<FileMetadataResponse> findAllByUserId(Long userId) {
+        return metadataRepo.findAllByUserId(userId).stream()
+                .map(metadata -> new FileMetadataResponse(
+                        metadata.getId(),
+                        metadata.getOriginalFilename(),
+                        metadata.getContentType(),
+                        metadata.getCreatedAt()
+                ))
+                .sorted(Comparator.comparing(FileMetadataResponse::id))
+                .collect(Collectors.toList());
     }
 }

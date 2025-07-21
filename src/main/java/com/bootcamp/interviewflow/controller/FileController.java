@@ -1,9 +1,16 @@
 package com.bootcamp.interviewflow.controller;
 
+import com.bootcamp.interviewflow.dto.FileMetadataResponse;
 import com.bootcamp.interviewflow.dto.FileResponse;
-import com.bootcamp.interviewflow.model.FileMetadata;
 import com.bootcamp.interviewflow.security.CustomUserDetails;
 import com.bootcamp.interviewflow.service.ObjectStorageService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.ArraySchema;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -25,6 +32,7 @@ import java.util.UUID;
 @Slf4j
 @RestController
 @RequestMapping("/api/files")
+@Tag(name = "File Management", description = "Upload, download, delete and list user files")
 public class FileController {
 
     private final ObjectStorageService storageService;
@@ -33,12 +41,26 @@ public class FileController {
         this.storageService = storageService;
     }
 
+    @Operation(summary = "Upload a file", description = "Uploads a file for the currently authenticated user")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "File uploaded successfully",
+                    content = @Content(schema = @Schema(implementation = FileResponse.class))),
+            @ApiResponse(responseCode = "401", description = "Unauthorized")
+    })
     @PostMapping
     public ResponseEntity<FileResponse> upload(@RequestParam("file") MultipartFile file) throws Exception {
         FileResponse response = storageService.upload(getCurrentUserId(), file);
         return ResponseEntity.ok(response);
     }
 
+    @Operation(summary = "Download a file", description = "Downloads the file with the specified ID")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "File downloaded successfully",
+                    content = @Content(mediaType = MediaType.APPLICATION_OCTET_STREAM_VALUE)),
+            @ApiResponse(responseCode = "401", description = "Unauthorized"),
+            @ApiResponse(responseCode = "404", description = "File not found"),
+            @ApiResponse(responseCode = "403", description = "Access denied")
+    })
     @GetMapping("/{fileId}")
     public ResponseEntity<byte[]> download(@PathVariable UUID fileId) throws Exception {
         byte[] data = storageService.download(fileId, getCurrentUserId());
@@ -47,15 +69,28 @@ public class FileController {
                 .body(data);
     }
 
+    @Operation(summary = "Delete a file", description = "Deletes the file with the specified ID")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "File deleted successfully",
+                    content = @Content(schema = @Schema(implementation = FileResponse.class))),
+            @ApiResponse(responseCode = "401", description = "Unauthorized"),
+            @ApiResponse(responseCode = "403", description = "Access denied")
+    })
     @DeleteMapping("/{fileId}")
     public ResponseEntity<FileResponse> delete(@PathVariable UUID fileId) throws Exception {
         storageService.delete(fileId, getCurrentUserId());
         return ResponseEntity.ok(new FileResponse("File deleted", fileId));
     }
 
+    @Operation(summary = "List user files", description = "Lists all files uploaded by the authenticated user")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "File list retrieved successfully",
+                    content = @Content(array = @ArraySchema(schema = @Schema(implementation = FileMetadataResponse.class)))),
+            @ApiResponse(responseCode = "401", description = "Unauthorized")
+    })
     @GetMapping
-    public ResponseEntity<List<FileMetadata>> list(@RequestParam("userId") Long userId) {
-        return ResponseEntity.ok(storageService.findAllByUserId(userId));
+    public ResponseEntity<List<FileMetadataResponse>> list() {
+        return ResponseEntity.ok(storageService.findAllByUserId(getCurrentUserId()));
     }
 
     private Long getCurrentUserId() {
