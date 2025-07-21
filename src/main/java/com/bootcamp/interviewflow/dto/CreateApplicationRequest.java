@@ -1,5 +1,6 @@
 package com.bootcamp.interviewflow.dto;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -7,6 +8,8 @@ import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.Setter;
+
+import java.time.LocalDateTime;
 
 @Setter
 @Getter
@@ -26,6 +29,11 @@ public class CreateApplicationRequest {
     @Size(max = 100, message = "Position must not exceed 100 characters")
     @Schema(description = "Job title or position applied for", example = "Software Engineer", requiredMode = Schema.RequiredMode.REQUIRED)
     private String position;
+
+    @Schema(description = "Timestamp when you actually applied for the job (optional - defaults to creation time)",
+            example = "2025-07-16T10:30:00")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")
+    LocalDateTime applyDate;
 
     @NotBlank(message = "Status is required")
     @Pattern(
