@@ -56,11 +56,25 @@ public class ApplicationServiceImpl implements ApplicationService {
     }
 
     @Override
-    public List<ApplicationListDTO> findAll() {
-        log.info("Fetching applications:");
-        List<Application> applications = applicationRepository.findAll();
-        return applicationListMapper.toApplicationListDTOs(applications);
+    public List<ApplicationListDTO> findAll(String status) {
+        log.info("Fetching applications with status filter: {}", status);
 
+        List<Application> applications;
+
+        if (status != null) {
+            try {
+                ApplicationStatus applicationStatus = ApplicationStatus.valueOf(status.toUpperCase());
+                applications = applicationRepository.findByStatus(applicationStatus);
+            } catch (IllegalArgumentException e) {
+                log.warn("Invalid status value: {}", status);
+                applications = applicationRepository.findAll();
+            }
+        } else {
+            applications = applicationRepository.findAll();
+        }
+
+        log.info("Found {} applications matching criteria", applications.size());
+        return applicationListMapper.toApplicationListDTOs(applications);
     }
 
     @Override

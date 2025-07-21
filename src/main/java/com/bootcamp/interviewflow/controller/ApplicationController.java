@@ -24,6 +24,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.List;
 
@@ -52,16 +53,17 @@ public class ApplicationController {
                 .body(created);
     }
 
-    @Operation(summary = "Get all job applications")
+    @Operation(summary = "Get all applications with optional status filter")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "List of applications",
                     content = @Content(array = @ArraySchema(schema = @Schema(implementation = ApplicationListDTO.class)))),
             @ApiResponse(responseCode = "401", description = "Unauthorized",
-                    content = @Content(schema = @Schema(implementation = com.bootcamp.interviewflow.dto.ApiResponse.class))),
+                    content = @Content(schema = @Schema(implementation = com.bootcamp.interviewflow.dto.ApiResponse.class)))
     })
     @GetMapping("/applications")
-    public ResponseEntity<List<ApplicationListDTO>> findAll() {
-        List<ApplicationListDTO> all = applicationService.findAll();
+    public ResponseEntity<List<ApplicationListDTO>> findAll(
+            @RequestParam(required = false) String status) {
+        List<ApplicationListDTO> all = applicationService.findAll(status);
         return ResponseEntity.ok(all);
     }
 

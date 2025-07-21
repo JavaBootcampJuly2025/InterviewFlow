@@ -4,7 +4,6 @@ import com.bootcamp.interviewflow.dto.ApplicationListDTO;
 import com.bootcamp.interviewflow.dto.ApplicationResponse;
 import com.bootcamp.interviewflow.dto.CreateApplicationRequest;
 import com.bootcamp.interviewflow.dto.UpdateApplicationRequest;
-import com.bootcamp.interviewflow.model.Application;
 
 import java.util.List;
 
@@ -14,7 +13,7 @@ public interface ApplicationService {
 
     ApplicationResponse create(CreateApplicationRequest dto);
 
-    List<ApplicationListDTO> findAll();
+    List<ApplicationListDTO> findAll(String status);
 
     void delete(Long id);
 
