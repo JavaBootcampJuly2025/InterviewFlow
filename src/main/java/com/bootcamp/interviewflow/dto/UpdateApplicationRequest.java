@@ -1,6 +1,7 @@
 package com.bootcamp.interviewflow.dto;
 
 import com.bootcamp.interviewflow.model.ApplicationStatus;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import lombok.Data;
@@ -24,6 +25,11 @@ public class UpdateApplicationRequest {
 
     private ApplicationStatus status;
 
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime applyDate;
-}
 
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")
+    private LocalDateTime interviewDate;
+
+    private Boolean emailNotificationsEnabled;
+}

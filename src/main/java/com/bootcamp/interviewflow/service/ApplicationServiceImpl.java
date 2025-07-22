@@ -18,6 +18,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
@@ -40,7 +41,13 @@ public class ApplicationServiceImpl implements ApplicationService {
         app.setCompanyName(dto.getCompanyName());
         app.setCompanyLink(dto.getCompanyLink());
         app.setPosition(dto.getPosition());
-        app.setApplyDate(dto.getApplyDate());
+        app.setApplyDate(dto.getApplyDate() != null ? dto.getApplyDate() : LocalDateTime.now());
+
+        app.setInterviewDate(dto.getInterviewDate());
+
+        app.setEmailNotificationsEnabled(dto.getEmailNotificationsEnabled() != null ?
+                dto.getEmailNotificationsEnabled() : false);
+
         app.setStatus(ApplicationStatus.valueOf(dto.getStatus()));
         app.setUser(user);
 

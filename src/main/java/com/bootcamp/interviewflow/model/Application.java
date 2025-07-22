@@ -46,6 +46,12 @@ public class Application {
     @Column(name = "apply_date", nullable = false)
     private LocalDateTime applyDate;
 
+    @Column(name = "interview_date")
+    private LocalDateTime interviewDate;
+
+    @Column(name = "email_notifications_enabled", nullable = false)
+    private Boolean emailNotificationsEnabled;
+
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
@@ -58,12 +64,14 @@ public class Application {
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
-    public Application(ApplicationStatus status, String companyName, String companyLink, String position, LocalDateTime applyDate, User user) {
+    public Application(ApplicationStatus status, String companyName, String companyLink, String position, LocalDateTime applyDate, LocalDateTime interviewDate, Boolean emailNotificationsEnabled, User user) {
         this.status = status;
         this.companyName = companyName;
         this.companyLink = companyLink;
         this.position = position;
         this.applyDate = applyDate;
+        this.interviewDate = interviewDate;
+        this.emailNotificationsEnabled = emailNotificationsEnabled;
         this.user = user;
     }
 }
