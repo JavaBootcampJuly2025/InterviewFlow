@@ -1,8 +1,7 @@
 # InterviewFlow
 
 **InterviewFlow** is a Backend API for simple and effective application designed to help jobseekers organize and manage
-all their job
-applications in one place.
+all their job applications in one place.
 
 ---
 
