@@ -8,3 +8,11 @@ spring:
     url: jdbc:postgresql://${POSTGRES_HOST}:${POSTGRES_PORT}/${POSTGRES_DB}
     username: ${POSTGRES_USER}
     password: ${POSTGRES_PASSWORD}
+
+minio:
+  url: localhost
+  port: 9000
+  tlsOn: false
+  accessKey: minioadmin
+  secretKey: minioadmin
+  bucket: if-bucket

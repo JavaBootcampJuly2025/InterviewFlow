@@ -10,3 +10,14 @@ spring:
     password: postgres
   liquibase:
     change-log: classpath:db/changelog/db.changelog-master.yml
+
+minio:
+  url: localhost
+  port: 9000
+  tlsOn: false
+  accessKey: minioadmin
+  secretKey: minioadmin
+  bucket: if-bucket
+
+server:
+  port: 8081

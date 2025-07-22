@@ -6,3 +6,11 @@ spring:
     url: ${DATASOURCE_URL}
     username: ${DATASOURCE_USERNAME}
     password: ${DATASOURCE_PASSWORD}
+
+minio:
+  url: localhost
+  port: 9000
+  tlsOn: false
+  accessKey: minioadmin
+  secretKey: minioadmin
+  bucket: if-bucket

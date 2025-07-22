@@ -49,6 +49,10 @@ public class FileController {
     })
     @PostMapping
     public ResponseEntity<FileResponse> upload(@RequestParam("file") MultipartFile file) throws Exception {
+        Long userId = getCurrentUserId();
+        String bucketName = "user-files";
+        String objectKey = userId + "/" + java.util.UUID.randomUUID() + "-" + file.getOriginalFilename();
+
         FileResponse response = storageService.upload(getCurrentUserId(), file);
         return ResponseEntity.ok(response);
     }

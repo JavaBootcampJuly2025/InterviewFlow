@@ -3,8 +3,11 @@ package com.bootcamp.interviewflow.configuration;
 import com.bootcamp.interviewflow.dto.ApiResponse;
 import com.bootcamp.interviewflow.exception.ApplicationNotFoundException;
 import com.bootcamp.interviewflow.exception.EmailAlreadyExistsException;
+import com.bootcamp.interviewflow.exception.FileNotFoundOrNoAccessException;
 import com.bootcamp.interviewflow.exception.NoteNotFoundException;
 import com.bootcamp.interviewflow.exception.UserNotFoundException;
+import jakarta.validation.ConstraintViolation;
+import jakarta.validation.ConstraintViolationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
@@ -16,8 +19,6 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
-import jakarta.validation.ConstraintViolation;
-import jakarta.validation.ConstraintViolationException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -110,4 +111,10 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.NOT_FOUND)
                 .body(new ApiResponse(false, ex.getMessage()));
     }
+
+    @ExceptionHandler(FileNotFoundOrNoAccessException.class)
+    public ResponseEntity<?> handleFileNotFound(FileNotFoundOrNoAccessException ex) {
+        return ResponseEntity.status(404).body(ex.getMessage());
+    }
+
 }
