@@ -19,6 +19,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.Sort;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -378,5 +379,64 @@ class ApplicationServiceImplTest {
         verify(applicationMapper).updateEntityFromDto(dto, existing);
         verify(applicationRepository).save(patched);
         verify(applicationMapper).toResponse(patched);
+    }
+
+    @Test
+    void findAllByUserIdSorted_ShouldReturnAllApplicationsSorted() {
+        Sort sort = Sort.by(Sort.Direction.DESC, "applyDate");
+
+        when(applicationRepository.findAllByUserId(userId, sort)).thenReturn(applications);
+        when(applicationListMapper.toApplicationListDTOs(applications)).thenReturn(dtos);
+
+        List<ApplicationListDTO> result = service.findAllByUserIdSorted(userId, sort);
+
+        assertThat(result).hasSize(2).isEqualTo(dtos);
+        verify(applicationRepository).findAllByUserId(userId, sort);
+        verify(applicationListMapper).toApplicationListDTOs(applications);
+    }
+
+    @Test
+    void findAllByUserIdSorted_ShouldReturnEmptyList_WhenNoApplications() {
+        Sort sort = Sort.by(Sort.Direction.ASC, "companyName");
+
+        when(applicationRepository.findAllByUserId(userId, sort)).thenReturn(List.of());
+        when(applicationListMapper.toApplicationListDTOs(List.of())).thenReturn(List.of());
+
+        List<ApplicationListDTO> result = service.findAllByUserIdSorted(userId, sort);
+
+        assertThat(result).isEmpty();
+        verify(applicationRepository).findAllByUserId(userId, sort);
+        verify(applicationListMapper).toApplicationListDTOs(List.of());
+    }
+
+    @Test
+    void findAllByUserIdAndStatus_ShouldReturnEmptyList_WhenNoMatches() {
+        Sort sort = Sort.by(Sort.Direction.DESC, "createdAt");
+
+        when(applicationRepository.findAllByUserIdAndStatus(userId, ApplicationStatus.WITHDRAWN, sort)).thenReturn(List.of());
+        when(applicationListMapper.toApplicationListDTOs(List.of())).thenReturn(List.of());
+
+        List<ApplicationListDTO> result = service.findAllByUserIdAndStatus(userId, ApplicationStatus.WITHDRAWN, sort);
+
+        assertThat(result).isEmpty();
+        verify(applicationRepository).findAllByUserIdAndStatus(userId, ApplicationStatus.WITHDRAWN, sort);
+        verify(applicationListMapper).toApplicationListDTOs(List.of());
+    }
+
+    @Test
+    void findAllByUserIdAndStatus_ShouldReturnSortedDTOs() {
+        Sort sort = Sort.by(Sort.Direction.ASC, "companyName");
+
+        List<Application> filteredApps = List.of(app1);
+        List<ApplicationListDTO> mappedDTOs = List.of(dtos.get(0));
+
+        when(applicationRepository.findAllByUserIdAndStatus(userId, APPLIED, sort)).thenReturn(filteredApps);
+        when(applicationListMapper.toApplicationListDTOs(filteredApps)).thenReturn(mappedDTOs);
+
+        List<ApplicationListDTO> result = service.findAllByUserIdAndStatus(userId, APPLIED, sort);
+
+        assertThat(result).hasSize(1).isEqualTo(mappedDTOs);
+        verify(applicationRepository).findAllByUserIdAndStatus(userId, APPLIED, sort);
+        verify(applicationListMapper).toApplicationListDTOs(filteredApps);
     }
 }
