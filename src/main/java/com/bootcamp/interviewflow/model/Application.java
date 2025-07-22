@@ -14,6 +14,7 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.JoinColumn;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
@@ -27,6 +28,7 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 @Data
+@Builder
 public class Application {
 
     @Id
@@ -69,15 +71,4 @@ public class Application {
 
     @OneToMany(mappedBy = "application", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Note> notes;
-
-    public Application(ApplicationStatus status, String companyName, String companyLink, String position, LocalDateTime applyDate, LocalDateTime interviewDate, Boolean emailNotificationsEnabled, User user) {
-        this.status = status;
-        this.companyName = companyName;
-        this.companyLink = companyLink;
-        this.position = position;
-        this.applyDate = applyDate;
-        this.interviewDate = interviewDate;
-        this.emailNotificationsEnabled = emailNotificationsEnabled;
-        this.user = user;
-    }
 }

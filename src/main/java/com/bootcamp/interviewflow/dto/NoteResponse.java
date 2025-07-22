@@ -1,5 +1,6 @@
 package com.bootcamp.interviewflow.dto;
 
+import com.bootcamp.interviewflow.model.Note;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import io.swagger.v3.oas.annotations.media.Schema;
 
@@ -24,4 +25,14 @@ public record NoteResponse(
         @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")
         LocalDateTime updatedAt
 
-) {}
+) {
+    public static NoteResponse from(Note note) {
+        return new NoteResponse(
+                note.getId(),
+                note.getApplication().getId(),
+                note.getContent(),
+                note.getCreatedAt(),
+                note.getUpdatedAt()
+        );
+    }
+}

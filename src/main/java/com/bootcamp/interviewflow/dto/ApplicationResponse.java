@@ -3,10 +3,12 @@ package com.bootcamp.interviewflow.dto;
 import com.bootcamp.interviewflow.model.ApplicationStatus;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import io.swagger.v3.oas.annotations.media.Schema;
+import lombok.Builder;
 
 import java.time.LocalDateTime;
 
 @Schema(description = "Detailed response representing a job application")
+@Builder
 public record ApplicationResponse(
 
         @Schema(description = "Unique ID of the application", example = "1001")
