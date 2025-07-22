@@ -20,9 +20,8 @@ public interface ObjectStorageService {
      * @param userId the ID of the user uploading the file
      * @param file the file to be uploaded
      * @return a {@link FileResponse} containing metadata about the uploaded file
-     * @throws Exception if the upload fails
      */
-    FileResponse upload(Long userId, MultipartFile file) throws Exception;
+    FileResponse upload(Long userId, MultipartFile file);
 
     /**
      * Downloads a file for a specific user.
@@ -30,18 +29,16 @@ public interface ObjectStorageService {
      * @param fileId the UUID of the file to download
      * @param userId the ID of the user requesting the file
      * @return the file content as a byte array
-     * @throws Exception if the file cannot be found or access is denied
      */
-    byte[] download(UUID fileId, Long userId) throws Exception;
+    byte[] download(UUID fileId, Long userId);
 
     /**
      * Deletes a file for a specific user.
      *
      * @param fileId the UUID of the file to delete
      * @param userId the ID of the user requesting the deletion
-     * @throws Exception if the file cannot be deleted or access is denied
      */
-    void delete(UUID fileId, Long userId) throws Exception;
+    void delete(UUID fileId, Long userId);
 
     /**
      * Retrieves all metadata for files uploaded by a specific user.

@@ -12,6 +12,7 @@ import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import com.bootcamp.interviewflow.security.JwtUtil;
 
 @Service
 public class UserServiceImpl implements UserService {
@@ -20,10 +21,12 @@ public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+    private final JwtUtil jwtUtil;
 
-    public UserServiceImpl(UserRepository userRepository, PasswordEncoder passwordEncoder) {
+    public UserServiceImpl(UserRepository userRepository, PasswordEncoder passwordEncoder, JwtUtil jwtUtil) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
+        this.jwtUtil = jwtUtil;
     }
 
     @Override
@@ -58,8 +61,18 @@ public class UserServiceImpl implements UserService {
             throw new BadCredentialsException("Invalid email or password");
         }
 
-        logger.info("User logged in successfully with ID: {}", user.getId());
-        return convertToResponse(user);
+        // Generate JWT token
+        String token = jwtUtil.generateToken(user.getEmail(), user.getId());
+
+        // Return response with token
+        return new UserResponse(
+                user.getId(),
+                user.getUsername(),
+                user.getEmail(),
+                token
+        );
+        //logger.info("User logged in successfully with ID: {}", user.getId());
+        //return convertToResponse(user);
     }
 
     private UserResponse convertToResponse(User user) {

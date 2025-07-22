@@ -2,6 +2,7 @@ package com.bootcamp.interviewflow.service;
 
 import com.bootcamp.interviewflow.dto.FileMetadataResponse;
 import com.bootcamp.interviewflow.dto.FileResponse;
+import com.bootcamp.interviewflow.exception.FileNotFoundOrNoAccessException;
 import com.bootcamp.interviewflow.model.FileMetadata;
 import com.bootcamp.interviewflow.repository.FileMetadataRepository;
 import io.minio.BucketExistsArgs;
@@ -45,28 +46,37 @@ public class MinioStorageService implements ObjectStorageService {
     }
 
     @PostConstruct
-    public void init() throws Exception {
-        boolean exists = minioClient.bucketExists(BucketExistsArgs.builder().bucket(bucket).build());
-        if (!exists) {
-            minioClient.makeBucket(MakeBucketArgs.builder().bucket(bucket).build());
-            log.info("Bucket with name {} created", bucket);
+    public void init() {
+        try {
+            boolean exists = minioClient.bucketExists(BucketExistsArgs.builder().bucket(bucket).build());
+            if (!exists) {
+                minioClient.makeBucket(MakeBucketArgs.builder().bucket(bucket).build());
+                log.info("Bucket with name {} created", bucket);
+            }
+        } catch (Exception e) {
+            log.error("Failed to initialize MinIO bucket", e);
+            throw new RuntimeException(e);
         }
     }
 
     @Override
-    public FileResponse upload(Long userId, MultipartFile file) throws Exception {
+    public FileResponse upload(Long userId, MultipartFile file) {
         UUID fileId = UUID.randomUUID();
         String extension = Optional.ofNullable(FilenameUtils.getExtension(file.getOriginalFilename())).orElse("");
         String objectKey = userId + "/" + fileId + (extension.isBlank() ? "" : "." + extension);
 
-        minioClient.putObject(
-                PutObjectArgs.builder()
-                        .bucket(bucket)
-                        .object(objectKey)
-                        .stream(file.getInputStream(), -1, 10485760)
-                        .contentType(file.getContentType())
-                        .build()
-        );
+        try {
+            minioClient.putObject(
+                    PutObjectArgs.builder()
+                            .bucket(bucket)
+                            .object(objectKey)
+                            .stream(file.getInputStream(), -1, 10485760)
+                            .contentType(file.getContentType())
+                            .build()
+            );
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to upload file", e);
+        }
 
         FileMetadata metadata = new FileMetadata();
         metadata.setId(fileId);
@@ -80,26 +90,31 @@ public class MinioStorageService implements ObjectStorageService {
     }
 
     @Override
-    public byte[] download(UUID fileId, Long userId) throws Exception {
+    public byte[] download(UUID fileId, Long userId) {
         FileMetadata metadata = metadataRepo.findByIdAndUserId(fileId, userId)
-                .orElseThrow(() -> new FileNotFoundException(NO_ACCESS_OR_FILE));
+                .orElseThrow(() -> new FileNotFoundOrNoAccessException(NO_ACCESS_OR_FILE));
 
         try (InputStream stream = minioClient.getObject(
                 GetObjectArgs.builder().bucket(bucket).object(metadata.getObjectKey()).build())) {
             return stream.readAllBytes();
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to download file", e);
         }
     }
 
     @Override
-    public void delete(UUID fileId, Long userId) throws Exception {
+    public void delete(UUID fileId, Long userId) {
         FileMetadata metadata = metadataRepo.findByIdAndUserId(fileId, userId)
-                .orElseThrow(() -> new FileNotFoundException(NO_ACCESS_OR_FILE));
+                .orElseThrow(() -> new FileNotFoundOrNoAccessException(NO_ACCESS_OR_FILE));
 
-        minioClient.removeObject(
-                RemoveObjectArgs.builder().bucket(bucket).object(metadata.getObjectKey()).build()
-        );
-
-        metadataRepo.delete(metadata);
+        try {
+            minioClient.removeObject(
+                    RemoveObjectArgs.builder().bucket(bucket).object(metadata.getObjectKey()).build()
+            );
+            metadataRepo.delete(metadata);
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to delete file", e);
+        }
     }
 
     @Override
