@@ -16,6 +16,7 @@ import com.bootcamp.interviewflow.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -61,10 +62,17 @@ public class ApplicationServiceImpl implements ApplicationService {
     }
 
     @Override
-    public List<ApplicationListDTO> findAllByUserIdAndStatus(Long userId, ApplicationStatus status) {
-        log.info("Fetching applications for user ID: {} with status: {}", userId, status);
-        List<Application> applications = applicationRepository.findAllByUserIdAndStatus(userId, status);
-        log.info("Found {} applications for user ID: {} with status: {}", applications.size(), userId, status);
+    public List<ApplicationListDTO> findAllByUserIdAndStatus(Long userId, ApplicationStatus status, Sort sort) {
+        log.info("Fetching applications for user ID: {} with status: {}, sort: {}", userId, status, sort);
+        List<Application> applications = applicationRepository.findAllByUserIdAndStatus(userId, status, sort);
+        log.info("Found {} applications for user ID: {} with status: {}, sort: {}", applications.size(), userId, status, sort);
+        return applicationListMapper.toApplicationListDTOs(applications);
+    }
+
+    @Override
+    public List<ApplicationListDTO> findAllByUserIdSorted(Long userId, Sort sort) {
+        log.info("Fetching sorted applications for user ID: {}, sort: {}", userId, sort);
+        List<Application> applications = applicationRepository.findAllByUserId(userId, sort);
         return applicationListMapper.toApplicationListDTOs(applications);
     }
 
