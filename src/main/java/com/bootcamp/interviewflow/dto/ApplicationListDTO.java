@@ -21,7 +21,7 @@ public record ApplicationListDTO(
 
         @Schema(description = "Timestamp when you actually applied for the job (optional - defaults to creation time)",
                 example = "2025-07-16T10:30:00")
-        @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")
+        @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:[ss]")
         LocalDateTime applyDate,
 
         @Schema(description = "Timestamp when the application was created", example = "2025-07-17 10:30:00")
