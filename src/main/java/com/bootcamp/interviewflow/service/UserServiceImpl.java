@@ -21,12 +21,12 @@ public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
-    private final JwtUtil JwtUtil;
+    private final JwtUtil jwtUtil;
 
     public UserServiceImpl(UserRepository userRepository, PasswordEncoder passwordEncoder, JwtUtil jwtUtil) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
-        this.JwtUtil = jwtUtil;
+        this.jwtUtil = jwtUtil;
     }
 
     @Override
@@ -62,7 +62,7 @@ public class UserServiceImpl implements UserService {
         }
 
         // Generate JWT token
-        String token = JwtUtil.generateToken(user.getEmail(), user.getId());
+        String token = jwtUtil.generateToken(user.getEmail(), user.getId());
 
         // Return response with token
         return new UserResponse(
