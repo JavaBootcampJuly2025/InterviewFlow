@@ -12,6 +12,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentMatchers;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -64,9 +65,10 @@ class UserServiceImplTest {
         mockUser.setUsername("John Doe");
         mockUser.setEmail("john.doe@example.com");
         mockUser.setPassword("encodedPassword");
+
         validUserRequest = new UserRequest();
-        validUserRequest.setUsername("Jane");
-        validUserRequest.setEmail("jane@example.com");
+        validUserRequest.setUsername("Alice");
+        validUserRequest.setEmail("alice@example.com");
         mockUser.setCreatedAt(LocalDateTime.now());
     }
 
@@ -601,61 +603,43 @@ class UserServiceImplTest {
     }
 
     @Test
-    @DisplayName("Should return profile when requested by owner")
-    void shouldReturnProfileForOwner() {
+    @DisplayName("Should return profile for current user when exists")
+    void shouldReturnProfileForCurrentUser() {
         when(userRepository.findById(1L)).thenReturn(Optional.of(mockUser));
 
-        UserResponse resp = userService.getUserProfile(1L, 1L);
+        UserResponse response = userService.getCurrentUserProfile(1L);
 
-        assertNotNull(resp);
-        assertEquals(mockUser.getId(), resp.getId());
-        assertEquals(mockUser.getUsername(), resp.getUserName());
-        assertEquals(mockUser.getEmail(), resp.getEmail());
-        assertEquals(mockUser.getCreatedAt(), resp.getCreatedAt());
+        assertNotNull(response);
+        assertEquals(mockUser.getId(), response.getId());
+        assertEquals(mockUser.getUsername(), response.getUserName());
+        assertEquals(mockUser.getEmail(), response.getEmail());
+        assertEquals(mockUser.getCreatedAt(), response.getCreatedAt());
 
         verify(userRepository).findById(1L);
     }
 
     @Test
-    @DisplayName("Should throw AccessDeniedException when fetching another's profile")
-    void shouldThrowAccessDeniedWhenFetchingOthersProfile() {
-        Long requestedId = 1L;
-        Long otherUserId = 2L;
-
-        AccessDeniedException exception = assertThrows(
-                AccessDeniedException.class,
-                () -> userService.getUserProfile(requestedId, otherUserId)
-        );
-        assertEquals("You can only view your own profile.", exception.getMessage());
-
-        verify(userRepository, never()).findById(anyLong());
-    }
-
-    @Test
-    @DisplayName("Throws EntityNotFoundException if profile does not exist")
-    void getUserProfile_nonExistingUser_throwsEntityNotFoundException() {
-        Long userId = 1L;
-        when(userRepository.findById(userId)).thenReturn(Optional.empty());
+    @DisplayName("Should throw EntityNotFoundException if profile does not exist")
+    void getCurrentUserProfile_nonExistingUser_throwsEntityNotFoundException() {
+        when(userRepository.findById(1L)).thenReturn(Optional.empty());
 
         EntityNotFoundException exception = assertThrows(
                 EntityNotFoundException.class,
-                () -> userService.getUserProfile(userId, userId)
+                () -> userService.getCurrentUserProfile(1L)
         );
+        assertEquals("User not found with ID: 1", exception.getMessage());
 
-        assertEquals("User not found", exception.getMessage());
-        verify(userRepository).findById(userId);
+        verify(userRepository).findById(1L);
     }
 
     @Test
-    @DisplayName("Should successfully update profile when requested by owner")
-    void shouldUpdateProfileWhenOwner() {
-        validUserRequest.setUsername("Alice");
-        validUserRequest.setEmail("alice@example.com");
+    @DisplayName("Should successfully update profile for current user")
+    void shouldUpdateProfileForCurrentUser() {
         when(userRepository.findById(1L)).thenReturn(Optional.of(mockUser));
-        when(userRepository.findByEmail("alice@example.com")).thenReturn(Optional.empty());
-        when(userRepository.save(any(User.class))).thenAnswer(inv -> inv.getArgument(0));
+        when(userRepository.findByEmail(validUserRequest.getEmail())).thenReturn(Optional.empty());
+        when(userRepository.save(ArgumentMatchers.any(User.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
-        UserResponse result = userService.updateUserProfile(1L, 1L, validUserRequest);
+        UserResponse result = userService.updateCurrentUserProfile(1L, validUserRequest);
 
         assertNotNull(result);
         assertEquals(1L, result.getId());
@@ -664,38 +648,22 @@ class UserServiceImplTest {
 
         verify(userRepository).findById(1L);
         verify(userRepository).findByEmail("alice@example.com");
-        verify(userRepository).save(argThat(u ->
-                u.getUsername().equals("Alice") &&
-                        u.getEmail().equals("alice@example.com")
+        verify(userRepository).save(argThat(user ->
+                "Alice".equals(user.getUsername()) &&
+                        "alice@example.com".equals(user.getEmail())
         ));
     }
 
     @Test
-    @DisplayName("Should throw AccessDeniedException when updating another's profile")
-    void shouldThrowAccessDeniedWhenUpdatingOthersProfile() {
-        validUserRequest.setUsername("Alice");
-        validUserRequest.setEmail("alice@example.com");
-
-        AccessDeniedException ex = assertThrows(
-                AccessDeniedException.class,
-                () -> userService.updateUserProfile(1L, 2L, validUserRequest)
-        );
-        assertEquals("You can only update your own profile.", ex.getMessage());
-
-        verify(userRepository, never()).findById(anyLong());
-        verify(userRepository, never()).save(any());
-    }
-
-    @Test
     @DisplayName("Should throw EntityNotFoundException when updating non-existent profile")
-    void updateUserProfile_nonExistingUser_throwsEntityNotFoundException() {
+    void updateCurrentUserProfile_nonExistingUser_throwsEntityNotFoundException() {
         when(userRepository.findById(1L)).thenReturn(Optional.empty());
 
-        EntityNotFoundException ex = assertThrows(
+        EntityNotFoundException exception = assertThrows(
                 EntityNotFoundException.class,
-                () -> userService.updateUserProfile(1L, 1L, validUserRequest)
+                () -> userService.updateCurrentUserProfile(1L, validUserRequest)
         );
-        assertEquals("User not found with ID: 1", ex.getMessage());
+        assertEquals("User not found with ID: 1", exception.getMessage());
 
         verify(userRepository).findById(1L);
         verify(userRepository, never()).save(any());
@@ -703,55 +671,41 @@ class UserServiceImplTest {
 
     @Test
     @DisplayName("Should throw EmailAlreadyExistsException when new email already in use")
-    void updateUserProfile_emailConflict_throwsEmailAlreadyExistsException() {
+    void updateCurrentUserProfile_emailConflict_throwsEmailAlreadyExistsException() {
         when(userRepository.findById(1L)).thenReturn(Optional.of(mockUser));
-        when(userRepository.findByEmail(validUserRequest.getEmail()))
-                .thenReturn(Optional.of(new User()));
+        when(userRepository.findByEmail(validUserRequest.getEmail())).thenReturn(Optional.of(new User()));
 
-        EmailAlreadyExistsException ex = assertThrows(
+        EmailAlreadyExistsException exception = assertThrows(
                 EmailAlreadyExistsException.class,
-                () -> userService.updateUserProfile(1L, 1L, validUserRequest)
+                () -> userService.updateCurrentUserProfile(1L, validUserRequest)
         );
-        assertEquals("Email already in use: " + validUserRequest.getEmail(), ex.getMessage());
+        assertEquals("Email already in use: alice@example.com", exception.getMessage());
 
-        verify(userRepository).findByEmail(validUserRequest.getEmail());
+        verify(userRepository).findByEmail("alice@example.com");
         verify(userRepository, never()).save(any());
     }
 
     @Test
-    @DisplayName("Should delete user when requested by owner")
-    void shouldDeleteUserWhenOwner() {
+    @DisplayName("Should delete current user when exists")
+    void shouldDeleteCurrentUser() {
         when(userRepository.findById(1L)).thenReturn(Optional.of(mockUser));
 
-        assertDoesNotThrow(() -> userService.deleteUser(1L, 1L));
+        assertDoesNotThrow(() -> userService.deleteCurrentUser(1L));
 
         verify(userRepository).findById(1L);
         verify(userRepository).delete(mockUser);
     }
 
     @Test
-    @DisplayName("Should throw AccessDeniedException when deleting another's user")
-    void deleteUser_unauthorized_throwsAccessDeniedException() {
-        AccessDeniedException ex = assertThrows(
-                AccessDeniedException.class,
-                () -> userService.deleteUser(1L, 2L)
-        );
-        assertEquals("You can only delete your own account.", ex.getMessage());
-
-        verify(userRepository, never()).findById(anyLong());
-        verify(userRepository, never()).delete(any());
-    }
-
-    @Test
     @DisplayName("Should throw EntityNotFoundException when deleting non-existent user")
-    void deleteUser_nonExistingUser_throwsEntityNotFoundException() {
+    void deleteCurrentUser_nonExistingUser_throwsEntityNotFoundException() {
         when(userRepository.findById(1L)).thenReturn(Optional.empty());
 
-        EntityNotFoundException ex = assertThrows(
+        EntityNotFoundException exception = assertThrows(
                 EntityNotFoundException.class,
-                () -> userService.deleteUser(1L, 1L)
+                () -> userService.deleteCurrentUser(1L)
         );
-        assertEquals("User not found with ID: 1", ex.getMessage());
+        assertEquals("User not found with ID: 1", exception.getMessage());
 
         verify(userRepository).findById(1L);
         verify(userRepository, never()).delete(any());
