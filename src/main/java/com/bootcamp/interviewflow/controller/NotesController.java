@@ -9,7 +9,9 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.constraints.NotNull;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -27,6 +29,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/notes")
 @Tag(name = "Notes", description = "User notes related to job applications")
+@SecurityRequirement(name = "bearerAuth")
 public class NotesController {
     private final NotesService notesService;
 
@@ -44,7 +47,10 @@ public class NotesController {
                     content = @Content(schema = @Schema(implementation = com.bootcamp.interviewflow.dto.ApiResponse.class)))
     })
     @PostMapping
-    public ResponseEntity<NoteResponse> create(@RequestBody NoteRequest request) {
+    public ResponseEntity<NoteResponse> create(@RequestBody NoteRequest request,
+                                               HttpServletRequest httpRequest) {
+        //request
+
         var response = notesService.create(request);
         return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
@@ -59,7 +65,10 @@ public class NotesController {
                     content = @Content(schema = @Schema(implementation = com.bootcamp.interviewflow.dto.ApiResponse.class)))
     })
     @GetMapping("/{id}")
-    public ResponseEntity<NoteResponse> getById(@NotNull @PathVariable Long id) {
+    public ResponseEntity<NoteResponse> getById(@NotNull @PathVariable Long id,
+                                                HttpServletRequest request) {
+        //request
+
         var response = notesService.getById(id);
         return ResponseEntity.ok(response);
     }
@@ -74,7 +83,10 @@ public class NotesController {
                     content = @Content(schema = @Schema(implementation = com.bootcamp.interviewflow.dto.ApiResponse.class)))
     })
     @GetMapping
-    public ResponseEntity<List<NoteResponse>> getAllByApplicationId(@NotNull @RequestParam Long applicationId) {
+    public ResponseEntity<List<NoteResponse>> getAllByApplicationId(@NotNull @RequestParam Long applicationId,
+                                                                    HttpServletRequest request) {
+        //request
+
         var response = notesService.getAllByApplicationId(applicationId);
         return ResponseEntity.ok(response);
     }
@@ -89,7 +101,9 @@ public class NotesController {
                     content = @Content(schema = @Schema(implementation = com.bootcamp.interviewflow.dto.ApiResponse.class)))
     })
     @DeleteMapping("/{id}")
-    public ResponseEntity<String> delete(@PathVariable Long id) {
+    public ResponseEntity<String> delete(@PathVariable Long id, HttpServletRequest request) {
+        //request
+
         notesService.deleteById(id);
         return ResponseEntity.noContent().build();
     }

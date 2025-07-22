@@ -12,7 +12,9 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -33,6 +35,7 @@ import java.util.List;
 @RequestMapping("/api/applications")
 @RequiredArgsConstructor
 @Tag(name = "Applications", description = "User job applications for employment")
+@SecurityRequirement(name = "bearerAuth")
 public class ApplicationController {
 
     private final ApplicationService applicationService;
