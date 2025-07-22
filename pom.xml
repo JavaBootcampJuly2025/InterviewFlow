@@ -26,6 +26,7 @@
         <springdoc.version>2.8.9</springdoc.version>
         <commons-lang3.version>3.18.0</commons-lang3.version>
         <minio.version>8.5.17</minio.version>
+        <awssdk.s3.version>2.32.5</awssdk.s3.version>
     </properties>
 
     <dependencies>
@@ -120,6 +121,12 @@
             <groupId>io.minio</groupId>
             <artifactId>minio</artifactId>
             <version>${minio.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>software.amazon.awssdk</groupId>
+            <artifactId>s3</artifactId>
+            <version>${awssdk.s3.version}</version>
         </dependency>
     </dependencies>
 

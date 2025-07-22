@@ -14,9 +14,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.AccessDeniedException;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -48,8 +46,9 @@ public class FileController {
             @ApiResponse(responseCode = "401", description = "Unauthorized")
     })
     @PostMapping
-    public ResponseEntity<FileResponse> upload(@RequestParam("file") MultipartFile file) throws Exception {
-        FileResponse response = storageService.upload(getCurrentUserId(), file);
+    public ResponseEntity<FileResponse> upload(@RequestParam("file") MultipartFile file,
+                                               @AuthenticationPrincipal UserPrincipal userPrincipal) throws Exception {
+        FileResponse response = storageService.upload(userPrincipal.getId(), file);
         return ResponseEntity.ok(response);
     }
 
@@ -62,8 +61,9 @@ public class FileController {
             @ApiResponse(responseCode = "403", description = "Access denied")
     })
     @GetMapping("/{fileId}")
-    public ResponseEntity<byte[]> download(@PathVariable UUID fileId) throws Exception {
-        byte[] data = storageService.download(fileId, getCurrentUserId());
+    public ResponseEntity<byte[]> download(@PathVariable UUID fileId,
+                                           @AuthenticationPrincipal UserPrincipal userPrincipal) throws Exception {
+        byte[] data = storageService.download(fileId, userPrincipal.getId());
         return ResponseEntity.ok()
                 .contentType(MediaType.APPLICATION_OCTET_STREAM)
                 .body(data);
@@ -77,8 +77,9 @@ public class FileController {
             @ApiResponse(responseCode = "403", description = "Access denied")
     })
     @DeleteMapping("/{fileId}")
-    public ResponseEntity<FileResponse> delete(@PathVariable UUID fileId) throws Exception {
-        storageService.delete(fileId, getCurrentUserId());
+    public ResponseEntity<FileResponse> delete(@PathVariable UUID fileId,
+                                               @AuthenticationPrincipal UserPrincipal userPrincipal) throws Exception {
+        storageService.delete(fileId, userPrincipal.getId());
         return ResponseEntity.ok(new FileResponse("File deleted", fileId));
     }
 
@@ -89,22 +90,7 @@ public class FileController {
             @ApiResponse(responseCode = "401", description = "Unauthorized")
     })
     @GetMapping
-    public ResponseEntity<List<FileMetadataResponse>> list() {
-        return ResponseEntity.ok(storageService.findAllByUserId(getCurrentUserId()));
+    public ResponseEntity<List<FileMetadataResponse>> list(@AuthenticationPrincipal UserPrincipal userPrincipal) {
+        return ResponseEntity.ok(storageService.findAllByUserId(userPrincipal.getId()));
     }
-
-    private Long getCurrentUserId() {
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        if (auth == null || !auth.isAuthenticated()) {
-            throw new AccessDeniedException("User not authenticated");
-        }
-
-        Object principal = auth.getPrincipal();
-        if (principal instanceof UserPrincipal userPrincipal) {
-            return userPrincipal.getId();
-        }
-
-        throw new IllegalStateException("Invalid principal type: " + principal.getClass());
-    }
-
 }
