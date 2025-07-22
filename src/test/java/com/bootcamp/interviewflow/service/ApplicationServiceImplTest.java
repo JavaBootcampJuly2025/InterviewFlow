@@ -51,16 +51,18 @@ class ApplicationServiceImplTest {
     private ApplicationServiceImpl service;
 
     private final Long userId = 1L;
+    private final Long applicationId = 1L;
     private LocalDateTime now;
     private Application app1, app2;
     private List<Application> applications;
     private List<ApplicationListDTO> dtos;
+    private User user;
 
     @BeforeEach
     void setUp() {
         now = LocalDateTime.now();
 
-        User user = new User();
+        user = new User();
         user.setId(userId);
 
         app1 = new Application();
@@ -120,12 +122,6 @@ class ApplicationServiceImplTest {
         dto.setCompanyLink("https://testcompany.com");
         dto.setPosition("Java Dev");
         dto.setStatus("APPLIED");
-        dto.setUserId(userId);
-
-        User user = new User();
-        user.setId(userId);
-        user.setUsername("testuser");
-        user.setEmail("testuser@example.com");
 
         Application testApp = new Application();
         testApp.setCompanyName(dto.getCompanyName());
@@ -145,10 +141,10 @@ class ApplicationServiceImplTest {
                 testApp.getUpdatedAt());
 
         when(userRepository.findById(userId)).thenReturn(Optional.of(user));
-        when(applicationRepository.save(testApp)).thenReturn(testApp);
+        when(applicationRepository.save(any(Application.class))).thenReturn(testApp);
         when(applicationMapper.toResponse(testApp)).thenReturn(appResponse);
 
-        ApplicationResponse saved = service.create(dto);
+        ApplicationResponse saved = service.create(dto, userId);
 
         assertEquals("TestCompany", saved.companyName());
         assertEquals("https://testcompany.com", saved.companyLink());
@@ -163,45 +159,42 @@ class ApplicationServiceImplTest {
     @Test
     void create_shouldThrowUserNotFoundException_whenUserDoesNotExist() {
         CreateApplicationRequest dto = new CreateApplicationRequest();
-        dto.setUserId(99L);
+        Long nonExistentUserId = 99L;
 
-        when(userRepository.findById(99L)).thenReturn(Optional.empty());
+        when(userRepository.findById(nonExistentUserId)).thenReturn(Optional.empty());
 
         UserNotFoundException exception = assertThrows(
                 UserNotFoundException.class,
-                () -> service.create(dto)
+                () -> service.create(dto, nonExistentUserId)
         );
         assertEquals("User with id 99 not found", exception.getMessage());
-        verify(userRepository).findById(99L);
+        verify(userRepository).findById(nonExistentUserId);
         verifyNoInteractions(applicationRepository);
     }
 
     @Test
-    void delete_shouldDeleteWhenApplicationExists() {
-        Long applicationId = 1L;
+    void delete_shouldDeleteWhenApplicationExistsAndUserOwnsIt() {
+        when(applicationRepository.findByIdAndUserId(applicationId, userId)).thenReturn(Optional.of(app1));
 
-        when(applicationRepository.existsById(applicationId)).thenReturn(true);
+        service.delete(applicationId, userId);
 
-        service.delete(applicationId);
-
-        verify(applicationRepository).existsById(applicationId);
+        verify(applicationRepository).findByIdAndUserId(applicationId, userId);
         verify(applicationRepository).deleteById(applicationId);
     }
 
     @Test
-    void delete_shouldThrowExceptionWhenApplicationNotExists() {
-        Long applicationId = 42L;
+    void delete_shouldThrowExceptionWhenApplicationNotFoundOrNotOwned() {
+        Long nonExistentAppId = 42L;
 
-        when(applicationRepository.existsById(applicationId)).thenReturn(false);
+        when(applicationRepository.findByIdAndUserId(nonExistentAppId, userId)).thenReturn(Optional.empty());
 
         ApplicationNotFoundException exception = assertThrows(
                 ApplicationNotFoundException.class,
-                () -> service.delete(applicationId)
+                () -> service.delete(nonExistentAppId, userId)
         );
         assertEquals("Application with id 42 not found", exception.getMessage());
-        verify(applicationRepository).existsById(applicationId);
-
-        verify(applicationRepository).existsById(applicationId);
+        verify(applicationRepository).findByIdAndUserId(nonExistentAppId, userId);
+        verify(applicationRepository, never()).deleteById(any());
     }
 
     @Test
@@ -235,19 +228,19 @@ class ApplicationServiceImplTest {
                 null
         );
 
-        when(applicationRepository.findById(appId)).thenReturn(Optional.of(existing));
+        when(applicationRepository.findByIdAndUserId(appId, userId)).thenReturn(Optional.of(existing));
         when(applicationMapper.updateEntityFromDto(dto, existing)).thenReturn(patched);
         when(applicationRepository.save(patched)).thenReturn(patched);
         when(applicationMapper.toResponse(patched)).thenReturn(respDto);
 
-        ApplicationResponse updated = service.partialUpdate(appId, dto);
+        ApplicationResponse updated = service.partialUpdate(appId, userId, dto);
 
         assertEquals("New Name", updated.companyName());
         assertEquals("oldlink.com", updated.companyLink());
         assertEquals("Old Position", updated.position());
         assertEquals(APPLIED, updated.status());
 
-        verify(applicationRepository).findById(appId);
+        verify(applicationRepository).findByIdAndUserId(appId, userId);
         verify(applicationMapper).updateEntityFromDto(dto, existing);
         verify(applicationRepository).save(patched);
         verify(applicationMapper).toResponse(patched);
@@ -286,35 +279,36 @@ class ApplicationServiceImplTest {
                 null
         );
 
-        when(applicationRepository.findById(appId)).thenReturn(Optional.of(existing));
+        when(applicationRepository.findByIdAndUserId(appId, userId)).thenReturn(Optional.of(existing));
         when(applicationMapper.updateEntityFromDto(dto, existing)).thenReturn(patched);
         when(applicationRepository.save(patched)).thenReturn(patched);
         when(applicationMapper.toResponse(patched)).thenReturn(respDto);
 
-        ApplicationResponse updated = service.partialUpdate(appId, dto);
+        ApplicationResponse updated = service.partialUpdate(appId, userId, dto);
 
         assertEquals("New", updated.companyName());
         assertEquals("old.com", updated.companyLink());
         assertEquals("NewPosition", updated.position());
         assertEquals(ApplicationStatus.ACCEPTED, updated.status());
 
+        verify(applicationRepository).findByIdAndUserId(appId, userId);
         verify(applicationMapper).updateEntityFromDto(dto, existing);
         verify(applicationRepository).save(patched);
         verify(applicationMapper).toResponse(patched);
     }
 
     @Test
-    void partialUpdate_shouldThrowExceptionIfAppNotFound() {
+    void partialUpdate_shouldThrowExceptionIfAppNotFoundOrNotOwned() {
         Long appId = 33L;
         UpdateApplicationRequest dto = new UpdateApplicationRequest();
         dto.setCompanyName("Whatever");
 
-        when(applicationRepository.findById(appId)).thenReturn(Optional.empty());
+        when(applicationRepository.findByIdAndUserId(appId, userId)).thenReturn(Optional.empty());
 
         assertThrows(ApplicationNotFoundException.class,
-                () -> service.partialUpdate(appId, dto));
+                () -> service.partialUpdate(appId, userId, dto));
 
-        verify(applicationRepository).findById(appId);
+        verify(applicationRepository).findByIdAndUserId(appId, userId);
         verify(applicationRepository, never()).save(any());
         verifyNoInteractions(applicationMapper);
     }
@@ -349,21 +343,21 @@ class ApplicationServiceImplTest {
                 null
         );
 
-        when(applicationRepository.findById(appId)).thenReturn(Optional.of(existing));
+        when(applicationRepository.findByIdAndUserId(appId, userId)).thenReturn(Optional.of(existing));
         when(applicationMapper.updateEntityFromDto(dto, existing)).thenReturn(patched);
         when(applicationRepository.save(patched)).thenReturn(patched);
         when(applicationMapper.toResponse(patched)).thenReturn(respDto);
 
-        ApplicationResponse updated = service.partialUpdate(appId, dto);
+        ApplicationResponse updated = service.partialUpdate(appId, userId, dto);
 
         assertEquals("OldName", updated.companyName());
         assertEquals("oldlink.com", updated.companyLink());
         assertEquals("OldPosition", updated.position());
         assertEquals(REJECTED, updated.status());
 
+        verify(applicationRepository).findByIdAndUserId(appId, userId);
         verify(applicationMapper).updateEntityFromDto(dto, existing);
         verify(applicationRepository).save(patched);
         verify(applicationMapper).toResponse(patched);
     }
-
 }

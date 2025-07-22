@@ -32,9 +32,9 @@ public class ApplicationServiceImpl implements ApplicationService {
     private final UserRepository userRepository;
 
     @Override
-    public ApplicationResponse create(CreateApplicationRequest dto) {
-        User user = userRepository.findById(dto.getUserId())
-                .orElseThrow(() -> new UserNotFoundException("User with id " + dto.getUserId() + " not found"));
+    public ApplicationResponse create(CreateApplicationRequest dto, Long userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new UserNotFoundException("User with id " + userId + " not found"));
 
         Application app = new Application();
         app.setCompanyName(dto.getCompanyName());
@@ -64,19 +64,23 @@ public class ApplicationServiceImpl implements ApplicationService {
     }
 
     @Override
-    public void delete(Long id) {
-        if (!applicationRepository.existsById(id)) {
-            throw new ApplicationNotFoundException("Application with id " + id + " not found");
-        }
+    public void delete(Long id, Long userId) {
+        findAndValidateOwnership(id, userId);
         applicationRepository.deleteById(id);
     }
 
     @Override
-    public ApplicationResponse partialUpdate(Long id, UpdateApplicationRequest dto) {
-        Application app = applicationRepository.findById(id)
-                .orElseThrow(() -> new ApplicationNotFoundException("Not found"));
-        Application updatedApp = applicationMapper.updateEntityFromDto(dto, app);
+    public ApplicationResponse partialUpdate(Long id, Long userId, UpdateApplicationRequest dto) {
+        Application application = findAndValidateOwnership(id, userId);
+        Application updatedApp = applicationMapper.updateEntityFromDto(dto, application);
+
         log.info("Application partially updated: {}", updatedApp);
         return applicationMapper.toResponse(applicationRepository.save(updatedApp));
     }
+
+    private Application findAndValidateOwnership(Long id, Long userId) {
+        return applicationRepository.findByIdAndUserId(id, userId)
+                .orElseThrow(() -> new ApplicationNotFoundException("Application with id " + id + " not found"));
+    }
+
 }

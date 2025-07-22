@@ -4,6 +4,7 @@ import com.bootcamp.interviewflow.dto.ApplicationListDTO;
 import com.bootcamp.interviewflow.dto.ApplicationResponse;
 import com.bootcamp.interviewflow.dto.CreateApplicationRequest;
 import com.bootcamp.interviewflow.dto.UpdateApplicationRequest;
+import com.bootcamp.interviewflow.security.UserPrincipal;
 import com.bootcamp.interviewflow.service.ApplicationService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
@@ -18,6 +19,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -30,7 +32,7 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api")
+@RequestMapping("/api/applications")
 @RequiredArgsConstructor
 @Tag(name = "Applications", description = "User job applications for employment")
 @SecurityRequirement(name = "bearerAuth")
@@ -47,16 +49,16 @@ public class ApplicationController {
             @ApiResponse(responseCode = "401", description = "Unauthorized",
                     content = @Content(schema = @Schema(implementation = com.bootcamp.interviewflow.dto.ApiResponse.class))),
     })
-    @PostMapping("/applications")
+    @PostMapping
     public ResponseEntity<ApplicationResponse> create(@RequestBody @Valid CreateApplicationRequest dto,
-                                                      HttpServletRequest request) {
-        //request
-        ApplicationResponse created = applicationService.create(dto);
+                                                      @AuthenticationPrincipal UserPrincipal userPrincipal) {
+        ApplicationResponse created = applicationService.create(dto, userPrincipal.getId());
         return ResponseEntity
                 .status(HttpStatus.CREATED)
                 .body(created);
     }
 
+    //TODO: Should be moved to AdminApplicationController?
     @Operation(summary = "Get all job applications")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "List of applications",
@@ -64,10 +66,8 @@ public class ApplicationController {
             @ApiResponse(responseCode = "401", description = "Unauthorized",
                     content = @Content(schema = @Schema(implementation = com.bootcamp.interviewflow.dto.ApiResponse.class))),
     })
-    @GetMapping("/applications")
-    public ResponseEntity<List<ApplicationListDTO>> findAll(HttpServletRequest request) {
-        //request
-
+    @GetMapping("/all")
+    public ResponseEntity<List<ApplicationListDTO>> findAll() {
         List<ApplicationListDTO> all = applicationService.findAll();
         return ResponseEntity.ok(all);
     }
@@ -81,12 +81,9 @@ public class ApplicationController {
             @ApiResponse(responseCode = "404", description = "User not found",
                     content = @Content(schema = @Schema(implementation = com.bootcamp.interviewflow.dto.ApiResponse.class)))
     })
-    @GetMapping(path = "/users/{userId}/applications")
-    public ResponseEntity<List<ApplicationListDTO>> getUserApplications(@PathVariable Long userId,
-                                                                        HttpServletRequest request) {
-        //request
-
-        return ResponseEntity.ok(applicationService.findAllByUserId(userId));
+    @GetMapping
+    public ResponseEntity<List<ApplicationListDTO>> getUserApplications(@AuthenticationPrincipal UserPrincipal userPrincipal) {
+        return ResponseEntity.ok(applicationService.findAllByUserId(userPrincipal.getId()));
     }
 
     @Operation(summary = "Delete a job application by ID")
@@ -98,11 +95,10 @@ public class ApplicationController {
             @ApiResponse(responseCode = "404", description = "User not found",
                     content = @Content(schema = @Schema(implementation = com.bootcamp.interviewflow.dto.ApiResponse.class)))
     })
-    @DeleteMapping("/applications/{id}")
-    public ResponseEntity<String> delete(@PathVariable Long id, HttpServletRequest request) {
-        //request
-
-        applicationService.delete(id);
+    @DeleteMapping("/{id}")
+    public ResponseEntity<String> delete(@PathVariable Long id,
+                                         @AuthenticationPrincipal UserPrincipal userPrincipal) {
+        applicationService.delete(id, userPrincipal.getId());
         return ResponseEntity.ok("Application with id " + id + " deleted");
     }
 
@@ -117,13 +113,11 @@ public class ApplicationController {
             @ApiResponse(responseCode = "404", description = "Application not found",
                     content = @Content(schema = @Schema(implementation = com.bootcamp.interviewflow.dto.ApiResponse.class)))
     })
-    @PatchMapping("/applications/{id}")
+    @PatchMapping("/{id}")
     public ResponseEntity<ApplicationResponse> partialUpdate(
             @PathVariable Long id,
             @RequestBody @Valid UpdateApplicationRequest dto,
-            HttpServletRequest request) {
-       //request
-
-        return ResponseEntity.ok(applicationService.partialUpdate(id, dto));
+            @AuthenticationPrincipal UserPrincipal userPrincipal) {
+        return ResponseEntity.ok(applicationService.partialUpdate(id, userPrincipal.getId(), dto));
     }
 }

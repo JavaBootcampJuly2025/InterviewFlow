@@ -2,12 +2,11 @@ package com.bootcamp.interviewflow.service;
 
 import com.bootcamp.interviewflow.model.User;
 import com.bootcamp.interviewflow.repository.UserRepository;
+import com.bootcamp.interviewflow.security.UserPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
-
-import java.util.Collections;
 
 @Service
 public class CustomUserDetailsService implements UserDetailsService {
@@ -23,10 +22,6 @@ public class CustomUserDetailsService implements UserDetailsService {
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found with email: " + email));
 
-        return org.springframework.security.core.userdetails.User.builder()
-                .username(user.getEmail())
-                .password(user.getPassword())
-                .authorities(Collections.emptyList()) // No specific roles
-                .build();
+        return UserPrincipal.create(user);
     }
 }
