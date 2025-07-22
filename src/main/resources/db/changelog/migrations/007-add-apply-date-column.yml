@@ -1,0 +1,18 @@
+databaseChangeLog:
+  - changeSet:
+      id: 007-add-apply-date-column
+      author: karolig
+      changes:
+        - addColumn:
+            tableName: applications
+            columns:
+              - column:
+                  name: apply_date
+                  type: TIMESTAMP
+                  defaultValueComputed: CURRENT_TIMESTAMP
+                  constraints:
+                    nullable: false
+      rollback:
+        - dropColumn:
+            tableName: applications
+            columnName: apply_date
