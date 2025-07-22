@@ -1,6 +1,7 @@
 package com.bootcamp.interviewflow.controller;
 
 import com.bootcamp.interviewflow.dto.ApiResponse;
+import com.bootcamp.interviewflow.dto.ChangePasswordRequest;
 import com.bootcamp.interviewflow.dto.LoginRequest;
 import com.bootcamp.interviewflow.dto.RegisterRequest;
 import com.bootcamp.interviewflow.dto.UserRequest;
@@ -128,5 +129,21 @@ public class UserController {
     public ResponseEntity<Void> deleteCurrentUser(@AuthenticationPrincipal UserPrincipal principal) {
         userService.deleteCurrentUser(principal.getId());
         return ResponseEntity.noContent().build();
+    }
+
+    @Operation(summary = "Change current user password")
+    @ApiResponses(value = {
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Password changed successfully",
+                    content = @Content(schema = @Schema(implementation = ApiResponse.class))),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "Invalid data"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "401", description = "Unauthorized"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "User not found")
+    })
+    @PostMapping("/users/me/change-password")
+    public ResponseEntity<ApiResponse> changePassword(
+            @Valid @RequestBody ChangePasswordRequest request,
+            @AuthenticationPrincipal UserPrincipal principal) {
+        userService.changePassword(principal.getId(), request);
+        return ResponseEntity.ok(new ApiResponse(true, "Password changed successfully"));
     }
 }
