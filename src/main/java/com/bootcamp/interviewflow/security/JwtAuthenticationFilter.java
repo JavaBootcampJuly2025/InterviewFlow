@@ -58,11 +58,19 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                     request.setAttribute("email", email);
                     request.setAttribute("userId", userId);
 
-                    // Create authentication token for Spring Security
-                    UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
+                    // Create UserPrincipal object
+                    UserPrincipal userPrincipal = new UserPrincipal(
+                            userId,
                             email,
-                            null,
+                            null, // password not needed for JWT authentication
                             Collections.singletonList(new SimpleGrantedAuthority("ROLE_USER"))
+                    );
+
+                    // Create authentication token for Spring Security with UserPrincipal
+                    UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
+                            userPrincipal, // <- Now using UserPrincipal object
+                            null,
+                            userPrincipal.getAuthorities()
                     );
                     authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
 
