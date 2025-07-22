@@ -11,9 +11,9 @@ public interface UserService {
 
     UserResponse login(LoginRequest loginRequest);
 
-    UserResponse getUserProfile(Long requestedId, Long authenticatedUserId);
+    UserResponse getCurrentUserProfile(Long authenticatedUserId);
 
-    UserResponse updateUserProfile(Long userId, Long authenticatedUserId, UserRequest request);
+    UserResponse updateCurrentUserProfile(Long authenticatedUserId, UserRequest request);
 
-    void deleteUser(Long userId, Long authenticatedUserId);
+    void deleteCurrentUser(Long authenticatedUserId);
 }

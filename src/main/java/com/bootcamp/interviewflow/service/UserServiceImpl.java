@@ -80,30 +80,19 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public UserResponse getUserProfile(Long requestedId, Long authenticatedUserId) {
-        logger.info("Fetching profile for userId: {} by authenticatedUserId: {}", requestedId, authenticatedUserId);
-        if (!requestedId.equals(authenticatedUserId)) {
-            logger.warn("Unauthorized profile access attempt: requestedId={}, authenticatedUserId={}", requestedId, authenticatedUserId);
-            throw new AccessDeniedException("You can only view your own profile.");
-        }
-
-        User user = userRepository.findById(requestedId)
-                .orElseThrow(() -> new EntityNotFoundException("User not found"));
-
+    public UserResponse getCurrentUserProfile(Long authenticatedUserId) {
+        logger.info("Fetching profile for userId: {}", authenticatedUserId);
+        User user = userRepository.findById(authenticatedUserId)
+                .orElseThrow(() -> new EntityNotFoundException("User not found with ID: " + authenticatedUserId));
         return convertToResponse(user);
     }
 
     @Override
     @Transactional
-    public UserResponse updateUserProfile(Long userId, Long authenticatedUserId, UserRequest request) {
-        logger.info("Updating profile for userId: {}", userId);
-        if (!userId.equals(authenticatedUserId)) {
-            logger.warn("Unauthorized profile update attempt by userId: {}", authenticatedUserId);
-            throw new AccessDeniedException("You can only update your own profile.");
-        }
-
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new EntityNotFoundException("User not found with ID: " + userId));
+    public UserResponse updateCurrentUserProfile(Long authenticatedUserId, UserRequest request) {
+        logger.info("Updating profile for userId: {}", authenticatedUserId);
+        User user = userRepository.findById(authenticatedUserId)
+                .orElseThrow(() -> new EntityNotFoundException("User not found with ID: " + authenticatedUserId));
 
         if (!user.getEmail().equals(request.getEmail())
                 && userRepository.findByEmail(request.getEmail()).isPresent()) {
@@ -120,17 +109,10 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional
-    public void deleteUser(Long userId, Long authenticatedUserId) {
-        logger.info("Deleting user with ID: {}", userId);
-        if (!userId.equals(authenticatedUserId)) {
-            logger.warn("Unauthorized delete attempt by userId: {}", authenticatedUserId);
-            throw new AccessDeniedException("You can only delete your own account.");
-        }
-
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new EntityNotFoundException("User not found with ID: " + userId));
-
-        logger.debug("Deleting applications for userId: {}", userId);
+    public void deleteCurrentUser(Long authenticatedUserId) {
+        logger.info("Deleting user with ID: {}", authenticatedUserId);
+        User user = userRepository.findById(authenticatedUserId)
+                .orElseThrow(() -> new EntityNotFoundException("User not found with ID: " + authenticatedUserId));
         userRepository.delete(user);
     }
 

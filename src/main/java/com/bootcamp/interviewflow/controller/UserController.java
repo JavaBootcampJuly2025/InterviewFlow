@@ -91,47 +91,42 @@ public class UserController {
                 null));
     }
 
-    @GetMapping("/users/{id}")
-    @Operation(summary = "Get user profile by ID")
+
+    @Operation(summary = "Get current user profile")
     @ApiResponses(value = {
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "User profile fetched",
                     content = @Content(schema = @Schema(implementation = UserResponse.class))),
-            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "403", description = "Forbidden"),
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "User not found")
     })
-    public ResponseEntity<UserResponse> getUserProfile(
-            @PathVariable Long id,
-            @AuthenticationPrincipal UserPrincipal principal) {
-        UserResponse response = userService.getUserProfile(id, principal.getId());
+    @GetMapping("/users/me")
+    public ResponseEntity<UserResponse> getCurrentUser(@AuthenticationPrincipal UserPrincipal principal) {
+        UserResponse response = userService.getCurrentUserProfile(principal.getId());
         return ResponseEntity.ok(response);
     }
 
-    @Operation(summary = "Update user profile")
+    @Operation(summary = "Update current user profile")
     @ApiResponses(value = {
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "User updated successfully",
                     content = @Content(schema = @Schema(implementation = UserResponse.class))),
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "Invalid data"),
-            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "403", description = "Forbidden"),
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "User not found")
     })
-    @PatchMapping("/users/{id}")
-    public ResponseEntity<UserResponse> updateUser(
-            @PathVariable Long id,
+    @PatchMapping("/users/me")
+    public ResponseEntity<UserResponse> updateCurrentUser(
             @Valid @RequestBody UserRequest request,
             @AuthenticationPrincipal UserPrincipal principal) {
-        UserResponse response = userService.updateUserProfile(id, principal.getId(), request);
+        UserResponse response = userService.updateCurrentUserProfile(principal.getId(), request);
         return ResponseEntity.ok(response);
     }
 
-    @Operation(summary = "Delete user account")
+    @Operation(summary = "Delete current user account")
     @ApiResponses(value = {
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "204", description = "User deleted successfully"),
-            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "403", description = "Forbidden"),
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "User not found")
     })
-    @DeleteMapping("/users/{id}")
-    public ResponseEntity<Void> deleteUser(@PathVariable Long id, @AuthenticationPrincipal UserPrincipal principal) {
-        userService.deleteUser(id, principal.getId());
+    @DeleteMapping("/users/me")
+    public ResponseEntity<Void> deleteCurrentUser(@AuthenticationPrincipal UserPrincipal principal) {
+        userService.deleteCurrentUser(principal.getId());
         return ResponseEntity.noContent().build();
     }
 }
