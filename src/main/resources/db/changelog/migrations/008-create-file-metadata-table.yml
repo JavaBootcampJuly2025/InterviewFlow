@@ -1,0 +1,40 @@
+databaseChangeLog:
+  - changeSet:
+      id: create-file-metadata-table
+      author: alexander biezbardis
+      changes:
+        - createTable:
+            tableName: file_metadata
+            columns:
+              - column:
+                  name: id
+                  type: UUID
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: user_id
+                  type: BIGINT
+                  constraints:
+                    nullable: false
+              - column:
+                  name: original_filename
+                  type: VARCHAR(255)
+              - column:
+                  name: content_type
+                  type: VARCHAR(255)
+              - column:
+                  name: object_key
+                  type: VARCHAR(255)
+                  constraints:
+                    nullable: false
+                    unique: true
+              - column:
+                  name: created_at
+                  type: TIMESTAMP
+                  constraints:
+                    nullable: false
+        - addDefaultValue:
+            tableName: file_metadata
+            columnName: created_at
+            defaultValueComputed: CURRENT_TIMESTAMP

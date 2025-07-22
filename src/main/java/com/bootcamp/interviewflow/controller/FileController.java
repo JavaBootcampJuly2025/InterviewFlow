@@ -2,7 +2,7 @@ package com.bootcamp.interviewflow.controller;
 
 import com.bootcamp.interviewflow.dto.FileMetadataResponse;
 import com.bootcamp.interviewflow.dto.FileResponse;
-import com.bootcamp.interviewflow.security.CustomUserDetails;
+import com.bootcamp.interviewflow.security.UserPrincipal;
 import com.bootcamp.interviewflow.service.ObjectStorageService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
@@ -100,8 +100,8 @@ public class FileController {
         }
 
         Object principal = auth.getPrincipal();
-        if (principal instanceof CustomUserDetails userDetails) {
-            return userDetails.getUserId();
+        if (principal instanceof UserPrincipal userPrincipal) {
+            return userPrincipal.getId();
         }
 
         throw new IllegalStateException("Invalid principal type: " + principal.getClass());
