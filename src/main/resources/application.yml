@@ -10,3 +10,24 @@ spring:
     password: postgres
   liquibase:
     change-log: classpath:db/changelog/db.changelog-master.yml
+
+  # Email Configuration
+  mail:
+    host: smtp.gmail.com
+    port: 465
+    username: ${MAIL_USERNAME:your-email@gmail.com}
+    password: ${MAIL_PASSWORD:your-app-password}
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+          ssl:
+            enable: true
+
+  # Enable scheduling
+  task:
+    scheduling:
+      pool:
+        size: 2
