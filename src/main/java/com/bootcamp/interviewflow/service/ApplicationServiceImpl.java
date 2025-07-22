@@ -37,19 +37,17 @@ public class ApplicationServiceImpl implements ApplicationService {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new UserNotFoundException("User with id " + userId + " not found"));
 
-        Application app = new Application();
-        app.setCompanyName(dto.getCompanyName());
-        app.setCompanyLink(dto.getCompanyLink());
-        app.setPosition(dto.getPosition());
-        app.setApplyDate(dto.getApplyDate() != null ? dto.getApplyDate() : LocalDateTime.now());
-
-        app.setInterviewDate(dto.getInterviewDate());
-
-        app.setEmailNotificationsEnabled(dto.getEmailNotificationsEnabled() != null ?
-                dto.getEmailNotificationsEnabled() : false);
-
-        app.setStatus(ApplicationStatus.valueOf(dto.getStatus()));
-        app.setUser(user);
+        Application app = Application.builder()
+                .status(ApplicationStatus.valueOf(dto.getStatus()))
+                .companyName(dto.getCompanyName())
+                .companyLink(dto.getCompanyLink())
+                .position(dto.getPosition())
+                .applyDate(dto.getApplyDate() != null ? dto.getApplyDate() : LocalDateTime.now())
+                .interviewDate(dto.getInterviewDate())
+                .emailNotificationsEnabled(dto.getEmailNotificationsEnabled() != null ?
+                        dto.getEmailNotificationsEnabled() : false)
+                .user(user)
+                .build();
 
         return applicationMapper.toResponse(applicationRepository.save(app));
     }

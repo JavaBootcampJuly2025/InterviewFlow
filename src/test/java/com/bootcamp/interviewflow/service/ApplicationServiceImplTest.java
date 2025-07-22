@@ -62,26 +62,29 @@ class ApplicationServiceImplTest {
     void setUp() {
         now = LocalDateTime.now();
 
-        user = new User();
-        user.setId(userId);
+        user = User.builder()
+                .id(userId)
+                .build();
 
-        app1 = new Application();
-        app1.setId(1L);
-        app1.setStatus(APPLIED);
-        app1.setCompanyName("Acme Corp");
-        app1.setPosition("Software Engineer");
-        app1.setCreatedAt(now);
-        app1.setUpdatedAt(now);
-        app1.setUser(user);
+        app1 = Application.builder()
+                .id(1L)
+                .status(APPLIED)
+                .companyName("Acme Corp")
+                .position("Software Engineer")
+                .createdAt(now)
+                .updatedAt(now)
+                .user(user)
+                .build();
 
-        app2 = new Application();
-        app2.setId(2L);
-        app2.setStatus(REJECTED);
-        app2.setCompanyName("Globex");
-        app2.setPosition("Business Analyst");
-        app2.setCreatedAt(now);
-        app2.setUpdatedAt(now);
-        app2.setUser(user);
+        app2 = Application.builder()
+                .id(2L)
+                .status(REJECTED)
+                .companyName("Globex")
+                .position("Business Analyst")
+                .createdAt(now)
+                .updatedAt(now)
+                .user(user)
+                .build();
 
         applications = List.of(app1, app2);
 
@@ -123,28 +126,32 @@ class ApplicationServiceImplTest {
         dto.setPosition("Java Dev");
         dto.setStatus("APPLIED");
 
-        Application testApp = new Application();
-        testApp.setCompanyName(dto.getCompanyName());
-        testApp.setCompanyLink(dto.getCompanyLink());
-        testApp.setPosition(dto.getPosition());
-        testApp.setStatus(ApplicationStatus.valueOf(dto.getStatus()));
-        testApp.setUser(user);
+        Application savedApp = Application.builder()
+                .id(1L)
+                .companyName(dto.getCompanyName())
+                .companyLink(dto.getCompanyLink())
+                .position(dto.getPosition())
+                .status(ApplicationStatus.valueOf(dto.getStatus()))
+                .user(user)
+                .createdAt(now)
+                .updatedAt(now)
+                .build();
 
         ApplicationResponse appResponse = new ApplicationResponse(
-                testApp.getId(),
-                testApp.getStatus(),
-                testApp.getCompanyName(),
-                testApp.getCompanyLink(),
-                testApp.getPosition(),
-                testApp.getApplyDate(),
-                testApp.getCreatedAt(),
-                testApp.getUpdatedAt(),
-                testApp.getInterviewDate(),
-                testApp.getEmailNotificationsEnabled());
+                savedApp.getId(),
+                savedApp.getStatus(),
+                savedApp.getCompanyName(),
+                savedApp.getCompanyLink(),
+                savedApp.getPosition(),
+                savedApp.getApplyDate(),
+                savedApp.getCreatedAt(),
+                savedApp.getUpdatedAt(),
+                savedApp.getInterviewDate(),
+                savedApp.getEmailNotificationsEnabled());
 
         when(userRepository.findById(userId)).thenReturn(Optional.of(user));
-        when(applicationRepository.save(any(Application.class))).thenReturn(testApp);
-        when(applicationMapper.toResponse(testApp)).thenReturn(appResponse);
+        when(applicationRepository.save(any(Application.class))).thenReturn(savedApp);
+        when(applicationMapper.toResponse(savedApp)).thenReturn(appResponse);
 
         ApplicationResponse saved = service.create(dto, userId);
 
@@ -155,7 +162,7 @@ class ApplicationServiceImplTest {
 
         verify(userRepository).findById(userId);
         verify(applicationRepository).save(any(Application.class));
-        verify(applicationMapper).toResponse(testApp);
+        verify(applicationMapper).toResponse(savedApp);
     }
 
     @Test
@@ -205,19 +212,21 @@ class ApplicationServiceImplTest {
         UpdateApplicationRequest dto = new UpdateApplicationRequest();
         dto.setCompanyName("New Name");
 
-        Application existing = new Application();
-        existing.setId(appId);
-        existing.setCompanyName("Old Name");
-        existing.setCompanyLink("oldlink.com");
-        existing.setPosition("Old Position");
-        existing.setStatus(APPLIED);
+        Application existing = Application.builder()
+                .id(appId)
+                .companyName("Old")
+                .companyLink("old.com")
+                .position("Old")
+                .status(APPLIED)
+                .build();
 
-        Application patched = new Application();
-        patched.setId(appId);
-        patched.setCompanyName("New Name");
-        patched.setCompanyLink("oldlink.com");
-        patched.setPosition("Old Position");
-        patched.setStatus(APPLIED);
+        Application patched = Application.builder()
+                .id(appId)
+                .companyName("New")
+                .companyLink("old.com")
+                .position("NewPosition")
+                .status(ApplicationStatus.ACCEPTED)
+                .build();
 
         ApplicationResponse respDto = new ApplicationResponse(
                 appId,
@@ -258,19 +267,21 @@ class ApplicationServiceImplTest {
         dto.setPosition("NewPosition");
         dto.setStatus(ApplicationStatus.ACCEPTED);
 
-        Application existing = new Application();
-        existing.setId(appId);
-        existing.setCompanyName("Old");
-        existing.setCompanyLink("old.com");
-        existing.setPosition("Old");
-        existing.setStatus(APPLIED);
+        Application existing = Application.builder()
+                .id(appId)
+                .companyName("Old")
+                .companyLink("old.com")
+                .position("Old")
+                .status(APPLIED)
+                .build();
 
-        Application patched = new Application();
-        patched.setId(appId);
-        patched.setCompanyName("New");
-        patched.setCompanyLink("old.com");
-        patched.setPosition("NewPosition");
-        patched.setStatus(ApplicationStatus.ACCEPTED);
+        Application patched = Application.builder()
+                .id(appId)
+                .companyName("New")
+                .companyLink("old.com")
+                .position("NewPosition")
+                .status(ApplicationStatus.ACCEPTED)
+                .build();
 
         ApplicationResponse respDto = new ApplicationResponse(
                 appId,
