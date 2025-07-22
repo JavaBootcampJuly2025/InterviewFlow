@@ -15,6 +15,5 @@ public interface ApplicationRepository extends JpaRepository<Application, Long> 
 
     Optional<Application> findByIdAndUserId(Long id, Long userId);
 
-    // Фильтрация по статусу для пользователя
     List<Application> findAllByUserIdAndStatus(Long userId, ApplicationStatus status);
 }
