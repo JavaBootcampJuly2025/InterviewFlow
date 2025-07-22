@@ -2,17 +2,21 @@ package com.bootcamp.interviewflow.service;
 
 import com.bootcamp.interviewflow.dto.LoginRequest;
 import com.bootcamp.interviewflow.dto.RegisterRequest;
+import com.bootcamp.interviewflow.dto.UserRequest;
 import com.bootcamp.interviewflow.dto.UserResponse;
 import com.bootcamp.interviewflow.exception.EmailAlreadyExistsException;
 import com.bootcamp.interviewflow.model.User;
 import com.bootcamp.interviewflow.repository.UserRepository;
+import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentMatchers;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
@@ -37,6 +41,7 @@ class UserServiceImplTest {
     @InjectMocks
     private UserServiceImpl userService;
 
+    private UserRequest validUserRequest;
     private RegisterRequest validRegisterRequest;
     private LoginRequest validLoginRequest;
     private User mockUser;
@@ -60,6 +65,10 @@ class UserServiceImplTest {
         mockUser.setUsername("John Doe");
         mockUser.setEmail("john.doe@example.com");
         mockUser.setPassword("encodedPassword");
+
+        validUserRequest = new UserRequest();
+        validUserRequest.setUsername("Alice");
+        validUserRequest.setEmail("alice@example.com");
         mockUser.setCreatedAt(LocalDateTime.now());
     }
 
@@ -591,5 +600,114 @@ class UserServiceImplTest {
         var inOrder = inOrder(userRepository, passwordEncoder);
         inOrder.verify(userRepository).findByEmail(validLoginRequest.getEmail());
         inOrder.verify(passwordEncoder).matches(validLoginRequest.getPassword(), mockUser.getPassword());
+    }
+
+    @Test
+    @DisplayName("Should return profile for current user when exists")
+    void shouldReturnProfileForCurrentUser() {
+        when(userRepository.findById(1L)).thenReturn(Optional.of(mockUser));
+
+        UserResponse response = userService.getCurrentUserProfile(1L);
+
+        assertNotNull(response);
+        assertEquals(mockUser.getId(), response.getId());
+        assertEquals(mockUser.getUsername(), response.getUserName());
+        assertEquals(mockUser.getEmail(), response.getEmail());
+        assertEquals(mockUser.getCreatedAt(), response.getCreatedAt());
+
+        verify(userRepository).findById(1L);
+    }
+
+    @Test
+    @DisplayName("Should throw EntityNotFoundException if profile does not exist")
+    void getCurrentUserProfile_nonExistingUser_throwsEntityNotFoundException() {
+        when(userRepository.findById(1L)).thenReturn(Optional.empty());
+
+        EntityNotFoundException exception = assertThrows(
+                EntityNotFoundException.class,
+                () -> userService.getCurrentUserProfile(1L)
+        );
+        assertEquals("User not found with ID: 1", exception.getMessage());
+
+        verify(userRepository).findById(1L);
+    }
+
+    @Test
+    @DisplayName("Should successfully update profile for current user")
+    void shouldUpdateProfileForCurrentUser() {
+        when(userRepository.findById(1L)).thenReturn(Optional.of(mockUser));
+        when(userRepository.findByEmail(validUserRequest.getEmail())).thenReturn(Optional.empty());
+        when(userRepository.save(ArgumentMatchers.any(User.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+        UserResponse result = userService.updateCurrentUserProfile(1L, validUserRequest);
+
+        assertNotNull(result);
+        assertEquals(1L, result.getId());
+        assertEquals("Alice", result.getUserName());
+        assertEquals("alice@example.com", result.getEmail());
+
+        verify(userRepository).findById(1L);
+        verify(userRepository).findByEmail("alice@example.com");
+        verify(userRepository).save(argThat(user ->
+                "Alice".equals(user.getUsername()) &&
+                        "alice@example.com".equals(user.getEmail())
+        ));
+    }
+
+    @Test
+    @DisplayName("Should throw EntityNotFoundException when updating non-existent profile")
+    void updateCurrentUserProfile_nonExistingUser_throwsEntityNotFoundException() {
+        when(userRepository.findById(1L)).thenReturn(Optional.empty());
+
+        EntityNotFoundException exception = assertThrows(
+                EntityNotFoundException.class,
+                () -> userService.updateCurrentUserProfile(1L, validUserRequest)
+        );
+        assertEquals("User not found with ID: 1", exception.getMessage());
+
+        verify(userRepository).findById(1L);
+        verify(userRepository, never()).save(any());
+    }
+
+    @Test
+    @DisplayName("Should throw EmailAlreadyExistsException when new email already in use")
+    void updateCurrentUserProfile_emailConflict_throwsEmailAlreadyExistsException() {
+        when(userRepository.findById(1L)).thenReturn(Optional.of(mockUser));
+        when(userRepository.findByEmail(validUserRequest.getEmail())).thenReturn(Optional.of(new User()));
+
+        EmailAlreadyExistsException exception = assertThrows(
+                EmailAlreadyExistsException.class,
+                () -> userService.updateCurrentUserProfile(1L, validUserRequest)
+        );
+        assertEquals("Email already in use: alice@example.com", exception.getMessage());
+
+        verify(userRepository).findByEmail("alice@example.com");
+        verify(userRepository, never()).save(any());
+    }
+
+    @Test
+    @DisplayName("Should delete current user when exists")
+    void shouldDeleteCurrentUser() {
+        when(userRepository.findById(1L)).thenReturn(Optional.of(mockUser));
+
+        assertDoesNotThrow(() -> userService.deleteCurrentUser(1L));
+
+        verify(userRepository).findById(1L);
+        verify(userRepository).delete(mockUser);
+    }
+
+    @Test
+    @DisplayName("Should throw EntityNotFoundException when deleting non-existent user")
+    void deleteCurrentUser_nonExistingUser_throwsEntityNotFoundException() {
+        when(userRepository.findById(1L)).thenReturn(Optional.empty());
+
+        EntityNotFoundException exception = assertThrows(
+                EntityNotFoundException.class,
+                () -> userService.deleteCurrentUser(1L)
+        );
+        assertEquals("User not found with ID: 1", exception.getMessage());
+
+        verify(userRepository).findById(1L);
+        verify(userRepository, never()).delete(any());
     }
 }
