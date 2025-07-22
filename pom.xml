@@ -121,6 +121,7 @@
             <artifactId>minio</artifactId>
             <version>${minio.version}</version>
         </dependency>
+<<<<<<< HEAD
 
         <dependency>
             <groupId>io.jsonwebtoken</groupId>
@@ -140,6 +141,8 @@
             <scope>runtime</scope>
         </dependency>
 
+=======
+>>>>>>> origin/feature/IF-86-onboard-s3-storage-for-dev
     </dependencies>
 
     <profiles>

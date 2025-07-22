@@ -1,8 +1,7 @@
 # InterviewFlow
 
 **InterviewFlow** is a Backend API for simple and effective application designed to help jobseekers organize and manage
-all their job
-applications in one place.
+all their job applications in one place.
 
 ---
 
@@ -57,6 +56,11 @@ The project comes with two profiles:
 * **`dev`** – used for local development and testing
 * **`prod`** – intended for deployment on AWS
 
+The project comes with two profiles:
+
+* **`dev`** – used for local development and testing
+* **`prod`** – intended for deployment on AWS
+
 By default, the `dev` profile is active, so you can start coding and testing right away without any extra setup.
 
 To keep things clean and centralized, the project uses a **`.env` file** for storing all service configuration values. 
@@ -88,8 +92,7 @@ To be confirmed
 ### SQL Database
 
 - **`users` table**: `id`, `username`, `password`, `email`, `created_at`, `updated_at`
-- **`applications` table**: `id`, `user_id`, `status`, `company_name`, `company_link`, `position`, `applied_at`,
-  `created_at`, `updated_at`
+- **`applications` table**: `id`, `user_id`, `status`, `company_name`, `company_link`, `position`, `applied_at`, `created_at`, `updated_at`
 - **`notes` table**: `id`, `application_id`, `content`, `created_at`, `updated_at`
 
 ### Object Storage (S3)

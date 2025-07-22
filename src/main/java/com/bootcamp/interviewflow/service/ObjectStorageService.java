@@ -2,6 +2,7 @@ package com.bootcamp.interviewflow.service;
 
 import com.bootcamp.interviewflow.dto.FileMetadataResponse;
 import com.bootcamp.interviewflow.dto.FileResponse;
+import com.bootcamp.interviewflow.model.FileMetadata;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
