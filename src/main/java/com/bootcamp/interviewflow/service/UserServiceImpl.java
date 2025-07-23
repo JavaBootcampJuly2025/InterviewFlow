@@ -1,5 +1,6 @@
 package com.bootcamp.interviewflow.service;
 
+import com.bootcamp.interviewflow.dto.ChangePasswordRequest;
 import com.bootcamp.interviewflow.dto.LoginRequest;
 import com.bootcamp.interviewflow.dto.RegisterRequest;
 import com.bootcamp.interviewflow.dto.UserRequest;
@@ -114,6 +115,22 @@ public class UserServiceImpl implements UserService {
         User user = userRepository.findById(authenticatedUserId)
                 .orElseThrow(() -> new EntityNotFoundException("User not found with ID: " + authenticatedUserId));
         userRepository.delete(user);
+    }
+
+    @Override
+    @Transactional
+    public void changePassword(Long authenticatedUserId, ChangePasswordRequest request) {
+        logger.info("Changing password for userId: {}", authenticatedUserId);
+        User user = userRepository.findById(authenticatedUserId)
+                .orElseThrow(() -> new EntityNotFoundException("User not found with ID: " + authenticatedUserId));
+
+        if (!passwordEncoder.matches(request.getCurrentPassword(), user.getPassword())) {
+            throw new BadCredentialsException("Current password is incorrect");
+        }
+
+        user.setPassword(passwordEncoder.encode(request.getNewPassword()));
+        userRepository.save(user);
+        logger.info("Password changed successfully for userId: {}", authenticatedUserId);
     }
 
     private UserResponse convertToResponse(User user) {

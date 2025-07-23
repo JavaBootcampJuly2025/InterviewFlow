@@ -1,5 +1,6 @@
 package com.bootcamp.interviewflow.service;
 
+import com.bootcamp.interviewflow.dto.ChangePasswordRequest;
 import com.bootcamp.interviewflow.dto.LoginRequest;
 import com.bootcamp.interviewflow.dto.RegisterRequest;
 import com.bootcamp.interviewflow.dto.UserRequest;
@@ -16,4 +17,6 @@ public interface UserService {
     UserResponse updateCurrentUserProfile(Long authenticatedUserId, UserRequest request);
 
     void deleteCurrentUser(Long authenticatedUserId);
+
+    void changePassword(Long authenticatedUserId, ChangePasswordRequest request);
 }
