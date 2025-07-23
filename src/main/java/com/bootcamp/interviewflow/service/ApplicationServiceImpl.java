@@ -43,6 +43,7 @@ public class ApplicationServiceImpl implements ApplicationService {
                 .companyName(dto.getCompanyName())
                 .companyLink(dto.getCompanyLink())
                 .position(dto.getPosition())
+                .location(dto.getLocation())
                 .applyDate(dto.getApplyDate() != null ? dto.getApplyDate() : LocalDateTime.now())
                 .interviewDate(dto.getInterviewDate())
                 .emailNotificationsEnabled(dto.getEmailNotificationsEnabled() != null ?
