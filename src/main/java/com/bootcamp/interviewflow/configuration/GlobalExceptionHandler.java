@@ -6,6 +6,7 @@ import com.bootcamp.interviewflow.exception.EmailAlreadyExistsException;
 import com.bootcamp.interviewflow.exception.FileNotFoundOrNoAccessException;
 import com.bootcamp.interviewflow.exception.NoteNotFoundException;
 import com.bootcamp.interviewflow.exception.UserNotFoundException;
+import com.bootcamp.interviewflow.model.ApplicationStatus;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.ConstraintViolationException;
 import org.slf4j.Logger;
@@ -18,7 +19,9 @@ import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -117,4 +120,24 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(404).body(ex.getMessage());
     }
 
+
+    @ExceptionHandler(MethodArgumentTypeMismatchException.class)
+    public ResponseEntity<Object> handleEnumConversionError(MethodArgumentTypeMismatchException ex) {
+        if (ex.getRequiredType() == ApplicationStatus.class) {
+            String message = "Invalid status value: " + ex.getValue() + ". Allowed values: " +
+                    Arrays.toString(ApplicationStatus.values());
+            return ResponseEntity.badRequest().body(Map.of("error", message));
+        }
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Unexpected error");
+    }
+
+    @ExceptionHandler(IllegalArgumentException.class)
+    public ResponseEntity<Object> handleIllegalArgumentException(IllegalArgumentException ex) {
+        Map<String, Object> response = new HashMap<>();
+        response.put("success", false);
+        response.put("message", ex.getMessage() != null ? ex.getMessage() : "Invalid argument");
+        response.put("data", null);
+
+        return ResponseEntity.badRequest().body(response);
+    }
 }

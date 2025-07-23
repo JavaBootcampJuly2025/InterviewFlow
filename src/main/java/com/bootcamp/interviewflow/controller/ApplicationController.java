@@ -14,9 +14,9 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -100,9 +100,28 @@ public class ApplicationController {
     @GetMapping("/filter")
     public ResponseEntity<List<ApplicationListDTO>> getUserApplicationsByStatus(
             @AuthenticationPrincipal UserPrincipal userPrincipal,
-            @RequestParam("status") ApplicationStatus status) {
-        List<ApplicationListDTO> filtered = applicationService.findAllByUserIdAndStatus(userPrincipal.getId(), status);
-        return ResponseEntity.ok(filtered);
+            @RequestParam(value = "status", required = false) ApplicationStatus status,
+            @RequestParam(value = "sortBy", defaultValue = "createdAt") String sortBy,
+            @RequestParam(value = "order", defaultValue = "desc") String order
+    ) {
+        Sort.Direction direction = order.equalsIgnoreCase("asc") ? Sort.Direction.ASC : Sort.Direction.DESC;
+
+        List<String> allowedSortFields = List.of("createdAt", "updatedAt", "applyDate", "interviewDate", "companyName", "status");
+        if (!allowedSortFields.contains(sortBy)) {
+            throw new IllegalArgumentException("Invalid sortBy parameter: " + sortBy);
+        }
+        if (!order.equalsIgnoreCase("asc") && !order.equalsIgnoreCase("desc")) {
+            throw new IllegalArgumentException("Invalid order parameter: " + order + ". Allowed values: asc, desc");
+        }
+
+        List<ApplicationListDTO> result;
+        Sort sort = Sort.by(direction, sortBy);
+        if (status != null) {
+            result = applicationService.findAllByUserIdAndStatus(userPrincipal.getId(), status, sort);
+        } else {
+            result = applicationService.findAllByUserIdSorted(userPrincipal.getId(), sort);
+        }
+        return ResponseEntity.ok(result);
     }
 
     @Operation(summary = "Delete a job application by ID")
