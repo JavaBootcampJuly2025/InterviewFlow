@@ -21,12 +21,19 @@ public record ApplicationListDTO(
 
         @Schema(description = "Timestamp when you actually applied for the job (optional - defaults to creation time)",
                 example = "2025-07-16T10:30:00")
-        @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")
+        @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:[ss]")
         LocalDateTime applyDate,
 
         @Schema(description = "Timestamp when the application was created", example = "2025-07-17 10:30:00")
         @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")
         LocalDateTime createdAt,
+
+        @Schema(description = "Timestamp when the interview is set for the application", example = "2025-07-18 14:30:00")
+        @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")
+        LocalDateTime interviewDate,
+
+        @Schema(description = "Enable reminder notifications for the interview?", example = "TRUE")
+        Boolean emailNotificationEnabled,
 
         @Schema(description = "Timestamp when the application was last updated", example = "2025-07-18 12:15:00")
         @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")

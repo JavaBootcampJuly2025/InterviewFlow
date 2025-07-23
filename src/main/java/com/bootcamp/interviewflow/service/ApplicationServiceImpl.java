@@ -18,6 +18,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
@@ -36,13 +37,17 @@ public class ApplicationServiceImpl implements ApplicationService {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new UserNotFoundException("User with id " + userId + " not found"));
 
-        Application app = new Application();
-        app.setCompanyName(dto.getCompanyName());
-        app.setCompanyLink(dto.getCompanyLink());
-        app.setPosition(dto.getPosition());
-        app.setApplyDate(dto.getApplyDate());
-        app.setStatus(ApplicationStatus.valueOf(dto.getStatus()));
-        app.setUser(user);
+        Application app = Application.builder()
+                .status(ApplicationStatus.valueOf(dto.getStatus()))
+                .companyName(dto.getCompanyName())
+                .companyLink(dto.getCompanyLink())
+                .position(dto.getPosition())
+                .applyDate(dto.getApplyDate() != null ? dto.getApplyDate() : LocalDateTime.now())
+                .interviewDate(dto.getInterviewDate())
+                .emailNotificationsEnabled(dto.getEmailNotificationsEnabled() != null ?
+                        dto.getEmailNotificationsEnabled() : false)
+                .user(user)
+                .build();
 
         return applicationMapper.toResponse(applicationRepository.save(app));
     }
@@ -52,6 +57,14 @@ public class ApplicationServiceImpl implements ApplicationService {
         log.info("Fetching applications for user ID: {}", userId);
         List<Application> applications = applicationRepository.findAllByUserId(userId);
         log.info("Found {} applications for user ID: {}", applications.size(), userId);
+        return applicationListMapper.toApplicationListDTOs(applications);
+    }
+
+    @Override
+    public List<ApplicationListDTO> findAllByUserIdAndStatus(Long userId, ApplicationStatus status) {
+        log.info("Fetching applications for user ID: {} with status: {}", userId, status);
+        List<Application> applications = applicationRepository.findAllByUserIdAndStatus(userId, status);
+        log.info("Found {} applications for user ID: {} with status: {}", applications.size(), userId, status);
         return applicationListMapper.toApplicationListDTOs(applications);
     }
 

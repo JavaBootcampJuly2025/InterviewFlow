@@ -36,7 +36,7 @@ public class GlobalExceptionHandler {
             errors.put(fieldName, errorMessage);
         });
 
-        logger.warn("Validation failed: {}", errors);
+        logger.error("Validation failed: {}", errors);
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                 .body(new ApiResponse(false, "Validation failed", errors));
     }
@@ -50,7 +50,7 @@ public class GlobalExceptionHandler {
             errors.put(fieldName, errorMessage);
         });
 
-        logger.warn("Binding failed: {}", errors);
+        logger.error("Binding failed: {}", errors);
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                 .body(new ApiResponse(false, "Validation failed", errors));
     }
@@ -65,35 +65,35 @@ public class GlobalExceptionHandler {
             errors.put(fieldName, errorMessage);
         }
 
-        logger.warn("Constraint violation: {}", errors);
+        logger.error("Constraint violation: {}", errors);
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                 .body(new ApiResponse(false, "Validation failed", errors));
     }
 
     @ExceptionHandler(EmailAlreadyExistsException.class)
     public ResponseEntity<ApiResponse> handleEmailAlreadyExistsException(EmailAlreadyExistsException ex) {
-        logger.warn("Email already exists: {}", ex.getMessage());
+        logger.error("Email already exists: {}", ex.getMessage());
         return ResponseEntity.status(HttpStatus.CONFLICT)
                 .body(new ApiResponse(false, ex.getMessage()));
     }
 
     @ExceptionHandler(BadCredentialsException.class)
     public ResponseEntity<ApiResponse> handleBadCredentialsException(BadCredentialsException ex) {
-        logger.warn("Bad credentials: {}", ex.getMessage());
+        logger.error("Bad credentials: {}", ex.getMessage());
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
                 .body(new ApiResponse(false, "Invalid email or password"));
     }
 
     @ExceptionHandler(UserNotFoundException.class)
     public ResponseEntity<ApiResponse> handleUserNotFoundException(UserNotFoundException ex) {
-        logger.warn("User not found: {}", ex.getMessage());
+        logger.error("User not found: {}", ex.getMessage());
         return ResponseEntity.status(HttpStatus.NOT_FOUND)
                 .body(new ApiResponse(false, ex.getMessage()));
     }
 
     @ExceptionHandler(NoteNotFoundException.class)
     public ResponseEntity<ApiResponse> handleNoteNotFoundException(NoteNotFoundException ex) {
-        logger.warn("Note not found: {}", ex.getMessage());
+        logger.error("Note not found: {}", ex.getMessage());
         return ResponseEntity.status(HttpStatus.NOT_FOUND)
                 .body(new ApiResponse(false, ex.getMessage()));
     }
@@ -107,7 +107,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(ApplicationNotFoundException.class)
     public ResponseEntity<ApiResponse> handleApplicationNotFoundException(ApplicationNotFoundException ex) {
-        logger.warn("Application not found: {}", ex.getMessage());
+        logger.error("Application not found: {}", ex.getMessage());
         return ResponseEntity.status(HttpStatus.NOT_FOUND)
                 .body(new ApiResponse(false, ex.getMessage()));
     }
