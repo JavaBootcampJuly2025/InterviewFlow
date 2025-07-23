@@ -5,3 +5,8 @@ spring:
     active: @spring.profiles.active@
   liquibase:
     change-log: classpath:db/changelog/db.changelog-master.yml
+
+interviewFlow:
+  frontend:
+    frontendDomain: localhost
+    frontendPort: 5173

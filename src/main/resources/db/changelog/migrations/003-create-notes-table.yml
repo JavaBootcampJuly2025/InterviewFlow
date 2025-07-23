@@ -19,6 +19,16 @@ databaseChangeLog:
                   constraints:
                     nullable: false
               - column:
+                  name: title
+                  type: VARCHAR(255)
+                  constraints:
+                    nullable: true
+              - column:
+                  name: tags
+                  type: VARCHAR(1000)
+                  constraints:
+                    nullable: true
+              - column:
                   name: content
                   type: VARCHAR(2000)
                   constraints:

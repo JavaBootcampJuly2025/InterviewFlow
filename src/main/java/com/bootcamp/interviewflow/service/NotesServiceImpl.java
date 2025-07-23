@@ -29,9 +29,15 @@ public class NotesServiceImpl implements NotesService {
         Application application = applicationRepository.findById(request.applicationId()).orElseThrow(
                 () -> new ApplicationNotFoundException("Application with id " + request.applicationId() + " not found"));
 
+        String tagsString = request.tags() != null && !request.tags().isEmpty()
+                ? String.join(",", request.tags())
+                : null;
+
         Note noteToSave = Note.builder()
                 .application(application)
+                .title(request.title())
                 .content(request.content())
+                .tags(tagsString)
                 .build();
 
         Note savedNote = noteRepository.save(noteToSave);
