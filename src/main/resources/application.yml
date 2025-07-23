@@ -3,10 +3,5 @@ spring:
     name: InterviewFlow
   profiles:
     active: @spring.profiles.active@
-  datasource:
-    driver-class-name: org.postgresql.Driver
-    url: jdbc:postgresql://localhost:5433/interview_flow_db
-    username: postgres
-    password: postgres
   liquibase:
     change-log: classpath:db/changelog/db.changelog-master.yml

@@ -14,9 +14,9 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -27,7 +27,9 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import com.bootcamp.interviewflow.model.ApplicationStatus;
 
 import java.util.List;
 
@@ -84,6 +86,42 @@ public class ApplicationController {
     @GetMapping
     public ResponseEntity<List<ApplicationListDTO>> getUserApplications(@AuthenticationPrincipal UserPrincipal userPrincipal) {
         return ResponseEntity.ok(applicationService.findAllByUserId(userPrincipal.getId()));
+    }
+
+    @Operation(summary = "Get all applications for current user filtered by status")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Filtered applications",
+                    content = @Content(array = @ArraySchema(schema = @Schema(implementation = ApplicationListDTO.class)))),
+            @ApiResponse(responseCode = "400", description = "Invalid status",
+                    content = @Content(schema = @Schema(implementation = com.bootcamp.interviewflow.dto.ApiResponse.class))),
+            @ApiResponse(responseCode = "401", description = "Unauthorized",
+                    content = @Content(schema = @Schema(implementation = com.bootcamp.interviewflow.dto.ApiResponse.class)))
+    })
+    @GetMapping("/filter")
+    public ResponseEntity<List<ApplicationListDTO>> getUserApplicationsByStatus(
+            @AuthenticationPrincipal UserPrincipal userPrincipal,
+            @RequestParam(value = "status", required = false) ApplicationStatus status,
+            @RequestParam(value = "sortBy", defaultValue = "createdAt") String sortBy,
+            @RequestParam(value = "order", defaultValue = "desc") String order
+    ) {
+        Sort.Direction direction = order.equalsIgnoreCase("asc") ? Sort.Direction.ASC : Sort.Direction.DESC;
+
+        List<String> allowedSortFields = List.of("createdAt", "updatedAt", "applyDate", "interviewDate", "companyName", "status");
+        if (!allowedSortFields.contains(sortBy)) {
+            throw new IllegalArgumentException("Invalid sortBy parameter: " + sortBy);
+        }
+        if (!order.equalsIgnoreCase("asc") && !order.equalsIgnoreCase("desc")) {
+            throw new IllegalArgumentException("Invalid order parameter: " + order + ". Allowed values: asc, desc");
+        }
+
+        List<ApplicationListDTO> result;
+        Sort sort = Sort.by(direction, sortBy);
+        if (status != null) {
+            result = applicationService.findAllByUserIdAndStatus(userPrincipal.getId(), status, sort);
+        } else {
+            result = applicationService.findAllByUserIdSorted(userPrincipal.getId(), sort);
+        }
+        return ResponseEntity.ok(result);
     }
 
     @Operation(summary = "Delete a job application by ID")
