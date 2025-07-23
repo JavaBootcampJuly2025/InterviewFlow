@@ -3,5 +3,13 @@ spring:
     name: InterviewFlow
   profiles:
     active: @spring.profiles.active@
+  datasource:
+    driver-class-name: org.postgresql.Driver
   liquibase:
     change-log: classpath:db/changelog/db.changelog-master.yml
+
+  # Enable scheduling
+  task:
+    scheduling:
+      pool:
+        size: 2

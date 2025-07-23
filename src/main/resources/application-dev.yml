@@ -9,10 +9,23 @@ spring:
     username: ${POSTGRES_USER}
     password: ${POSTGRES_PASSWORD}
 
-minio:
-  url: localhost
-  port: 9000
-  tlsOn: false
-  accessKey: minioadmin
-  secretKey: minioadmin
-  bucket: if-bucket
+  # Email Configuration for Development
+  mail:
+    host: smtp.gmail.com
+    port: 465
+    username: ${MAIL_USERNAME:interviewflowcorp@gmail.com}
+    password: ${MAIL_PASSWORD:gwtdkpzzvybetiza}
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+          ssl:
+            enable: true
+
+# Application-specific configuration for Development
+app:
+  notification:
+    batch-size: 50
+    enabled: true
