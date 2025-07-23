@@ -3,7 +3,7 @@ package com.bootcamp.interviewflow.controller;
 import com.bootcamp.interviewflow.dto.FileResponse;
 import com.bootcamp.interviewflow.dto.ResumeResponse;
 import com.bootcamp.interviewflow.security.UserPrincipal;
-import com.bootcamp.interviewflow.service.ResumeService;
+import com.bootcamp.interviewflow.service.ObjectStorageService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -34,7 +34,7 @@ import java.util.UUID;
 @Tag(name = "Resumes", description = "Upload resume files")
 public class ResumeController {
 
-    private final ResumeService resumeService;
+    private final ObjectStorageService objectStorageService;
 
     @Operation(summary = "Upload a resume (PDF only, max 5MB)", description = "Uploads a resume for the currently authenticated user")
     @ApiResponses({
@@ -47,7 +47,7 @@ public class ResumeController {
     public ResponseEntity<ResumeResponse> uploadResume(
             @AuthenticationPrincipal UserPrincipal userPrincipal,
             @RequestParam("file") MultipartFile file) {
-        ResumeResponse response = resumeService.upload(userPrincipal.getId(), file);
+        ResumeResponse response = objectStorageService.upload(userPrincipal.getId(), file);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
@@ -63,7 +63,7 @@ public class ResumeController {
     public ResponseEntity<byte[]> download(
             @AuthenticationPrincipal UserPrincipal userPrincipal,
             @PathVariable UUID fileId) {
-        byte[] data = resumeService.download(fileId, userPrincipal.getId());
+        byte[] data = objectStorageService.download(fileId, userPrincipal.getId());
         return ResponseEntity.ok()
                 .contentType(MediaType.APPLICATION_OCTET_STREAM)
                 .body(data);
@@ -80,7 +80,7 @@ public class ResumeController {
     public ResponseEntity<FileResponse> delete(
             @AuthenticationPrincipal UserPrincipal userPrincipal,
             @PathVariable UUID fileId) {
-        resumeService.delete(fileId, userPrincipal.getId());
+        objectStorageService.delete(fileId, userPrincipal.getId());
         return ResponseEntity.ok(new FileResponse("Resume deleted", fileId));
     }
 
@@ -92,6 +92,6 @@ public class ResumeController {
     })
     @GetMapping
     public ResponseEntity<List<ResumeResponse>> list(@AuthenticationPrincipal UserPrincipal userPrincipal) {
-        return ResponseEntity.ok(resumeService.findAllByUserId(userPrincipal.getId()));
+        return ResponseEntity.ok(objectStorageService.findAllByUserId(userPrincipal.getId()));
     }
 }

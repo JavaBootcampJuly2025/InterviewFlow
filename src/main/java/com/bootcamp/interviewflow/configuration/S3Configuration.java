@@ -12,9 +12,9 @@ import software.amazon.awssdk.services.s3.S3Client;
 @Profile("prod")
 @Configuration
 public class S3Configuration {
-    private String region;
-    private String accessKeyId;
-    private String secretAccessKey;
+    private final String region;
+    private final String accessKeyId;
+    private final String secretAccessKey;
 
     public S3Configuration(@Value("${aws.region}") String region,
                            @Value("${aws.accessKeyId}") String accessKeyId,

@@ -1,117 +1,68 @@
 package com.bootcamp.interviewflow.service;
 
-import com.bootcamp.interviewflow.dto.FileMetadataResponse;
-import com.bootcamp.interviewflow.dto.FileResponse;
-import com.bootcamp.interviewflow.model.FileMetadata;
-import com.bootcamp.interviewflow.repository.FileMetadataRepository;
-import io.minio.BucketExistsArgs;
+import com.bootcamp.interviewflow.repository.ResumeRepository;
+import com.bootcamp.interviewflow.repository.UserRepository;
 import io.minio.GetObjectArgs;
-import io.minio.MakeBucketArgs;
 import io.minio.MinioClient;
 import io.minio.PutObjectArgs;
 import io.minio.RemoveObjectArgs;
-import jakarta.annotation.PostConstruct;
-import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.io.FilenameUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.FileNotFoundException;
 import java.io.InputStream;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
-import java.util.stream.Collectors;
 
 @Profile("dev")
-@Slf4j
 @Service
-public class MinioStorageService implements ObjectStorageService {
-    protected static final String NO_ACCESS_OR_FILE = "No access or file";
+public class MinioStorageService extends AbstractStorageService {
 
     private final MinioClient minioClient;
-    private final FileMetadataRepository metadataRepo;
-    private final String bucket;
+    private final String bucketName;
 
-    public MinioStorageService(MinioClient minioClient,
-                               FileMetadataRepository metadataRepo,
-                               @Value("${minio.bucket}") String bucket) {
+    public MinioStorageService(ResumeRepository resumeRepository,
+                               UserRepository userRepository,
+                               MinioClient minioClient,
+                               @Value("${minio.bucket}") String bucketName) {
+        super(resumeRepository, userRepository);
         this.minioClient = minioClient;
-        this.metadataRepo = metadataRepo;
-        this.bucket = bucket;
+        this.bucketName = bucketName;
     }
 
-    @PostConstruct
-    public void init() throws Exception {
-        boolean exists = minioClient.bucketExists(BucketExistsArgs.builder().bucket(bucket).build());
-        if (!exists) {
-            minioClient.makeBucket(MakeBucketArgs.builder().bucket(bucket).build());
-            log.info("Bucket with name {} created", bucket);
+    @Override
+    protected void uploadFile(String objectKey, MultipartFile file) {
+        try {
+            minioClient.putObject(
+                    PutObjectArgs.builder()
+                            .bucket(bucketName)
+                            .object(objectKey)
+                            .stream(file.getInputStream(), -1, file.getSize())
+                            .contentType(file.getContentType())
+                            .build()
+            );
+        } catch (Exception e) {
+            throw new RuntimeException(FAILED_TO_UPLOAD_FILE, e);
         }
     }
 
     @Override
-    public FileResponse upload(Long userId, MultipartFile file) throws Exception {
-        UUID fileId = UUID.randomUUID();
-        String extension = Optional.ofNullable(FilenameUtils.getExtension(file.getOriginalFilename())).orElse("");
-        String objectKey = userId + "/" + fileId + (extension.isBlank() ? "" : "." + extension);
-
-        minioClient.putObject(
-                PutObjectArgs.builder()
-                        .bucket(bucket)
-                        .object(objectKey)
-                        .stream(file.getInputStream(), -1, 10485760)
-                        .contentType(file.getContentType())
-                        .build()
-        );
-
-        FileMetadata metadata = new FileMetadata();
-        metadata.setId(fileId);
-        metadata.setUserId(userId);
-        metadata.setOriginalFilename(file.getOriginalFilename());
-        metadata.setContentType(file.getContentType());
-        metadata.setObjectKey(objectKey);
-        metadataRepo.save(metadata);
-
-        return new FileResponse("File uploaded", fileId);
-    }
-
-    @Override
-    public byte[] download(UUID fileId, Long userId) throws Exception {
-        FileMetadata metadata = metadataRepo.findByIdAndUserId(fileId, userId)
-                .orElseThrow(() -> new FileNotFoundException(NO_ACCESS_OR_FILE));
-
+    protected byte[] downloadFile(String objectKey) {
         try (InputStream stream = minioClient.getObject(
-                GetObjectArgs.builder().bucket(bucket).object(metadata.getObjectKey()).build())) {
+                GetObjectArgs.builder().bucket(bucketName).object(objectKey).build())) {
             return stream.readAllBytes();
+        } catch (Exception e) {
+            throw new RuntimeException(FAILED_TO_DOWNLOAD_FILE, e);
         }
     }
 
     @Override
-    public void delete(UUID fileId, Long userId) throws Exception {
-        FileMetadata metadata = metadataRepo.findByIdAndUserId(fileId, userId)
-                .orElseThrow(() -> new FileNotFoundException(NO_ACCESS_OR_FILE));
-
-        minioClient.removeObject(
-                RemoveObjectArgs.builder().bucket(bucket).object(metadata.getObjectKey()).build()
-        );
-
-        metadataRepo.delete(metadata);
-    }
-
-    @Override
-    public List<FileMetadataResponse> findAllByUserId(Long userId) {
-        return metadataRepo.findAllByUserId(userId).stream()
-                .map(metadata -> new FileMetadataResponse(
-                        metadata.getId(),
-                        metadata.getOriginalFilename(),
-                        metadata.getContentType(),
-                        metadata.getCreatedAt()
-                ))
-                .sorted(Comparator.comparing(FileMetadataResponse::id))
-                .collect(Collectors.toList());
+    protected void deleteFile(String objectKey) {
+        try {
+            minioClient.removeObject(
+                    RemoveObjectArgs.builder().bucket(bucketName).object(objectKey).build()
+            );
+        } catch (Exception e) {
+            throw new RuntimeException(FAILED_TO_DELETE_FILE, e);
+        }
     }
 }

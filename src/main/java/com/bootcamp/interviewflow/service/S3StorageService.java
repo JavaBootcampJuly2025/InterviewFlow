@@ -1,48 +1,37 @@
 package com.bootcamp.interviewflow.service;
 
-import com.bootcamp.interviewflow.dto.FileMetadataResponse;
-import com.bootcamp.interviewflow.dto.FileResponse;
-import com.bootcamp.interviewflow.model.FileMetadata;
-import com.bootcamp.interviewflow.repository.FileMetadataRepository;
+import com.bootcamp.interviewflow.repository.ResumeRepository;
+import com.bootcamp.interviewflow.repository.UserRepository;
 import jakarta.annotation.PostConstruct;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.io.FilenameUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
-import software.amazon.awssdk.core.ResponseBytes;
 import software.amazon.awssdk.core.sync.RequestBody;
 import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.DeleteObjectRequest;
 import software.amazon.awssdk.services.s3.model.GetObjectRequest;
-import software.amazon.awssdk.services.s3.model.GetObjectResponse;
 import software.amazon.awssdk.services.s3.model.HeadBucketRequest;
 import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 import software.amazon.awssdk.services.s3.model.S3Exception;
 
-import java.io.FileNotFoundException;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
-import java.util.stream.Collectors;
+import java.io.IOException;
+import java.io.UncheckedIOException;
 
 @Profile("prod")
 @Slf4j
 @Service
-public class S3StorageService implements ObjectStorageService {
-    protected static final String NO_ACCESS_OR_FILE = "No access or file";
-
+public class S3StorageService extends AbstractStorageService {
     private final S3Client s3Client;
-    private final FileMetadataRepository metadataRepo;
     private final String bucketName;
 
-    public S3StorageService(S3Client s3Client,
-                            FileMetadataRepository metadataRepo,
+    public S3StorageService(ResumeRepository resumeRepository,
+                            UserRepository userRepository,
+                            S3Client s3Client,
                             @Value("${aws.s3.bucket}") String bucketName) {
+        super(resumeRepository, userRepository);
         this.s3Client = s3Client;
-        this.metadataRepo = metadataRepo;
         this.bucketName = bucketName;
     }
 
@@ -50,13 +39,9 @@ public class S3StorageService implements ObjectStorageService {
     public void init() {
         try {
             s3Client.headBucket(HeadBucketRequest.builder().bucket(bucketName).build());
-            log.error("S3 bucket exists and is accessible: {}", bucketName);
+            log.info("S3 bucket is accessible: {}", bucketName);
         } catch (S3Exception e) {
-            if (e.statusCode() == 404) {
-                log.error("S3 bucket does not exist: {}", bucketName);
-            } else {
-                log.error("Error accessing bucket: {}", e.awsErrorDetails().errorMessage());
-            }
+            log.error("S3 error: {}", e.awsErrorDetails().errorMessage());
             System.exit(1);
         } catch (Exception e) {
             log.error("Unexpected error while checking bucket: {}", e.getMessage());
@@ -65,68 +50,35 @@ public class S3StorageService implements ObjectStorageService {
     }
 
     @Override
-    public FileResponse upload(Long userId, MultipartFile file) throws Exception {
-        UUID fileId = UUID.randomUUID();
-        String extension = Optional.ofNullable(FilenameUtils.getExtension(file.getOriginalFilename())).orElse("");
-        String objectKey = "files/user_" + userId + "/" + fileId + (extension.isBlank() ? "" : "." + extension);
-
+    protected void uploadFile(String objectKey, MultipartFile file) {
         PutObjectRequest putRequest = PutObjectRequest.builder()
                 .bucket(bucketName)
                 .key(objectKey)
                 .contentType(file.getContentType())
                 .contentLength(file.getSize())
                 .build();
-
-        s3Client.putObject(putRequest, RequestBody.fromInputStream(file.getInputStream(), file.getSize()));
-
-        FileMetadata metadata = new FileMetadata();
-        metadata.setId(fileId);
-        metadata.setUserId(userId);
-        metadata.setOriginalFilename(file.getOriginalFilename());
-        metadata.setContentType(file.getContentType());
-        metadata.setObjectKey(objectKey);
-        metadataRepo.save(metadata);
-
-        return new FileResponse("File uploaded", fileId);
+        try {
+            s3Client.putObject(putRequest, RequestBody.fromInputStream(file.getInputStream(), file.getSize()));
+        } catch (IOException e) {
+            throw new UncheckedIOException(FAILED_TO_READ_FILE, e);
+        }
     }
 
     @Override
-    public byte[] download(UUID fileId, Long userId) throws Exception {
-        FileMetadata metadata = metadataRepo.findByIdAndUserId(fileId, userId)
-                .orElseThrow(() -> new FileNotFoundException(NO_ACCESS_OR_FILE));
-
+    protected byte[] downloadFile(String objectKey) {
         GetObjectRequest getRequest = GetObjectRequest.builder()
                 .bucket(bucketName)
-                .key(metadata.getObjectKey())
+                .key(objectKey)
                 .build();
-
-        ResponseBytes<GetObjectResponse> objectBytes = s3Client.getObjectAsBytes(getRequest);
-        return objectBytes.asByteArray();
+        return s3Client.getObjectAsBytes(getRequest).asByteArray();
     }
 
     @Override
-    public void delete(UUID fileId, Long userId) throws Exception {
-        FileMetadata metadata = metadataRepo.findByIdAndUserId(fileId, userId)
-                .orElseThrow(() -> new FileNotFoundException(NO_ACCESS_OR_FILE));
-
+    protected void deleteFile(String objectKey) {
         DeleteObjectRequest deleteRequest = DeleteObjectRequest.builder()
                 .bucket(bucketName)
-                .key(metadata.getObjectKey())
+                .key(objectKey)
                 .build();
-
         s3Client.deleteObject(deleteRequest);
-    }
-
-    @Override
-    public List<FileMetadataResponse> findAllByUserId(Long userId) {
-        return metadataRepo.findAllByUserId(userId).stream()
-                .map(metadata -> new FileMetadataResponse(
-                        metadata.getId(),
-                        metadata.getOriginalFilename(),
-                        metadata.getContentType(),
-                        metadata.getCreatedAt()
-                ))
-                .sorted(Comparator.comparing(FileMetadataResponse::id))
-                .collect(Collectors.toList());
     }
 }
