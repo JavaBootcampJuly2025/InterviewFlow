@@ -99,7 +99,7 @@ To be confirmed
 
 All files uploaded by users are saved to the following path
 
-`/{bucket}/{userId}/{uuid}.{ext}`
+`/{bucket}/resumes/user_{userId}/{uuid}.{ext}`
 
 Uploading files of various extensions is supported, and uploading files without extensions is also possible.
 
