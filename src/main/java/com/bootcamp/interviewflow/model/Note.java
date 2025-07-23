@@ -28,6 +28,12 @@ public class Note {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(nullable = true)
+    private String title; // Новое поле
+
+    @Column(nullable = true)
+    private String tags; // Новое поле, храним как строку (например, "tag1,tag2")
+
     @Column(nullable = false, columnDefinition = "TEXT")
     private String content;
 
@@ -40,6 +46,14 @@ public class Note {
 
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
+
+    public Note(Application application, String title, String content, String tags) {
+        this.title = title;
+        this.content = content;
+        this.tags = tags;
+        this.application = application;
+        onCreate();
+    }
 
     public Note(Application application, String content) {
         this.content = content;
