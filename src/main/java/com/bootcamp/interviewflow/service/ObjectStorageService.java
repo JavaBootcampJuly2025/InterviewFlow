@@ -1,8 +1,6 @@
 package com.bootcamp.interviewflow.service;
 
-import com.bootcamp.interviewflow.dto.FileMetadataResponse;
-import com.bootcamp.interviewflow.dto.FileResponse;
-import com.bootcamp.interviewflow.model.FileMetadata;
+import com.bootcamp.interviewflow.dto.ResumeResponse;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
@@ -18,10 +16,10 @@ public interface ObjectStorageService {
      * Uploads a file for a specific user.
      *
      * @param userId the ID of the user uploading the file
-     * @param file the file to be uploaded
-     * @return a {@link FileResponse} containing metadata about the uploaded file
+     * @param file   the file to be uploaded
+     * @return a {@link ResumeResponse} containing metadata about the uploaded file
      */
-    FileResponse upload(Long userId, MultipartFile file);
+    ResumeResponse upload(Long userId, MultipartFile file);
 
     /**
      * Downloads a file for a specific user.
@@ -44,7 +42,7 @@ public interface ObjectStorageService {
      * Retrieves all metadata for files uploaded by a specific user.
      *
      * @param userId the ID of the user
-     * @return a list of {@link FileMetadataResponse} objects
+     * @return a list of {@link ResumeResponse} objects
      */
-    List<FileMetadataResponse> findAllByUserId(Long userId);
+    List<ResumeResponse> findAllByUserId(Long userId);
 }

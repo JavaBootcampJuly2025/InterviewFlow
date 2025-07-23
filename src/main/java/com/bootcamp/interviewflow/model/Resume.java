@@ -39,6 +39,6 @@ public class Resume {
     private String objectKey;
 
     @Column(nullable = false)
-    private Long fileSize;
+    private Long size;
 
 }

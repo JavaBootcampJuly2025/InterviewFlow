@@ -1,6 +1,7 @@
 package com.bootcamp.interviewflow.service;
 
 import com.bootcamp.interviewflow.exception.UserNotFoundException;
+import com.bootcamp.interviewflow.model.User;
 import com.bootcamp.interviewflow.repository.ResumeRepository;
 import com.bootcamp.interviewflow.repository.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
@@ -34,36 +35,41 @@ class ResumeServiceImplTest {
 
     @Test
     void uploadResume_shouldThrowIfFileIsNull() {
-        assertThatThrownBy(() -> resumeService.uploadResume(1L, null))
+        when(userRepository.findById(1L)).thenReturn(Optional.of(new User()));
+
+        assertThatThrownBy(() -> resumeService.upload(1L, null))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessage("File is required");
     }
 
     @Test
     void uploadResume_shouldThrowIfFileIsEmpty() {
+        when(userRepository.findById(1L)).thenReturn(Optional.of(new User()));
         when(file.isEmpty()).thenReturn(true);
-        assertThatThrownBy(() -> resumeService.uploadResume(1L, file))
+        assertThatThrownBy(() -> resumeService.upload(1L, file))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessage("File is required");
     }
 
     @Test
     void uploadResume_shouldThrowIfNotPDF() {
+        when(userRepository.findById(1L)).thenReturn(Optional.of(new User()));
         when(file.isEmpty()).thenReturn(false);
         when(file.getOriginalFilename()).thenReturn("resume.docx");
-        assertThatThrownBy(() -> resumeService.uploadResume(1L, file))
+        assertThatThrownBy(() -> resumeService.upload(1L, file))
                 .isInstanceOf(IllegalArgumentException.class)
-                .hasMessage("Only PDF allowed");
+                .hasMessage(ResumeService.ONLY_PDF_IS_ALLOWED);
     }
 
     @Test
     void uploadResume_shouldThrowIfTooBig() {
+        when(userRepository.findById(1L)).thenReturn(Optional.of(new User()));
         when(file.isEmpty()).thenReturn(false);
         when(file.getOriginalFilename()).thenReturn("resume.pdf");
         when(file.getSize()).thenReturn(6L * 1024 * 1024); // 6MB
-        assertThatThrownBy(() -> resumeService.uploadResume(1L, file))
+        assertThatThrownBy(() -> resumeService.upload(1L, file))
                 .isInstanceOf(IllegalArgumentException.class)
-                .hasMessage("Max size 5MB");
+                .hasMessage(ResumeService.MAX_FILE_SIZE_5_MB_IS_ALLOWED);
     }
 
     @Test
@@ -72,7 +78,7 @@ class ResumeServiceImplTest {
         when(file.getOriginalFilename()).thenReturn("resume.pdf");
         when(file.getSize()).thenReturn(1024L);
         when(userRepository.findById(1L)).thenReturn(Optional.empty());
-        assertThatThrownBy(() -> resumeService.uploadResume(1L, file))
+        assertThatThrownBy(() -> resumeService.upload(1L, file))
                 .isInstanceOf(UserNotFoundException.class)
                 .hasMessageContaining("User not found");
     }
