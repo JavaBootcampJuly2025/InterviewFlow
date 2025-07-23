@@ -31,30 +31,32 @@ public class ApplicationServiceImpl implements ApplicationService {
     private final ApplicationListMapper applicationListMapper;
     private final ApplicationMapper applicationMapper;
     private final UserRepository userRepository;
-    private final EmailReminderService emailReminderService; // Add email service
+    private final NotificationService notificationService; // Add notification service
 
     @Override
     public ApplicationResponse create(CreateApplicationRequest dto, Long userId) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new UserNotFoundException("User with id " + userId + " not found"));
 
-        Application app = new Application();
-        app.setCompanyName(dto.getCompanyName());
-        app.setCompanyLink(dto.getCompanyLink());
-        app.setPosition(dto.getPosition());
-        app.setApplyDate(dto.getApplyDate() != null ? dto.getApplyDate() : LocalDateTime.now());
-        app.setInterviewDate(dto.getInterviewDate());
-        app.setEmailNotificationsEnabled(dto.getEmailNotificationsEnabled() != null ?
-                dto.getEmailNotificationsEnabled() : false);
-        app.setStatus(ApplicationStatus.valueOf(dto.getStatus()));
-        app.setUser(user);
+        Application app = Application.builder()
+                .status(ApplicationStatus.valueOf(dto.getStatus()))
+                .companyName(dto.getCompanyName())
+                .companyLink(dto.getCompanyLink())
+                .position(dto.getPosition())
+                .applyDate(dto.getApplyDate() != null ? dto.getApplyDate() : LocalDateTime.now())
+                .interviewDate(dto.getInterviewDate())
+                .emailNotificationsEnabled(dto.getEmailNotificationsEnabled() != null ?
+                        dto.getEmailNotificationsEnabled() : false)
+                .user(user)
+                .build();
 
         Application savedApp = applicationRepository.save(app);
 
-        // Schedule interview reminder if conditions are met
+
         if (savedApp.getInterviewDate() != null &&
                 Boolean.TRUE.equals(savedApp.getEmailNotificationsEnabled())) {
-            emailReminderService.scheduleInterviewReminder(savedApp, user.getEmail());
+            notificationService.scheduleInterviewReminder(savedApp, user);
+            log.info("Interview reminder scheduled for application {}", savedApp.getId());
         }
 
         return applicationMapper.toResponse(savedApp);
@@ -70,67 +72,68 @@ public class ApplicationServiceImpl implements ApplicationService {
 
     @Override
     public List<ApplicationListDTO> findAll() {
-        log.info("Fetching applications:");
+        log.info("Fetching all applications");
         List<Application> applications = applicationRepository.findAll();
         return applicationListMapper.toApplicationListDTOs(applications);
     }
 
     @Override
     public void delete(Long id, Long userId) {
-        Application application = findAndValidateOwnership(id, userId);
 
-        // Cancel any scheduled reminders before deleting
-        emailReminderService.cancelInterviewReminder(id);
+
+        // Cancel any scheduled notifications before deleting
+        notificationService.cancelNotificationsForApplication(id);
 
         applicationRepository.deleteById(id);
-        log.info("Application {} deleted and reminders cancelled", id);
+        log.info("Application {} deleted and notifications cancelled", id);
     }
 
     @Override
     public ApplicationResponse partialUpdate(Long id, Long userId, UpdateApplicationRequest dto) {
         Application application = findAndValidateOwnership(id, userId);
 
-        // Store original interview date and notification settings to detect changes
+        // Store original values to detect changes
         LocalDateTime originalInterviewDate = application.getInterviewDate();
         Boolean originalNotificationEnabled = application.getEmailNotificationsEnabled();
 
         Application updatedApp = applicationMapper.updateEntityFromDto(dto, application);
         Application savedApp = applicationRepository.save(updatedApp);
 
-        // Handle reminder scheduling based on changes
-        handleReminderScheduling(savedApp, originalInterviewDate, originalNotificationEnabled);
+        // Handle notification scheduling based on changes
+        handleNotificationScheduling(savedApp, originalInterviewDate, originalNotificationEnabled);
 
-        log.info("Application partially updated: {}", savedApp);
+        log.info("Application {} updated", savedApp.getId());
         return applicationMapper.toResponse(savedApp);
     }
 
-    private void handleReminderScheduling(Application updatedApp,
-                                          LocalDateTime originalInterviewDate,
-                                          Boolean originalNotificationEnabled) {
+    private void handleNotificationScheduling(Application updatedApp,
+                                              LocalDateTime originalInterviewDate,
+                                              Boolean originalNotificationEnabled) {
 
         LocalDateTime newInterviewDate = updatedApp.getInterviewDate();
         Boolean newNotificationEnabled = updatedApp.getEmailNotificationsEnabled();
 
         // Check if interview date or notification settings changed
         boolean interviewDateChanged = (originalInterviewDate == null && newInterviewDate != null) ||
-                (originalInterviewDate != null && !originalInterviewDate.equals(newInterviewDate));
+                (originalInterviewDate != null && !originalInterviewDate.equals(newInterviewDate)) ||
+                (originalInterviewDate != null && newInterviewDate == null);
 
         boolean notificationSettingChanged = !Boolean.TRUE.equals(originalNotificationEnabled) &&
-                Boolean.TRUE.equals(newNotificationEnabled);
+                Boolean.TRUE.equals(newNotificationEnabled) ||
+                Boolean.TRUE.equals(originalNotificationEnabled) &&
+                        !Boolean.TRUE.equals(newNotificationEnabled);
 
         if (interviewDateChanged || notificationSettingChanged) {
-            // Cancel existing reminder first
-            emailReminderService.cancelInterviewReminder(updatedApp.getId());
+            // Cancel existing notifications first
+            notificationService.cancelNotificationsForApplication(updatedApp.getId());
 
-            // Schedule new reminder if conditions are met
+            // Schedule new notification if conditions are met
             if (newInterviewDate != null && Boolean.TRUE.equals(newNotificationEnabled)) {
-                emailReminderService.scheduleInterviewReminder(updatedApp, updatedApp.getUser().getEmail());
+                notificationService.scheduleInterviewReminder(updatedApp, updatedApp.getUser());
                 log.info("Interview reminder rescheduled for application {}", updatedApp.getId());
+            } else {
+                log.info("Interview reminder cancelled for application {} - conditions not met", updatedApp.getId());
             }
-        } else if (Boolean.FALSE.equals(newNotificationEnabled)) {
-            // If notifications are disabled, cancel any existing reminders
-            emailReminderService.cancelInterviewReminder(updatedApp.getId());
-            log.info("Interview reminder cancelled for application {} - notifications disabled", updatedApp.getId());
         }
     }
 

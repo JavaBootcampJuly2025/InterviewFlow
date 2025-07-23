@@ -5,26 +5,8 @@ spring:
     active: @spring.profiles.active@
   datasource:
     driver-class-name: org.postgresql.Driver
-    url: jdbc:postgresql://localhost:5433/interview_flow_db
-    username: postgres
-    password: postgres
   liquibase:
     change-log: classpath:db/changelog/db.changelog-master.yml
-
-  # Email Configuration
-  mail:
-    host: smtp.gmail.com
-    port: 465
-    username: ${MAIL_USERNAME:your-email@gmail.com}
-    password: ${MAIL_PASSWORD:your-app-password}
-    properties:
-      mail:
-        smtp:
-          auth: true
-          starttls:
-            enable: true
-          ssl:
-            enable: true
 
   # Enable scheduling
   task:

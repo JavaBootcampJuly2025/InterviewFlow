@@ -23,3 +23,9 @@ spring:
             enable: true
           ssl:
             enable: true
+
+# Application-specific configuration for Development
+app:
+  notification:
+    batch-size: 50
+    enabled: true
