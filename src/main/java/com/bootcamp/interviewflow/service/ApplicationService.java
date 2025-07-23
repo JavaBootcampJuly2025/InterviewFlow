@@ -5,6 +5,7 @@ import com.bootcamp.interviewflow.dto.ApplicationResponse;
 import com.bootcamp.interviewflow.dto.CreateApplicationRequest;
 import com.bootcamp.interviewflow.dto.UpdateApplicationRequest;
 import com.bootcamp.interviewflow.model.ApplicationStatus;
+import org.springframework.data.domain.Sort;
 
 import java.util.List;
 
@@ -19,5 +20,8 @@ public interface ApplicationService {
 
     ApplicationResponse partialUpdate(Long id, Long userId, UpdateApplicationRequest dto);
 
-    List<ApplicationListDTO> findAllByUserIdAndStatus(Long userId, ApplicationStatus status);
+    List<ApplicationListDTO> findAllByUserIdAndStatus(Long userId, ApplicationStatus status, Sort sort);
+
+    List<ApplicationListDTO> findAllByUserIdSorted(Long userId, Sort sort);
+
 }

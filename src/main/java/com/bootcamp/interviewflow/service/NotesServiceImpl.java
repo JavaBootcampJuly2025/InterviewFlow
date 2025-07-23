@@ -4,6 +4,7 @@ import com.bootcamp.interviewflow.dto.NoteRequest;
 import com.bootcamp.interviewflow.dto.NoteResponse;
 import com.bootcamp.interviewflow.exception.ApplicationNotFoundException;
 import com.bootcamp.interviewflow.exception.NoteNotFoundException;
+import com.bootcamp.interviewflow.model.Application;
 import com.bootcamp.interviewflow.model.Note;
 import com.bootcamp.interviewflow.repository.ApplicationRepository;
 import com.bootcamp.interviewflow.repository.NoteRepository;
@@ -25,36 +26,37 @@ public class NotesServiceImpl implements NotesService {
 
     @Override
     public NoteResponse create(NoteRequest request) {
-        var application = applicationRepository.findById(request.applicationId()).orElseThrow(
+        Application application = applicationRepository.findById(request.applicationId()).orElseThrow(
                 () -> new ApplicationNotFoundException("Application with id " + request.applicationId() + " not found"));
-        var savedNote = noteRepository.save(new Note(application, request.content()));
-        return new NoteResponse(savedNote.getId(),
-                application.getId(),
-                savedNote.getContent(),
-                savedNote.getCreatedAt(),
-                savedNote.getUpdatedAt());
+
+        String tagsString = request.tags() != null && !request.tags().isEmpty()
+                ? String.join(",", request.tags())
+                : null;
+
+        Note noteToSave = Note.builder()
+                .application(application)
+                .title(request.title())
+                .content(request.content())
+                .tags(tagsString)
+                .build();
+
+        Note savedNote = noteRepository.save(noteToSave);
+
+        return NoteResponse.from(savedNote);
     }
 
     @Override
     public NoteResponse getById(Long id) {
-        var note = noteRepository.findById(id).orElseThrow(() -> new NoteNotFoundException(id));
-        return new NoteResponse(note.getId(),
-                note.getApplication().getId(),
-                note.getContent(),
-                note.getCreatedAt(),
-                note.getUpdatedAt());
+        Note note = noteRepository.findById(id).orElseThrow(() -> new NoteNotFoundException(id));
+        return NoteResponse.from(note);
     }
 
     @Override
     public List<NoteResponse> getAllByApplicationId(Long applicationId) {
         List<Note> notes = noteRepository.findAllByApplication_Id(applicationId);
-        return notes.stream()
-                .map(note -> new NoteResponse(
-                        note.getId(),
-                        note.getApplication().getId(),
-                        note.getContent(),
-                        note.getCreatedAt(),
-                        note.getUpdatedAt()))
+        return notes
+                .stream()
+                .map(NoteResponse::from)
                 .toList();
     }
 
