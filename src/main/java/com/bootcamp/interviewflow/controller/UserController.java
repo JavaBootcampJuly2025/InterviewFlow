@@ -3,19 +3,27 @@ package com.bootcamp.interviewflow.controller;
 import com.bootcamp.interviewflow.dto.ApiResponse;
 import com.bootcamp.interviewflow.dto.LoginRequest;
 import com.bootcamp.interviewflow.dto.RegisterRequest;
+import com.bootcamp.interviewflow.dto.UserRequest;
 import com.bootcamp.interviewflow.dto.UserResponse;
+import com.bootcamp.interviewflow.security.UserPrincipal;
 import com.bootcamp.interviewflow.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -64,7 +72,7 @@ public class UserController {
         return ResponseEntity.ok(new ApiResponse(true, "Login successful", userResponse));
     }
 
-    @Operation(summary = "User dashboard")
+    @Operation(summary = "User dashboard", security = @SecurityRequirement(name = "bearerAuth"))
     @ApiResponses(value = {
             @io.swagger.v3.oas.annotations.responses.ApiResponse(
                     responseCode = "200", description = "Dashboard",
@@ -74,13 +82,51 @@ public class UserController {
                     content = @Content(schema = @Schema(implementation = ApiResponse.class)))
     })
     @GetMapping("/dashboard")
-    public ResponseEntity<ApiResponse> dashboard() {
-        // This endpoint requires Authorization header: Basic base64(email:password)
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        String currentUserEmail = authentication.getName();
+    public ResponseEntity<ApiResponse> dashboard(HttpServletRequest request) {
+        // Get user information from JWT token (set by JwtAuthenticationFilter)
+        String currentUserEmail = (String) request.getAttribute("email");
 
         return ResponseEntity.ok(new ApiResponse(true,
                 "Welcome to dashboard, " + currentUserEmail,
                 null));
+    }
+
+
+    @Operation(summary = "Get current user profile")
+    @ApiResponses(value = {
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "User profile fetched",
+                    content = @Content(schema = @Schema(implementation = UserResponse.class))),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "User not found")
+    })
+    @GetMapping("/users/me")
+    public ResponseEntity<UserResponse> getCurrentUser(@AuthenticationPrincipal UserPrincipal principal) {
+        UserResponse response = userService.getCurrentUserProfile(principal.getId());
+        return ResponseEntity.ok(response);
+    }
+
+    @Operation(summary = "Update current user profile")
+    @ApiResponses(value = {
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "User updated successfully",
+                    content = @Content(schema = @Schema(implementation = UserResponse.class))),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "Invalid data"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "User not found")
+    })
+    @PatchMapping("/users/me")
+    public ResponseEntity<UserResponse> updateCurrentUser(
+            @Valid @RequestBody UserRequest request,
+            @AuthenticationPrincipal UserPrincipal principal) {
+        UserResponse response = userService.updateCurrentUserProfile(principal.getId(), request);
+        return ResponseEntity.ok(response);
+    }
+
+    @Operation(summary = "Delete current user account")
+    @ApiResponses(value = {
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "204", description = "User deleted successfully"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "User not found")
+    })
+    @DeleteMapping("/users/me")
+    public ResponseEntity<Void> deleteCurrentUser(@AuthenticationPrincipal UserPrincipal principal) {
+        userService.deleteCurrentUser(principal.getId());
+        return ResponseEntity.noContent().build();
     }
 }

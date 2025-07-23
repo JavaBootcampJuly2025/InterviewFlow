@@ -1,8 +1,6 @@
 package com.bootcamp.interviewflow.service;
 
-import com.bootcamp.interviewflow.dto.FileMetadataResponse;
-import com.bootcamp.interviewflow.dto.FileResponse;
-import com.bootcamp.interviewflow.model.FileMetadata;
+import com.bootcamp.interviewflow.dto.ResumeResponse;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
@@ -18,11 +16,10 @@ public interface ObjectStorageService {
      * Uploads a file for a specific user.
      *
      * @param userId the ID of the user uploading the file
-     * @param file the file to be uploaded
-     * @return a {@link FileResponse} containing metadata about the uploaded file
-     * @throws Exception if the upload fails
+     * @param file   the file to be uploaded
+     * @return a {@link ResumeResponse} containing metadata about the uploaded file
      */
-    FileResponse upload(Long userId, MultipartFile file) throws Exception;
+    ResumeResponse upload(Long userId, MultipartFile file);
 
     /**
      * Downloads a file for a specific user.
@@ -30,24 +27,22 @@ public interface ObjectStorageService {
      * @param fileId the UUID of the file to download
      * @param userId the ID of the user requesting the file
      * @return the file content as a byte array
-     * @throws Exception if the file cannot be found or access is denied
      */
-    byte[] download(UUID fileId, Long userId) throws Exception;
+    byte[] download(UUID fileId, Long userId);
 
     /**
      * Deletes a file for a specific user.
      *
      * @param fileId the UUID of the file to delete
      * @param userId the ID of the user requesting the deletion
-     * @throws Exception if the file cannot be deleted or access is denied
      */
-    void delete(UUID fileId, Long userId) throws Exception;
+    void delete(UUID fileId, Long userId);
 
     /**
      * Retrieves all metadata for files uploaded by a specific user.
      *
      * @param userId the ID of the user
-     * @return a list of {@link FileMetadataResponse} objects
+     * @return a list of {@link ResumeResponse} objects
      */
-    List<FileMetadataResponse> findAllByUserId(Long userId);
+    List<ResumeResponse> findAllByUserId(Long userId);
 }

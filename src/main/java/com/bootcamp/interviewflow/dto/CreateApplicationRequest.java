@@ -30,9 +30,16 @@ public class CreateApplicationRequest {
     private String position;
 
     @Schema(description = "Timestamp when you actually applied for the job (optional - defaults to creation time)",
-            example = "2025-07-16T10:30:00")
+            example = "2025-07-16 10:30:00")
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")
-    LocalDateTime applyDate;
+    private LocalDateTime applyDate;
+
+    @Schema(description = "Timestamp when the interview is set for the application", example = "2025-07-16 10:30:00")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")
+    private LocalDateTime interviewDate;
+
+    @Schema(description = "Enable reminder notifications for the interview?", example = "TRUE")
+    private Boolean emailNotificationsEnabled;
 
     @NotBlank(message = "Status is required")
     @Pattern(

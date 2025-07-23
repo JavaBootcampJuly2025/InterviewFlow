@@ -2,16 +2,21 @@ package com.bootcamp.interviewflow.service;
 
 import com.bootcamp.interviewflow.dto.LoginRequest;
 import com.bootcamp.interviewflow.dto.RegisterRequest;
+import com.bootcamp.interviewflow.dto.UserRequest;
 import com.bootcamp.interviewflow.dto.UserResponse;
 import com.bootcamp.interviewflow.exception.EmailAlreadyExistsException;
 import com.bootcamp.interviewflow.model.User;
+import com.bootcamp.interviewflow.repository.ApplicationRepository;
 import com.bootcamp.interviewflow.repository.UserRepository;
+import jakarta.persistence.EntityNotFoundException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import com.bootcamp.interviewflow.security.JwtUtil;
 
 @Service
 public class UserServiceImpl implements UserService {
@@ -20,10 +25,12 @@ public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+    private final JwtUtil jwtUtil;
 
-    public UserServiceImpl(UserRepository userRepository, PasswordEncoder passwordEncoder) {
+    public UserServiceImpl(UserRepository userRepository, PasswordEncoder passwordEncoder, JwtUtil jwtUtil) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
+        this.jwtUtil = jwtUtil;
     }
 
     @Override
@@ -58,8 +65,55 @@ public class UserServiceImpl implements UserService {
             throw new BadCredentialsException("Invalid email or password");
         }
 
-        logger.info("User logged in successfully with ID: {}", user.getId());
+        // Generate JWT token
+        String token = jwtUtil.generateToken(user.getEmail(), user.getId());
+
+        // Return response with token
+        return new UserResponse(
+                user.getId(),
+                user.getUsername(),
+                user.getEmail(),
+                token
+        );
+        //logger.info("User logged in successfully with ID: {}", user.getId());
+        //return convertToResponse(user);
+    }
+
+    @Override
+    public UserResponse getCurrentUserProfile(Long authenticatedUserId) {
+        logger.info("Fetching profile for userId: {}", authenticatedUserId);
+        User user = userRepository.findById(authenticatedUserId)
+                .orElseThrow(() -> new EntityNotFoundException("User not found with ID: " + authenticatedUserId));
         return convertToResponse(user);
+    }
+
+    @Override
+    @Transactional
+    public UserResponse updateCurrentUserProfile(Long authenticatedUserId, UserRequest request) {
+        logger.info("Updating profile for userId: {}", authenticatedUserId);
+        User user = userRepository.findById(authenticatedUserId)
+                .orElseThrow(() -> new EntityNotFoundException("User not found with ID: " + authenticatedUserId));
+
+        if (!user.getEmail().equals(request.getEmail())
+                && userRepository.findByEmail(request.getEmail()).isPresent()) {
+            throw new EmailAlreadyExistsException("Email already in use: " + request.getEmail());
+        }
+
+        logger.debug("New username: {}, New email: {}", request.getUsername(), request.getEmail());
+        user.setUsername(request.getUsername());
+        user.setEmail(request.getEmail());
+
+        User updated = userRepository.save(user);
+        return convertToResponse(updated);
+    }
+
+    @Override
+    @Transactional
+    public void deleteCurrentUser(Long authenticatedUserId) {
+        logger.info("Deleting user with ID: {}", authenticatedUserId);
+        User user = userRepository.findById(authenticatedUserId)
+                .orElseThrow(() -> new EntityNotFoundException("User not found with ID: " + authenticatedUserId));
+        userRepository.delete(user);
     }
 
     private UserResponse convertToResponse(User user) {

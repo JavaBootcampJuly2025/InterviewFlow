@@ -1,12 +1,13 @@
-package com.bootcamp.interviewflow.service;
+package com.bootcamp.interviewflow.security;
 
 import com.bootcamp.interviewflow.model.User;
 import com.bootcamp.interviewflow.repository.UserRepository;
-import com.bootcamp.interviewflow.security.UserPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
+
+import java.util.Collections;
 
 @Service
 public class CustomUserDetailsService implements UserDetailsService {

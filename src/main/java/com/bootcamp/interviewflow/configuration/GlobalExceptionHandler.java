@@ -3,8 +3,12 @@ package com.bootcamp.interviewflow.configuration;
 import com.bootcamp.interviewflow.dto.ApiResponse;
 import com.bootcamp.interviewflow.exception.ApplicationNotFoundException;
 import com.bootcamp.interviewflow.exception.EmailAlreadyExistsException;
+import com.bootcamp.interviewflow.exception.FileNotFoundOrNoAccessException;
 import com.bootcamp.interviewflow.exception.NoteNotFoundException;
 import com.bootcamp.interviewflow.exception.UserNotFoundException;
+import com.bootcamp.interviewflow.model.ApplicationStatus;
+import jakarta.validation.ConstraintViolation;
+import jakarta.validation.ConstraintViolationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
@@ -15,9 +19,9 @@ import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
-import jakarta.validation.ConstraintViolation;
-import jakarta.validation.ConstraintViolationException;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -35,7 +39,7 @@ public class GlobalExceptionHandler {
             errors.put(fieldName, errorMessage);
         });
 
-        logger.warn("Validation failed: {}", errors);
+        logger.error("Validation failed: {}", errors);
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                 .body(new ApiResponse(false, "Validation failed", errors));
     }
@@ -49,7 +53,7 @@ public class GlobalExceptionHandler {
             errors.put(fieldName, errorMessage);
         });
 
-        logger.warn("Binding failed: {}", errors);
+        logger.error("Binding failed: {}", errors);
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                 .body(new ApiResponse(false, "Validation failed", errors));
     }
@@ -64,35 +68,35 @@ public class GlobalExceptionHandler {
             errors.put(fieldName, errorMessage);
         }
 
-        logger.warn("Constraint violation: {}", errors);
+        logger.error("Constraint violation: {}", errors);
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                 .body(new ApiResponse(false, "Validation failed", errors));
     }
 
     @ExceptionHandler(EmailAlreadyExistsException.class)
     public ResponseEntity<ApiResponse> handleEmailAlreadyExistsException(EmailAlreadyExistsException ex) {
-        logger.warn("Email already exists: {}", ex.getMessage());
+        logger.error("Email already exists: {}", ex.getMessage());
         return ResponseEntity.status(HttpStatus.CONFLICT)
                 .body(new ApiResponse(false, ex.getMessage()));
     }
 
     @ExceptionHandler(BadCredentialsException.class)
     public ResponseEntity<ApiResponse> handleBadCredentialsException(BadCredentialsException ex) {
-        logger.warn("Bad credentials: {}", ex.getMessage());
+        logger.error("Bad credentials: {}", ex.getMessage());
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
                 .body(new ApiResponse(false, "Invalid email or password"));
     }
 
     @ExceptionHandler(UserNotFoundException.class)
     public ResponseEntity<ApiResponse> handleUserNotFoundException(UserNotFoundException ex) {
-        logger.warn("User not found: {}", ex.getMessage());
+        logger.error("User not found: {}", ex.getMessage());
         return ResponseEntity.status(HttpStatus.NOT_FOUND)
                 .body(new ApiResponse(false, ex.getMessage()));
     }
 
     @ExceptionHandler(NoteNotFoundException.class)
     public ResponseEntity<ApiResponse> handleNoteNotFoundException(NoteNotFoundException ex) {
-        logger.warn("Note not found: {}", ex.getMessage());
+        logger.error("Note not found: {}", ex.getMessage());
         return ResponseEntity.status(HttpStatus.NOT_FOUND)
                 .body(new ApiResponse(false, ex.getMessage()));
     }
@@ -106,8 +110,34 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(ApplicationNotFoundException.class)
     public ResponseEntity<ApiResponse> handleApplicationNotFoundException(ApplicationNotFoundException ex) {
-        logger.warn("Application not found: {}", ex.getMessage());
+        logger.error("Application not found: {}", ex.getMessage());
         return ResponseEntity.status(HttpStatus.NOT_FOUND)
                 .body(new ApiResponse(false, ex.getMessage()));
+    }
+
+    @ExceptionHandler(FileNotFoundOrNoAccessException.class)
+    public ResponseEntity<?> handleFileNotFound(FileNotFoundOrNoAccessException ex) {
+        return ResponseEntity.status(404).body(ex.getMessage());
+    }
+
+
+    @ExceptionHandler(MethodArgumentTypeMismatchException.class)
+    public ResponseEntity<Object> handleEnumConversionError(MethodArgumentTypeMismatchException ex) {
+        if (ex.getRequiredType() == ApplicationStatus.class) {
+            String message = "Invalid status value: " + ex.getValue() + ". Allowed values: " +
+                    Arrays.toString(ApplicationStatus.values());
+            return ResponseEntity.badRequest().body(Map.of("error", message));
+        }
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Unexpected error");
+    }
+
+    @ExceptionHandler(IllegalArgumentException.class)
+    public ResponseEntity<Object> handleIllegalArgumentException(IllegalArgumentException ex) {
+        Map<String, Object> response = new HashMap<>();
+        response.put("success", false);
+        response.put("message", ex.getMessage() != null ? ex.getMessage() : "Invalid argument");
+        response.put("data", null);
+
+        return ResponseEntity.badRequest().body(response);
     }
 }

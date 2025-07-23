@@ -1,21 +1,11 @@
 spring:
   docker:
     compose:
-      enabled: true
-      file: docker-compose-prod.yml
-      lifecycle-management: start_and_stop
+      enabled: false
   datasource:
-    url: jdbc:postgresql://${POSTGRES_HOST}:${POSTGRES_PORT}/${POSTGRES_DB}
-    username: ${POSTGRES_USER}
-    password: ${POSTGRES_PASSWORD}
-## TODO remove docker compose and change datasource after onboarding AWS Aurora
-#  docker:
-#    compose:
-#      enabled: false
-#  datasource:
-#    url: ${DATASOURCE_URL}
-#    username: ${DATASOURCE_USERNAME}
-#    password: ${DATASOURCE_PASSWORD}
+    url: jdbc:postgresql://${DATASOURCE_URL}:${DATASOURCE_PORT}/${DATASOURCE_DB}
+    username: ${DATASOURCE_USERNAME}
+    password: ${DATASOURCE_PASSWORD}
 aws:
   region: ${AWS_REGION}
   accessKeyId: ${AWS_ACCESS_KEY_ID}
