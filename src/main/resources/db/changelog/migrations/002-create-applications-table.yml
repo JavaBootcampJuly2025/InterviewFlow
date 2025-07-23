@@ -35,6 +35,11 @@ databaseChangeLog:
                   name: position
                   type: VARCHAR(255)
               - column:
+                  name: location
+                  type: VARCHAR(255)
+                  constraints:
+                    nullable: true
+              - column:
                   name: created_at
                   type: TIMESTAMP
                   defaultValueComputed: CURRENT_TIMESTAMP
