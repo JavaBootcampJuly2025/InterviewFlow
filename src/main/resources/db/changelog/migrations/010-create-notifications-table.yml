@@ -1,0 +1,63 @@
+databaseChangeLog:
+  - changeSet:
+      id: 010-create-notifications-table
+      author: you@example.com
+      changes:
+        - createTable:
+            tableName: notifications
+            columns:
+              - column:
+                  name: id
+                  type: BIGINT
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: application_id
+                  type: BIGINT
+                  constraints:
+                    nullable: false
+              - column:
+                  name: recipient_email
+                  type: VARCHAR(255)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: subject
+                  type: VARCHAR(500)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: message
+                  type: VARCHAR(2000)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: scheduled_time
+                  type: TIMESTAMP
+                  constraints:
+                    nullable: false
+              - column:
+                  name: status
+                  type: VARCHAR(20)
+                  defaultValue: 'PENDING'
+                  constraints:
+                    nullable: false
+        - addForeignKeyConstraint:
+            baseTableName: notifications
+            baseColumnNames: application_id
+            referencedTableName: applications
+            referencedColumnNames: id
+            constraintName: fk_notifications_applications
+        - createIndex:
+            indexName: idx_notifications_status_time
+            tableName: notifications
+            columns:
+              - column:
+                  name: status
+              - column:
+                  name: scheduled_time
+      rollback:
+        - dropTable:
+            tableName: notifications
