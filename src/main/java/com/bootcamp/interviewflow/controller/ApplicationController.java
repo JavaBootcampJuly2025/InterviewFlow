@@ -1,6 +1,6 @@
 package com.bootcamp.interviewflow.controller;
 
-import com.bootcamp.interviewflow.dto.ApplicationListDTO;
+import com.bootcamp.interviewflow.dto.ApplicationListResponse;
 import com.bootcamp.interviewflow.dto.ApplicationResponse;
 import com.bootcamp.interviewflow.dto.CreateApplicationRequest;
 import com.bootcamp.interviewflow.dto.UpdateApplicationRequest;
@@ -64,41 +64,41 @@ public class ApplicationController {
     @Operation(summary = "Get all job applications")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "List of applications",
-                    content = @Content(array = @ArraySchema(schema = @Schema(implementation = ApplicationListDTO.class)))),
+                    content = @Content(array = @ArraySchema(schema = @Schema(implementation = ApplicationListResponse.class)))),
             @ApiResponse(responseCode = "401", description = "Unauthorized",
                     content = @Content(schema = @Schema(implementation = com.bootcamp.interviewflow.dto.ApiResponse.class))),
     })
     @GetMapping("/all")
-    public ResponseEntity<List<ApplicationListDTO>> findAll() {
-        List<ApplicationListDTO> all = applicationService.findAll();
+    public ResponseEntity<List<ApplicationListResponse>> findAll() {
+        List<ApplicationListResponse> all = applicationService.findAll();
         return ResponseEntity.ok(all);
     }
 
     @Operation(summary = "Get all applications submitted by a specific user")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "User's job applications",
-                    content = @Content(array = @ArraySchema(schema = @Schema(implementation = ApplicationListDTO.class)))),
+                    content = @Content(array = @ArraySchema(schema = @Schema(implementation = ApplicationListResponse.class)))),
             @ApiResponse(responseCode = "401", description = "Unauthorized",
                     content = @Content(schema = @Schema(implementation = com.bootcamp.interviewflow.dto.ApiResponse.class))),
             @ApiResponse(responseCode = "404", description = "User not found",
                     content = @Content(schema = @Schema(implementation = com.bootcamp.interviewflow.dto.ApiResponse.class)))
     })
     @GetMapping
-    public ResponseEntity<List<ApplicationListDTO>> getUserApplications(@AuthenticationPrincipal UserPrincipal userPrincipal) {
+    public ResponseEntity<List<ApplicationListResponse>> getUserApplications(@AuthenticationPrincipal UserPrincipal userPrincipal) {
         return ResponseEntity.ok(applicationService.findAllByUserId(userPrincipal.getId()));
     }
 
     @Operation(summary = "Get all applications for current user filtered by status")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Filtered applications",
-                    content = @Content(array = @ArraySchema(schema = @Schema(implementation = ApplicationListDTO.class)))),
+                    content = @Content(array = @ArraySchema(schema = @Schema(implementation = ApplicationListResponse.class)))),
             @ApiResponse(responseCode = "400", description = "Invalid status",
                     content = @Content(schema = @Schema(implementation = com.bootcamp.interviewflow.dto.ApiResponse.class))),
             @ApiResponse(responseCode = "401", description = "Unauthorized",
                     content = @Content(schema = @Schema(implementation = com.bootcamp.interviewflow.dto.ApiResponse.class)))
     })
     @GetMapping("/filter")
-    public ResponseEntity<List<ApplicationListDTO>> getUserApplicationsByStatus(
+    public ResponseEntity<List<ApplicationListResponse>> getUserApplicationsByStatus(
             @AuthenticationPrincipal UserPrincipal userPrincipal,
             @RequestParam(value = "status", required = false) ApplicationStatus status,
             @RequestParam(value = "sortBy", defaultValue = "createdAt") String sortBy,
@@ -114,7 +114,7 @@ public class ApplicationController {
             throw new IllegalArgumentException("Invalid order parameter: " + order + ". Allowed values: asc, desc");
         }
 
-        List<ApplicationListDTO> result;
+        List<ApplicationListResponse> result;
         Sort sort = Sort.by(direction, sortBy);
         if (status != null) {
             result = applicationService.findAllByUserIdAndStatus(userPrincipal.getId(), status, sort);

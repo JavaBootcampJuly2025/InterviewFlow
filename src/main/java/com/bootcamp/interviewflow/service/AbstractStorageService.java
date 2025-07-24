@@ -15,7 +15,6 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 public abstract class AbstractStorageService implements ObjectStorageService {
     protected static final String RESUMES_PATH_MASK = "resumes/user_%d/%s%s";
@@ -23,7 +22,7 @@ public abstract class AbstractStorageService implements ObjectStorageService {
     protected final ResumeRepository resumeRepository;
     protected final UserRepository userRepository;
 
-    public AbstractStorageService(ResumeRepository resumeRepository, UserRepository userRepository) {
+    protected AbstractStorageService(ResumeRepository resumeRepository, UserRepository userRepository) {
         this.resumeRepository = resumeRepository;
         this.userRepository = userRepository;
     }
@@ -88,7 +87,7 @@ public abstract class AbstractStorageService implements ObjectStorageService {
         return resumeRepository.findAllByUser_Id(userId).stream()
                 .map(r -> new ResumeResponse(r.getId(), r.getFileName(), r.getSize()))
                 .sorted(Comparator.comparing(ResumeResponse::fileId))
-                .collect(Collectors.toList());
+                .toList();
     }
 
     private Resume findResume(UUID fileId, Long userId) {

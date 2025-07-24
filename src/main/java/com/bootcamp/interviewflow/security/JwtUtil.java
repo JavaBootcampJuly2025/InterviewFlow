@@ -54,8 +54,7 @@ public class JwtUtil {
     }
 
     public Boolean isTokenExpired(String token) {
-        final Date expiration = getExpirationDateFromToken(token);
-        return expiration.before(new Date());
+        return getExpirationDateFromToken(token).before(new Date());
     }
 
     public Boolean validateToken(String token, String email) {
@@ -63,7 +62,7 @@ public class JwtUtil {
         return (tokenEmail.equals(email) && !isTokenExpired(token));
     }
 
-    public Boolean validateToken(String token) {
+    public boolean validateToken(String token) {
         try {
             Jwts.parserBuilder()
                     .setSigningKey(getSigningKey())

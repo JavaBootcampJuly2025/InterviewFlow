@@ -7,8 +7,8 @@ import jakarta.servlet.http.HttpServletResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
@@ -19,7 +19,7 @@ import java.util.Collections;
 @Component
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
-    private static final Logger logger = LoggerFactory.getLogger(JwtAuthenticationFilter.class);
+    private static final Logger log = LoggerFactory.getLogger(JwtAuthenticationFilter.class);
     private final JwtUtil jwtUtil;
 
     public JwtAuthenticationFilter(JwtUtil jwtUtil) {
@@ -32,17 +32,16 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         String path = request.getRequestURI();
         String method = request.getMethod();
 
-        logger.info("JWT Filter - Processing request: {} {}", method, path);
+        log.info("JWT Filter - Processing request: {} {}", method, path);
 
-        // Get JWT token from Authorization header
         String authHeader = request.getHeader("Authorization");
         String token = null;
 
         if (authHeader != null && authHeader.startsWith("Bearer ")) {
             token = authHeader.substring(7);
-            logger.info("JWT Filter - Token found in header");
+            log.info("JWT Filter - Token found in header");
         } else {
-            logger.info("JWT Filter - No token found in Authorization header");
+            log.info("JWT Filter - No token found in Authorization header");
         }
 
         if (token != null && SecurityContextHolder.getContext().getAuthentication() == null) {
@@ -52,13 +51,11 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                     String email = jwtUtil.getEmailFromToken(token);
                     Long userId = jwtUtil.getUserIdFromToken(token);
 
-                    logger.info("JWT Filter - Valid token for user: {} (ID: {})", email, userId);
+                    log.info("JWT Filter - Valid token for user: {} (ID: {})", email, userId);
 
-                    // Add user info to request attributes for use in controllers
                     request.setAttribute("email", email);
                     request.setAttribute("userId", userId);
 
-                    // Create UserPrincipal object
                     UserPrincipal userPrincipal = new UserPrincipal(
                             userId,
                             email,
@@ -74,19 +71,17 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                     );
                     authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
 
-                    // Set authentication in Spring Security context
                     SecurityContextHolder.getContext().setAuthentication(authToken);
 
-                    logger.info("JWT Filter - Authentication set in security context for user: {}", email);
+                    log.info("JWT Filter - Authentication set in security context for user: {}", email);
                 } else {
-                    logger.warn("JWT Filter - Invalid token for endpoint: {}", path);
+                    log.warn("JWT Filter - Invalid token for endpoint: {}", path);
                 }
             } catch (Exception e) {
-                logger.error("JWT Filter - Error validating token", e);
+                log.error("JWT Filter - Error validating token", e);
             }
         }
 
-        // Continue with the filter chain
         filterChain.doFilter(request, response);
     }
 }
