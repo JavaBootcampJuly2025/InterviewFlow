@@ -1,5 +1,6 @@
 package com.bootcamp.interviewflow.service;
 
+import com.bootcamp.interviewflow.exception.FileInteractionException;
 import com.bootcamp.interviewflow.repository.ResumeRepository;
 import com.bootcamp.interviewflow.repository.UserRepository;
 import io.minio.GetObjectArgs;
@@ -16,6 +17,7 @@ import java.io.InputStream;
 @Profile("dev")
 @Service
 public class MinioStorageService extends AbstractStorageService {
+    protected static final int PART_SIZE = 5 * 1024 * 1024; // Minimum allowed part size according to Minio Specs
 
     private final MinioClient minioClient;
     private final String bucketName;
@@ -36,12 +38,12 @@ public class MinioStorageService extends AbstractStorageService {
                     PutObjectArgs.builder()
                             .bucket(bucketName)
                             .object(objectKey)
-                            .stream(file.getInputStream(), -1, file.getSize())
+                            .stream(file.getInputStream(), -1, PART_SIZE)
                             .contentType(file.getContentType())
                             .build()
             );
         } catch (Exception e) {
-            throw new RuntimeException(FAILED_TO_UPLOAD_FILE, e);
+            throw new FileInteractionException(FAILED_TO_UPLOAD_FILE);
         }
     }
 
@@ -51,7 +53,7 @@ public class MinioStorageService extends AbstractStorageService {
                 GetObjectArgs.builder().bucket(bucketName).object(objectKey).build())) {
             return stream.readAllBytes();
         } catch (Exception e) {
-            throw new RuntimeException(FAILED_TO_DOWNLOAD_FILE, e);
+            throw new FileInteractionException(FAILED_TO_DOWNLOAD_FILE);
         }
     }
 
@@ -62,7 +64,7 @@ public class MinioStorageService extends AbstractStorageService {
                     RemoveObjectArgs.builder().bucket(bucketName).object(objectKey).build()
             );
         } catch (Exception e) {
-            throw new RuntimeException(FAILED_TO_DELETE_FILE, e);
+            throw new FileInteractionException(FAILED_TO_DELETE_FILE);
         }
     }
 }

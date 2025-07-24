@@ -43,7 +43,7 @@ public class ResumeController {
             @ApiResponse(responseCode = "400", description = "Invalid file or user"),
             @ApiResponse(responseCode = "401", description = "Unauthorized")
     })
-    @PostMapping(value = "/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<ResumeResponse> uploadResume(
             @AuthenticationPrincipal UserPrincipal userPrincipal,
             @RequestParam("file") MultipartFile file) {

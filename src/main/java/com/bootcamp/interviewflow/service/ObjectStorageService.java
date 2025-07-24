@@ -14,7 +14,7 @@ public interface ObjectStorageService {
 
     String FAILED_TO_DELETE_FILE = "Failed to delete file";
     String FAILED_TO_DOWNLOAD_FILE = "Failed to download file";
-    String FAILED_TO_READ_FILE = "Failed to read file: ";
+    String FAILED_TO_READ_FILE = "Failed to read file";
     String FAILED_TO_UPLOAD_FILE = "Failed to upload file";
     String FILE_IS_REQUIRED = "File is required";
     String MAX_FILE_SIZE_5_MB_IS_ALLOWED = "Max file size 5MB is allowed";

@@ -8,6 +8,7 @@ import com.bootcamp.interviewflow.model.User;
 import com.bootcamp.interviewflow.repository.ResumeRepository;
 import com.bootcamp.interviewflow.repository.UserRepository;
 import org.apache.commons.io.FilenameUtils;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.Comparator;
@@ -17,6 +18,7 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 public abstract class AbstractStorageService implements ObjectStorageService {
+    protected static final String RESUMES_PATH_MASK = "resumes/user_%d/%s%s";
 
     protected final ResumeRepository resumeRepository;
     protected final UserRepository userRepository;
@@ -31,7 +33,12 @@ public abstract class AbstractStorageService implements ObjectStorageService {
     protected abstract void deleteFile(String objectKey);
 
     protected String buildObjectKey(Long userId, UUID fileId, String extension) {
-        return "resumes/user_" + userId + "/" + fileId + (extension.isBlank() ? "" : "." + extension);
+        return String.format(RESUMES_PATH_MASK, userId, fileId.toString(), getDotExtension(extension));
+    }
+
+    @NotNull
+    private static String getDotExtension(String extension) {
+        return extension.isBlank() ? "" : "." + extension;
     }
 
     @Override
