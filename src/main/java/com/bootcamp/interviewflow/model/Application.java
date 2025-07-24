@@ -48,6 +48,9 @@ public class Application {
     @Column(length = 255)
     private String position;
 
+    @Column(length = 255)
+    private String location;
+
     @Column(name = "apply_date", nullable = false)
     private LocalDateTime applyDate;
 
