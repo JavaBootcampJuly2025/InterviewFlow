@@ -11,11 +11,4 @@ public interface NotificationService {
 
     void cancelNotificationsForApplication(Long applicationId);
 
-    record NotificationStats(
-            long pendingCount,
-            long sentCount,
-            long failedCount,
-            long cancelledCount
-    ) {}
-
 }

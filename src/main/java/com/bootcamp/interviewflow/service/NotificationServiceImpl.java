@@ -53,14 +53,12 @@ public class NotificationServiceImpl implements NotificationService {
             return;
         }
 
-        // Check if notification already exists for this application
         if (notificationRepository.existsByApplicationIdAndStatus(application.getId(), NotificationStatus.PENDING)) {
             log.debug("Notification already exists for application {}", application.getId());
-            // Cancel existing and create new one
+
             cancelNotificationsForApplication(application.getId());
         }
 
-        // Create new notification
         Notification notification = new Notification(
                 application.getId(),
                 user.getEmail(),
@@ -90,7 +88,6 @@ public class NotificationServiceImpl implements NotificationService {
 
         int processedCount = 0;
 
-        // Process in batches to handle large volumes
         Pageable pageable = PageRequest.of(0, batchSize);
         Page<Notification> dueNotifications;
 
@@ -106,7 +103,6 @@ public class NotificationServiceImpl implements NotificationService {
                 processedCount++;
             }
 
-            // Move to next batch
             pageable = pageable.next();
 
         } while (dueNotifications.hasNext());
@@ -118,7 +114,6 @@ public class NotificationServiceImpl implements NotificationService {
 
     private void processSingleNotification(Notification notification) {
         try {
-            // Fetch fresh application data to ensure it still exists
             Optional<Application> applicationOpt = applicationRepository.findById(notification.getApplicationId());
 
             if (applicationOpt.isEmpty()) {
@@ -131,7 +126,6 @@ public class NotificationServiceImpl implements NotificationService {
 
             Application application = applicationOpt.get();
 
-            // Double-check if notifications are still enabled
             if (!Boolean.TRUE.equals(application.getEmailNotificationsEnabled())) {
                 notification.setStatus(NotificationStatus.CANCELLED);
                 notificationRepository.save(notification);

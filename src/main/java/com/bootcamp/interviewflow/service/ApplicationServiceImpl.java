@@ -83,7 +83,6 @@ public class ApplicationServiceImpl implements ApplicationService {
     public void delete(Long id, Long userId) {
         Application application = findAndValidateOwnership(id, userId);
 
-        // Cancel any scheduled notifications before deleting
         notificationService.cancelNotificationsForApplication(application.getId());
 
         applicationRepository.delete(application);
@@ -95,14 +94,12 @@ public class ApplicationServiceImpl implements ApplicationService {
     public ApplicationResponse partialUpdate(Long id, Long userId, UpdateApplicationRequest dto) {
         Application application = findAndValidateOwnership(id, userId);
 
-        // Store original values to detect changes
         LocalDateTime originalInterviewDate = application.getInterviewDate();
         Boolean originalNotificationEnabled = application.getEmailNotificationsEnabled();
 
         Application updatedApp = applicationMapper.updateEntityFromDto(dto, application);
         Application savedApp = applicationRepository.save(updatedApp);
 
-        // Handle notification scheduling based on changes
         handleNotificationScheduling(savedApp, originalInterviewDate, originalNotificationEnabled);
 
         log.info("Application {} updated", savedApp.getId());
@@ -116,7 +113,6 @@ public class ApplicationServiceImpl implements ApplicationService {
         LocalDateTime newInterviewDate = updatedApp.getInterviewDate();
         Boolean newNotificationEnabled = updatedApp.getEmailNotificationsEnabled();
 
-        // Check if interview date or notification settings changed
         boolean interviewDateChanged = (originalInterviewDate == null && newInterviewDate != null) ||
                 (originalInterviewDate != null && !originalInterviewDate.equals(newInterviewDate)) ||
                 (originalInterviewDate != null && newInterviewDate == null);
@@ -127,10 +123,9 @@ public class ApplicationServiceImpl implements ApplicationService {
                         !Boolean.TRUE.equals(newNotificationEnabled);
 
         if (interviewDateChanged || notificationSettingChanged) {
-            // Cancel existing notifications first
+
             notificationService.cancelNotificationsForApplication(updatedApp.getId());
 
-            // Schedule new notification if conditions are met
             if (newInterviewDate != null && Boolean.TRUE.equals(newNotificationEnabled)) {
                 notificationService.scheduleInterviewReminder(updatedApp, updatedApp.getUser());
                 log.info("Interview reminder rescheduled for application {}", updatedApp.getId());
