@@ -198,15 +198,14 @@ class ValidationTest {
         assertFalse(violations.isEmpty(), "Blank password should fail validation");
     }
 
-    // Email validation tests
     @Test
-    @DisplayName("Debug Email Validation")
-    void debugEmailValidation() {
-        String email = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa@example.subdomain.withaveryverylongdomainnamethatkeepsgoingandgoingandstillfitsunderthe255characterlimitasrequiredbythestandard.com";
-
-        RegisterRequest request = new RegisterRequest("User123", email, "StrongPass123!");
+    @DisplayName("Valid email should pass validation")
+    void testValidEmail() {
+        RegisterRequest request = new RegisterRequest("John Doe", "valid@example.com", "StrongPass123!");
 
         Set<ConstraintViolation<RegisterRequest>> violations = validator.validate(request);
+
+        assertTrue(violations.isEmpty(), "Valid email should pass validation");
     }
 
     @Test

@@ -39,7 +39,6 @@ public class UserResponse {
         this.accessToken = accessToken;
     }
 
-    // Getters and setters
     public Long getId() {
         return id;
     }

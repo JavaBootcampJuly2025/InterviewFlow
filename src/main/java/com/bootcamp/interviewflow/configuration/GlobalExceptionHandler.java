@@ -29,11 +29,12 @@ import java.util.Map;
 public class GlobalExceptionHandler {
 
     private static final Logger logger = LoggerFactory.getLogger(GlobalExceptionHandler.class);
+    public static final String VALIDATION_FAILED = "Validation failed";
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ApiResponse> handleValidationExceptions(MethodArgumentNotValidException ex) {
         Map<String, String> errors = new HashMap<>();
-        ex.getBindingResult().getAllErrors().forEach((error) -> {
+        ex.getBindingResult().getAllErrors().forEach(error-> {
             String fieldName = ((FieldError) error).getField();
             String errorMessage = error.getDefaultMessage();
             errors.put(fieldName, errorMessage);
@@ -41,13 +42,13 @@ public class GlobalExceptionHandler {
 
         logger.error("Validation failed: {}", errors);
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                .body(new ApiResponse(false, "Validation failed", errors));
+                .body(new ApiResponse(false, VALIDATION_FAILED, errors));
     }
 
     @ExceptionHandler(BindException.class)
     public ResponseEntity<ApiResponse> handleBindExceptions(BindException ex) {
         Map<String, String> errors = new HashMap<>();
-        ex.getBindingResult().getAllErrors().forEach((error) -> {
+        ex.getBindingResult().getAllErrors().forEach(error -> {
             String fieldName = ((FieldError) error).getField();
             String errorMessage = error.getDefaultMessage();
             errors.put(fieldName, errorMessage);
@@ -55,7 +56,7 @@ public class GlobalExceptionHandler {
 
         logger.error("Binding failed: {}", errors);
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                .body(new ApiResponse(false, "Validation failed", errors));
+                .body(new ApiResponse(false, VALIDATION_FAILED, errors));
     }
 
     @ExceptionHandler(ConstraintViolationException.class)
@@ -70,7 +71,7 @@ public class GlobalExceptionHandler {
 
         logger.error("Constraint violation: {}", errors);
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                .body(new ApiResponse(false, "Validation failed", errors));
+                .body(new ApiResponse(false, VALIDATION_FAILED, errors));
     }
 
     @ExceptionHandler(EmailAlreadyExistsException.class)
@@ -116,7 +117,7 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(FileNotFoundOrNoAccessException.class)
-    public ResponseEntity<?> handleFileNotFound(FileNotFoundOrNoAccessException ex) {
+    public ResponseEntity<String> handleFileNotFound(FileNotFoundOrNoAccessException ex) {
         return ResponseEntity.status(404).body(ex.getMessage());
     }
 

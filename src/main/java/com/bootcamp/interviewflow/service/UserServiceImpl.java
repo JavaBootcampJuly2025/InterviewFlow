@@ -1,23 +1,17 @@
 package com.bootcamp.interviewflow.service;
 
-import com.bootcamp.interviewflow.dto.ChangePasswordRequest;
-import com.bootcamp.interviewflow.dto.LoginRequest;
-import com.bootcamp.interviewflow.dto.RegisterRequest;
-import com.bootcamp.interviewflow.dto.UserRequest;
-import com.bootcamp.interviewflow.dto.UserResponse;
+import com.bootcamp.interviewflow.dto.*;
 import com.bootcamp.interviewflow.exception.EmailAlreadyExistsException;
 import com.bootcamp.interviewflow.model.User;
-import com.bootcamp.interviewflow.repository.ApplicationRepository;
 import com.bootcamp.interviewflow.repository.UserRepository;
+import com.bootcamp.interviewflow.security.JwtUtil;
 import jakarta.persistence.EntityNotFoundException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import com.bootcamp.interviewflow.security.JwtUtil;
 
 @Service
 public class UserServiceImpl implements UserService {
@@ -43,7 +37,6 @@ public class UserServiceImpl implements UserService {
             throw new EmailAlreadyExistsException("Email already exists: " + registerRequest.getEmail());
         }
 
-        // Create new user
         User user = new User();
         user.setUsername(registerRequest.getUsername());
         user.setEmail(registerRequest.getEmail());
@@ -66,25 +59,20 @@ public class UserServiceImpl implements UserService {
             throw new BadCredentialsException("Invalid email or password");
         }
 
-        // Generate JWT token
         String token = jwtUtil.generateToken(user.getEmail(), user.getId());
 
-        // Return response with token
         return new UserResponse(
                 user.getId(),
                 user.getUsername(),
                 user.getEmail(),
                 token
         );
-        //logger.info("User logged in successfully with ID: {}", user.getId());
-        //return convertToResponse(user);
     }
 
     @Override
     public UserResponse getCurrentUserProfile(Long authenticatedUserId) {
         logger.info("Fetching profile for userId: {}", authenticatedUserId);
-        User user = userRepository.findById(authenticatedUserId)
-                .orElseThrow(() -> new EntityNotFoundException("User not found with ID: " + authenticatedUserId));
+        User user = findUserById(authenticatedUserId);
         return convertToResponse(user);
     }
 
@@ -92,8 +80,7 @@ public class UserServiceImpl implements UserService {
     @Transactional
     public UserResponse updateCurrentUserProfile(Long authenticatedUserId, UserRequest request) {
         logger.info("Updating profile for userId: {}", authenticatedUserId);
-        User user = userRepository.findById(authenticatedUserId)
-                .orElseThrow(() -> new EntityNotFoundException("User not found with ID: " + authenticatedUserId));
+        User user = findUserById(authenticatedUserId);
 
         if (!user.getEmail().equals(request.getEmail())
                 && userRepository.findByEmail(request.getEmail()).isPresent()) {
@@ -112,8 +99,7 @@ public class UserServiceImpl implements UserService {
     @Transactional
     public void deleteCurrentUser(Long authenticatedUserId) {
         logger.info("Deleting user with ID: {}", authenticatedUserId);
-        User user = userRepository.findById(authenticatedUserId)
-                .orElseThrow(() -> new EntityNotFoundException("User not found with ID: " + authenticatedUserId));
+        User user = findUserById(authenticatedUserId);
         userRepository.delete(user);
     }
 
@@ -121,8 +107,7 @@ public class UserServiceImpl implements UserService {
     @Transactional
     public void changePassword(Long authenticatedUserId, ChangePasswordRequest request) {
         logger.info("Changing password for userId: {}", authenticatedUserId);
-        User user = userRepository.findById(authenticatedUserId)
-                .orElseThrow(() -> new EntityNotFoundException("User not found with ID: " + authenticatedUserId));
+        User user = findUserById(authenticatedUserId);
 
         if (!passwordEncoder.matches(request.getCurrentPassword(), user.getPassword())) {
             throw new BadCredentialsException("Current password is incorrect");
@@ -140,5 +125,10 @@ public class UserServiceImpl implements UserService {
                 user.getEmail(),
                 user.getCreatedAt()
         );
+    }
+
+    private User findUserById(Long userId) {
+        return userRepository.findById(userId)
+                .orElseThrow(() -> new EntityNotFoundException("User not found with ID: " + userId));
     }
 }
