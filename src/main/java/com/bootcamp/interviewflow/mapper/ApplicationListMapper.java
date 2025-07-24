@@ -21,6 +21,7 @@ public class ApplicationListMapper {
                 application.getCreatedAt(),
                 application.getInterviewDate(),
                 application.getEmailNotificationsEnabled(),
+                application.getResume() != null ? application.getResume().getId().toString() : null,
                 application.getUpdatedAt()
         );
     }

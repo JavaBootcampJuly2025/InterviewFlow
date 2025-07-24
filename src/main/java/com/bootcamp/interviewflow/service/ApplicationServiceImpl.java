@@ -10,8 +10,10 @@ import com.bootcamp.interviewflow.mapper.ApplicationListMapper;
 import com.bootcamp.interviewflow.mapper.ApplicationMapper;
 import com.bootcamp.interviewflow.model.Application;
 import com.bootcamp.interviewflow.model.ApplicationStatus;
+import com.bootcamp.interviewflow.model.Resume;
 import com.bootcamp.interviewflow.model.User;
 import com.bootcamp.interviewflow.repository.ApplicationRepository;
+import com.bootcamp.interviewflow.repository.ResumeRepository;
 import com.bootcamp.interviewflow.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
@@ -22,6 +24,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -33,12 +36,25 @@ public class ApplicationServiceImpl implements ApplicationService {
     private final ApplicationListMapper applicationListMapper;
     private final ApplicationMapper applicationMapper;
     private final UserRepository userRepository;
+    private final ResumeRepository resumeRepository;
     private final NotificationService notificationService;
 
     @Override
     public ApplicationResponse create(CreateApplicationRequest dto, Long userId) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new UserNotFoundException("User with id " + userId + " not found"));
+
+        Resume resume = null;
+        if (dto.getResumeId() != null && !dto.getResumeId().trim().isEmpty()) {
+            try {
+                UUID resumeUuid = UUID.fromString(dto.getResumeId());
+                resume = resumeRepository.findByIdAndUserId(resumeUuid, userId)
+                        .orElseThrow(() -> new IllegalArgumentException("Resume not found or does not belong to user"));
+            } catch (IllegalArgumentException e) {
+                log.warn("Invalid resume ID provided: {}", dto.getResumeId());
+                throw new IllegalArgumentException("Invalid resume ID format");
+            }
+        }
 
         log.info("Creating application for user ID: {}", userId);
         Application app = Application.builder()
@@ -52,6 +68,7 @@ public class ApplicationServiceImpl implements ApplicationService {
                 .emailNotificationsEnabled(dto.getEmailNotificationsEnabled() != null &&
                         dto.getEmailNotificationsEnabled())
                 .user(user)
+                .resume(resume)
                 .build();
 
         Application savedApp = applicationRepository.save(app);

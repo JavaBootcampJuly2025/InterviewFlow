@@ -35,4 +35,6 @@ public class UpdateApplicationRequest {
     private LocalDateTime interviewDate;
 
     private Boolean emailNotificationsEnabled;
+
+    private String resumeId;
 }

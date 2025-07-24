@@ -60,4 +60,7 @@ public class CreateApplicationRequest {
             }
     )
     private String status;
+
+    @Schema(description = "ID of the resume file to attach to this application")
+    private String resumeId;
 }
