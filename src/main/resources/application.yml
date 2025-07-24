@@ -5,14 +5,10 @@ spring:
     active: @spring.profiles.active@
   liquibase:
     change-log: classpath:db/changelog/db.changelog-master.yml
-
   task:
     scheduling:
       pool:
         size: 2
-
 interviewFlow:
   frontend:
     frontendDomain: ${FRONTEND_URL}
-    frontendPort: ${FRONTEND_PORT}
-
