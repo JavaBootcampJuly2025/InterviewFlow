@@ -3,10 +3,13 @@ package com.bootcamp.interviewflow.service;
 import com.bootcamp.interviewflow.exception.FileInteractionException;
 import com.bootcamp.interviewflow.repository.ResumeRepository;
 import com.bootcamp.interviewflow.repository.UserRepository;
+import io.minio.BucketExistsArgs;
 import io.minio.GetObjectArgs;
+import io.minio.MakeBucketArgs;
 import io.minio.MinioClient;
 import io.minio.PutObjectArgs;
 import io.minio.RemoveObjectArgs;
+import jakarta.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
@@ -29,6 +32,14 @@ public class MinioStorageService extends AbstractStorageService {
         super(resumeRepository, userRepository);
         this.minioClient = minioClient;
         this.bucketName = bucketName;
+    }
+
+    @PostConstruct
+    public void init() throws Exception {
+        boolean exists = minioClient.bucketExists(BucketExistsArgs.builder().bucket(bucket).build());
+        if (!exists) {
+            minioClient.makeBucket(MakeBucketArgs.builder().bucket(bucket).build());
+        }
     }
 
     @Override
