@@ -1,6 +1,6 @@
 package com.bootcamp.interviewflow.mapper;
 
-import com.bootcamp.interviewflow.dto.ApplicationListDTO;
+import com.bootcamp.interviewflow.dto.ApplicationListResponse;
 import com.bootcamp.interviewflow.model.Application;
 import com.bootcamp.interviewflow.model.ApplicationStatus;
 import com.bootcamp.interviewflow.model.User;
@@ -52,7 +52,7 @@ class ApplicationListMapperTest {
 
     @Test
     void toApplicationListDTO_ShouldMapApplicationToDTO() {
-        ApplicationListDTO dto = mapper.toApplicationListDTO(app1);
+        ApplicationListResponse dto = mapper.toApplicationListDTO(app1);
 
         assertThat(dto.id()).isEqualTo(app1.getId());
         assertThat(dto.status()).isEqualTo(app1.getStatus());
@@ -65,7 +65,7 @@ class ApplicationListMapperTest {
 
     @Test
     void toApplicationListDTOs_ShouldMapApplicationListToDTOList() {
-        List<ApplicationListDTO> dtos = mapper.toApplicationListDTOs(applications);
+        List<ApplicationListResponse> dtos = mapper.toApplicationListDTOs(applications);
 
         assertThat(dtos).hasSize(2);
         assertThat(dtos.get(0).id()).isEqualTo(1L);
@@ -76,7 +76,7 @@ class ApplicationListMapperTest {
 
     @Test
     void toApplicationListDTOs_ShouldReturnEmptyList_WhenInputIsEmpty() {
-        List<ApplicationListDTO> dtos = mapper.toApplicationListDTOs(List.of());
+        List<ApplicationListResponse> dtos = mapper.toApplicationListDTOs(List.of());
         assertThat(dtos).isEmpty();
     }
 }

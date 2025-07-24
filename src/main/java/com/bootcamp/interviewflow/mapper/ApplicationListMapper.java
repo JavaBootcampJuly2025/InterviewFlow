@@ -1,6 +1,6 @@
 package com.bootcamp.interviewflow.mapper;
 
-import com.bootcamp.interviewflow.dto.ApplicationListDTO;
+import com.bootcamp.interviewflow.dto.ApplicationListResponse;
 import com.bootcamp.interviewflow.model.Application;
 import org.springframework.stereotype.Component;
 
@@ -9,8 +9,8 @@ import java.util.List;
 @Component
 public class ApplicationListMapper {
 
-    public ApplicationListDTO toApplicationListDTO(Application application) {
-        return new ApplicationListDTO(
+    public ApplicationListResponse toApplicationListDTO(Application application) {
+        return new ApplicationListResponse(
                 application.getId(),
                 application.getStatus(),
                 application.getCompanyName(),
@@ -25,7 +25,7 @@ public class ApplicationListMapper {
         );
     }
 
-    public List<ApplicationListDTO> toApplicationListDTOs(List<Application> applications) {
+    public List<ApplicationListResponse> toApplicationListDTOs(List<Application> applications) {
         return applications.stream()
                 .map(this::toApplicationListDTO)
                 .toList();

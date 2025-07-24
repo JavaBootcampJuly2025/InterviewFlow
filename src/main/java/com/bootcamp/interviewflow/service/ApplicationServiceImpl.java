@@ -1,6 +1,6 @@
 package com.bootcamp.interviewflow.service;
 
-import com.bootcamp.interviewflow.dto.ApplicationListDTO;
+import com.bootcamp.interviewflow.dto.ApplicationListResponse;
 import com.bootcamp.interviewflow.dto.ApplicationResponse;
 import com.bootcamp.interviewflow.dto.CreateApplicationRequest;
 import com.bootcamp.interviewflow.dto.UpdateApplicationRequest;
@@ -40,6 +40,7 @@ public class ApplicationServiceImpl implements ApplicationService {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new UserNotFoundException("User with id " + userId + " not found"));
 
+        log.info("Creating application for user ID: {}", userId);
         Application app = Application.builder()
                 .status(ApplicationStatus.valueOf(dto.getStatus()))
                 .companyName(dto.getCompanyName())
@@ -48,8 +49,8 @@ public class ApplicationServiceImpl implements ApplicationService {
                 .location(dto.getLocation())
                 .applyDate(dto.getApplyDate() != null ? dto.getApplyDate() : LocalDateTime.now())
                 .interviewDate(dto.getInterviewDate())
-                .emailNotificationsEnabled(dto.getEmailNotificationsEnabled() != null ?
-                        dto.getEmailNotificationsEnabled() : false)
+                .emailNotificationsEnabled(dto.getEmailNotificationsEnabled() != null &&
+                        dto.getEmailNotificationsEnabled())
                 .user(user)
                 .build();
 
@@ -65,7 +66,7 @@ public class ApplicationServiceImpl implements ApplicationService {
     }
 
     @Override
-    public List<ApplicationListDTO> findAllByUserId(Long userId) {
+    public List<ApplicationListResponse> findAllByUserId(Long userId) {
         log.info("Fetching applications for user ID: {}", userId);
         List<Application> applications = applicationRepository.findAllByUserId(userId);
         log.info("Found {} applications for user ID: {}", applications.size(), userId);
@@ -73,7 +74,7 @@ public class ApplicationServiceImpl implements ApplicationService {
     }
 
     @Override
-    public List<ApplicationListDTO> findAllByUserIdAndStatus(Long userId, ApplicationStatus status, Sort sort) {
+    public List<ApplicationListResponse> findAllByUserIdAndStatus(Long userId, ApplicationStatus status, Sort sort) {
         log.info("Fetching applications for user ID: {} with status: {}, sort: {}", userId, status, sort);
         List<Application> applications = applicationRepository.findAllByUserIdAndStatus(userId, status, sort);
         log.info("Found {} applications for user ID: {} with status: {}, sort: {}", applications.size(), userId, status, sort);
@@ -81,15 +82,15 @@ public class ApplicationServiceImpl implements ApplicationService {
     }
 
     @Override
-    public List<ApplicationListDTO> findAllByUserIdSorted(Long userId, Sort sort) {
+    public List<ApplicationListResponse> findAllByUserIdSorted(Long userId, Sort sort) {
         log.info("Fetching sorted applications for user ID: {}, sort: {}", userId, sort);
         List<Application> applications = applicationRepository.findAllByUserId(userId, sort);
         return applicationListMapper.toApplicationListDTOs(applications);
     }
 
     @Override
-    public List<ApplicationListDTO> findAll() {
-        log.info("Fetching all applications");
+    public List<ApplicationListResponse> findAll() {
+        log.info("Fetching applications:");
         List<Application> applications = applicationRepository.findAll();
         return applicationListMapper.toApplicationListDTOs(applications);
     }

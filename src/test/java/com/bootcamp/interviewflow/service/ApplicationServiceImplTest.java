@@ -1,6 +1,6 @@
 package com.bootcamp.interviewflow.service;
 
-import com.bootcamp.interviewflow.dto.ApplicationListDTO;
+import com.bootcamp.interviewflow.dto.ApplicationListResponse;
 import com.bootcamp.interviewflow.dto.ApplicationResponse;
 import com.bootcamp.interviewflow.dto.CreateApplicationRequest;
 import com.bootcamp.interviewflow.dto.UpdateApplicationRequest;
@@ -48,6 +48,9 @@ class ApplicationServiceImplTest {
     @Mock
     private ApplicationMapper applicationMapper;
 
+    @Mock
+    private NotificationService notificationService;
+
     @InjectMocks
     private ApplicationServiceImpl service;
 
@@ -56,7 +59,7 @@ class ApplicationServiceImplTest {
     private LocalDateTime now;
     private Application app1, app2;
     private List<Application> applications;
-    private List<ApplicationListDTO> dtos;
+    private List<ApplicationListResponse> dtos;
     private User user;
 
     @BeforeEach
@@ -90,8 +93,8 @@ class ApplicationServiceImplTest {
         applications = List.of(app1, app2);
 
         dtos = List.of(
-                new ApplicationListDTO(1L, APPLIED, "Acme Corp", "https://acme.example", "Software Engineer", "NY", now, now, now, true, now),
-                new ApplicationListDTO(2L, REJECTED, "Globex", "https://globex.example", "Business Analyst","NY", now, now, now, true, now)
+                new ApplicationListResponse(1L, APPLIED, "Acme Corp", "https://acme.example", "Software Engineer", "NY", now, now, now, true, now),
+                new ApplicationListResponse(2L, REJECTED, "Globex", "https://globex.example", "Business Analyst","NY", now, now, now, true, now)
         );
     }
 
@@ -100,7 +103,7 @@ class ApplicationServiceImplTest {
         when(applicationRepository.findAllByUserId(userId)).thenReturn(applications);
         when(applicationListMapper.toApplicationListDTOs(applications)).thenReturn(dtos);
 
-        List<ApplicationListDTO> result = service.findAllByUserId(userId);
+        List<ApplicationListResponse> result = service.findAllByUserId(userId);
 
         assertThat(result).hasSize(2).isEqualTo(dtos);
         verify(applicationRepository).findAllByUserId(userId);
@@ -112,7 +115,7 @@ class ApplicationServiceImplTest {
         when(applicationRepository.findAllByUserId(userId)).thenReturn(List.of());
         when(applicationListMapper.toApplicationListDTOs(List.of())).thenReturn(List.of());
 
-        List<ApplicationListDTO> result = service.findAllByUserId(userId);
+        List<ApplicationListResponse> result = service.findAllByUserId(userId);
 
         assertThat(result).isEmpty();
         verify(applicationRepository).findAllByUserId(userId);
@@ -190,7 +193,8 @@ class ApplicationServiceImplTest {
         service.delete(applicationId, userId);
 
         verify(applicationRepository).findByIdAndUserId(applicationId, userId);
-        verify(applicationRepository).deleteById(applicationId);
+        verify(notificationService).cancelNotificationsForApplication(applicationId);
+        verify(applicationRepository).delete(app1);
     }
 
     @Test
@@ -392,7 +396,7 @@ class ApplicationServiceImplTest {
         when(applicationRepository.findAllByUserId(userId, sort)).thenReturn(applications);
         when(applicationListMapper.toApplicationListDTOs(applications)).thenReturn(dtos);
 
-        List<ApplicationListDTO> result = service.findAllByUserIdSorted(userId, sort);
+        List<ApplicationListResponse> result = service.findAllByUserIdSorted(userId, sort);
 
         assertThat(result).hasSize(2).isEqualTo(dtos);
         verify(applicationRepository).findAllByUserId(userId, sort);
@@ -406,7 +410,7 @@ class ApplicationServiceImplTest {
         when(applicationRepository.findAllByUserId(userId, sort)).thenReturn(List.of());
         when(applicationListMapper.toApplicationListDTOs(List.of())).thenReturn(List.of());
 
-        List<ApplicationListDTO> result = service.findAllByUserIdSorted(userId, sort);
+        List<ApplicationListResponse> result = service.findAllByUserIdSorted(userId, sort);
 
         assertThat(result).isEmpty();
         verify(applicationRepository).findAllByUserId(userId, sort);
@@ -420,7 +424,7 @@ class ApplicationServiceImplTest {
         when(applicationRepository.findAllByUserIdAndStatus(userId, ApplicationStatus.WITHDRAWN, sort)).thenReturn(List.of());
         when(applicationListMapper.toApplicationListDTOs(List.of())).thenReturn(List.of());
 
-        List<ApplicationListDTO> result = service.findAllByUserIdAndStatus(userId, ApplicationStatus.WITHDRAWN, sort);
+        List<ApplicationListResponse> result = service.findAllByUserIdAndStatus(userId, ApplicationStatus.WITHDRAWN, sort);
 
         assertThat(result).isEmpty();
         verify(applicationRepository).findAllByUserIdAndStatus(userId, ApplicationStatus.WITHDRAWN, sort);
@@ -432,12 +436,12 @@ class ApplicationServiceImplTest {
         Sort sort = Sort.by(Sort.Direction.ASC, "companyName");
 
         List<Application> filteredApps = List.of(app1);
-        List<ApplicationListDTO> mappedDTOs = List.of(dtos.get(0));
+        List<ApplicationListResponse> mappedDTOs = List.of(dtos.get(0));
 
         when(applicationRepository.findAllByUserIdAndStatus(userId, APPLIED, sort)).thenReturn(filteredApps);
         when(applicationListMapper.toApplicationListDTOs(filteredApps)).thenReturn(mappedDTOs);
 
-        List<ApplicationListDTO> result = service.findAllByUserIdAndStatus(userId, APPLIED, sort);
+        List<ApplicationListResponse> result = service.findAllByUserIdAndStatus(userId, APPLIED, sort);
 
         assertThat(result).hasSize(1).isEqualTo(mappedDTOs);
         verify(applicationRepository).findAllByUserIdAndStatus(userId, APPLIED, sort);
