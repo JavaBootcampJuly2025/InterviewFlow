@@ -22,10 +22,12 @@ import org.springframework.dao.EmptyResultDataAccessException;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
+import java.util.Arrays;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -48,34 +50,42 @@ class NotesServiceTest {
         LocalDateTime now = LocalDateTime.of(2022, 10, 22, 10, 0);
         localDateTimeMocked.when(LocalDateTime::now).thenReturn(now);
 
-        var application = new Application(100L,
-                ApplicationStatus.APPLIED,
-                "TestCompany",
-                "Link",
-                "TestPosition",
-                now,
-                now,
-                true,
-                now,
-                now,
-                new User());
+        Application application = Application.builder()
+                .id(100L)
+                .status(ApplicationStatus.APPLIED)
+                .companyName("TestCompany")
+                .companyLink("Link")
+                .position("TestPosition")
+                .applyDate(now)
+                .createdAt(now)
+                .updatedAt(now)
+                .user(new User())
+                .build();
 
-        Note note = new Note(1L, "Test note", application, now, now);
-        Note testNote = new Note(application, "Test note");
+        Note note = Note.builder()
+                .id(1L)
+                .title("Test Title")
+                .content("Test note")
+                .tags("urgent,followup")
+                .application(application)
+                .createdAt(now)
+                .updatedAt(now)
+                .build();
 
-        when(noteRepository.save(testNote)).thenReturn(note);
+
         when(applicationRepository.findById(100L)).thenReturn(Optional.of(application));
+        when(noteRepository.save(any(Note.class))).thenReturn(note);
 
-        var actual = service.create(new NoteRequest(100L, "Test note"));
+        NoteResponse actual = service.create(new NoteRequest(100L, "Test Title", "Test note", Arrays.asList("urgent", "followup")));
 
         assertEquals(note.getId(), actual.id());
+        assertEquals(note.getTitle(), actual.title());
         assertEquals(note.getContent(), actual.content());
         assertEquals(note.getApplication(), application);
         assertEquals(note.getCreatedAt(), actual.createdAt());
         assertEquals(note.getUpdatedAt(), actual.updatedAt());
 
-        note.setId(null);
-        verify(noteRepository, times(1)).save(testNote);
+        verify(noteRepository, times(1)).save(any(Note.class));
         verify(applicationRepository, times(1)).findById(100L);
 
         localDateTimeMocked.close();
@@ -86,7 +96,7 @@ class NotesServiceTest {
         when(applicationRepository.findById(100L)).thenReturn(Optional.empty());
 
         var thrown = assertThrows(ApplicationNotFoundException.class,
-                () -> service.create(new NoteRequest(100L, "Test note")));
+                () -> service.create(new NoteRequest(100L, "Test Title", "Test note", Arrays.asList("urgent"))));
         assertTrue(thrown.getMessage().contains("Application with id 100 not found"));
 
         verify(applicationRepository, times(1)).findById(100L);
@@ -98,30 +108,42 @@ class NotesServiceTest {
         LocalDateTime now = LocalDateTime.of(2022, 10, 22, 10, 0);
         localDateTimeMocked.when(LocalDateTime::now).thenReturn(now);
 
-        var application = new Application(1L,
-                ApplicationStatus.APPLIED,
-                "TestCompany",
-                "Link",
-                "TestPosition",
-                now,
-                now,
-                true,
-                now,
-                now,
-                new User());
-        Note note = new Note(100L, "Test note", application, now, now);
+        Application application = Application.builder()
+                .id(1L)
+                .status(ApplicationStatus.APPLIED)
+                .companyName("TestCompany")
+                .companyLink("Link")
+                .position("TestPosition")
+                .applyDate(now)
+                .createdAt(now)
+                .updatedAt(now)
+                .user(new User())
+                .build();
 
-        when(noteRepository.findById(100L)).thenReturn(Optional.of(note));
+        Note note = Note.builder()
+                .id(100L)
+                .title("Test Title")
+                .content("Test note")
+                .tags("urgent,followup")
+                .application(application)
+                .createdAt(now)
+                .updatedAt(now)
+                .build();
 
-        var actual = service.getById(100L);
+        when(applicationRepository.findById(100L)).thenReturn(Optional.of(application));
+        when(noteRepository.save(any(Note.class))).thenReturn(note);
+
+        NoteResponse actual = service.create(new NoteRequest(100L, "Test Title", "Test note", Arrays.asList("urgent", "followup")));
 
         assertEquals(note.getId(), actual.id());
+        assertEquals(note.getApplication().getId(), actual.applicationId());
+        assertEquals(note.getTitle(), actual.title());
         assertEquals(note.getContent(), actual.content());
-        assertEquals(note.getApplication(), application);
         assertEquals(note.getCreatedAt(), actual.createdAt());
         assertEquals(note.getUpdatedAt(), actual.updatedAt());
 
-        verify(noteRepository, times(1)).findById(100L);
+        verify(noteRepository, times(1)).save(any(Note.class));
+        verify(applicationRepository, times(1)).findById(100L);
 
         localDateTimeMocked.close();
     }
@@ -143,40 +165,73 @@ class NotesServiceTest {
         LocalDateTime now = LocalDateTime.of(2022, 10, 22, 10, 0);
         localDateTimeMocked.when(LocalDateTime::now).thenReturn(now);
 
-        var application = new Application(1L,
-                ApplicationStatus.APPLIED,
-                "TestCompany",
-                "Link",
-                "TestPosition",
-                now,
-                now,
-                true,
-                now,
-                now,
-                new User());
-        Note noteOne = new Note(100L, "Test note one", application, now, now);
-        Note noteTwo = new Note(100L, "Test note two", application, now, now);
-        Note noteThree = new Note(100L, "Test note three", application, now, now);
+        Application application = Application.builder()
+                .id(1L)
+                .status(ApplicationStatus.APPLIED)
+                .companyName("TestCompany")
+                .companyLink("Link")
+                .position("TestPosition")
+                .applyDate(now)
+                .createdAt(now)
+                .updatedAt(now)
+                .user(new User())
+                .build();
+
+        Note noteOne = Note.builder()
+                .id(100L)
+                .title("Test Title One")
+                .content("Test note one")
+                .tags("urgent")
+                .application(application)
+                .createdAt(now)
+                .updatedAt(now)
+                .build();
+
+        Note noteTwo = Note.builder()
+                .id(101L)
+                .title("Test Title Two")
+                .content("Test note two")
+                .tags("followup")
+                .application(application)
+                .createdAt(now)
+                .updatedAt(now)
+                .build();
+
+        Note noteThree = Note.builder()
+                .id(102L)
+                .title("Test Title Three")
+                .content("Test note three")
+                .tags("urgent,followup")
+                .application(application)
+                .createdAt(now)
+                .updatedAt(now)
+                .build();
         List<Note> notes = List.of(noteOne, noteTwo, noteThree);
 
-        var responseOne = new NoteResponse(
+        NoteResponse responseOne = new NoteResponse(
                 noteOne.getId(),
                 noteOne.getApplication().getId(),
+                noteOne.getTitle(),
                 noteOne.getContent(),
+                List.of("urgent"),
                 noteOne.getCreatedAt(),
                 noteOne.getUpdatedAt());
 
-        var responseTwo = new NoteResponse(
+        NoteResponse responseTwo = new NoteResponse(
                 noteTwo.getId(),
                 noteTwo.getApplication().getId(),
+                noteTwo.getTitle(),
                 noteTwo.getContent(),
+                List.of("followup"),
                 noteTwo.getCreatedAt(),
                 noteTwo.getUpdatedAt());
 
-        var responseThree = new NoteResponse(
+        NoteResponse responseThree = new NoteResponse(
                 noteThree.getId(),
                 noteThree.getApplication().getId(),
+                noteThree.getTitle(),
                 noteThree.getContent(),
+                Arrays.asList("urgent", "followup"),
                 noteThree.getCreatedAt(),
                 noteThree.getUpdatedAt());
 

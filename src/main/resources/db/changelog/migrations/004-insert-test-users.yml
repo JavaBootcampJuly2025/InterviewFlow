@@ -9,7 +9,7 @@ databaseChangeLog:
               - column: { name: id, valueNumeric: 1 }
               - column: { name: username, value: john_doe }
               - column: { name: email, value: john@example.com }
-              - column: { name: password, value: hashed_password_123 }
+              - column: { name: password, value: $2a$10$IaV.UwE3bcGduKDLJWp1S.cZaX4FBNiveiB0eYIsnfDQ3UVQXRhv. } #johnsecret
 
         - insert:
             tableName: users
@@ -17,7 +17,7 @@ databaseChangeLog:
               - column: { name: id, valueNumeric: 2 }
               - column: { name: username, value: jane_smith }
               - column: { name: email, value: jane@example.com }
-              - column: { name: password, value: hashed_password_456 }
+              - column: { name: password, value: $2a$10$rgvANC9xt57S4C3rdt44Ge7zrO8h4FPcnIDbjOxgbRFC1CHaRDdUe } #janesecret
 
       rollback:
         - delete:

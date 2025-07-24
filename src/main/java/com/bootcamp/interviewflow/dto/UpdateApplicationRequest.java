@@ -23,6 +23,9 @@ public class UpdateApplicationRequest {
     @Size(min = 1, max = 255, message = "Position must be between 1 and 255 characters")
     private String position;
 
+    @Size(max = 255, message = "Location must not exceed 255 characters")
+    private String location;
+
     private ApplicationStatus status;
 
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")

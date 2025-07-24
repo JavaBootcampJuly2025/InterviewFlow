@@ -6,8 +6,13 @@ spring:
   liquibase:
     change-log: classpath:db/changelog/db.changelog-master.yml
 
-  # Enable scheduling
   task:
     scheduling:
       pool:
         size: 2
+
+interviewFlow:
+  frontend:
+    frontendDomain: ${FRONTEND_URL}
+    frontendPort: ${FRONTEND_PORT}
+

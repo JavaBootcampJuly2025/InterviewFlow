@@ -1,0 +1,57 @@
+databaseChangeLog:
+  - changeSet:
+      id: 009-create-resumes-table
+      author: askolds
+      changes:
+        - createTable:
+            tableName: resumes
+            columns:
+              - column:
+                  name: id
+                  type: uuid
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: user_id
+                  type: bigint
+                  constraints:
+                    nullable: false
+              - column:
+                  name: file_name
+                  type: varchar(255)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: object_key
+                  type: varchar(512)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: size
+                  type: bigint
+                  constraints:
+                    nullable: false
+        - addForeignKeyConstraint:
+            baseTableName: resumes
+            baseColumnNames: user_id
+            referencedTableName: users
+            referencedColumnNames: id
+            constraintName: fk_resumes_users
+
+  - changeSet:
+      id: 009-add-resume_id-to-applications
+      author: askolds
+      changes:
+        - addColumn:
+            tableName: applications
+            columns:
+              - column:
+                  name: resume_id
+                  type: uuid
+        - addForeignKeyConstraint:
+            baseTableName: applications
+            baseColumnNames: resume_id
+            referencedTableName: resumes
+            referencedColumnNames: id
+            constraintName: fk_applications_resumes

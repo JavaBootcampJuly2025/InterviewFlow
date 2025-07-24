@@ -3,11 +3,10 @@ spring:
     compose:
       enabled: false
   datasource:
-    url: ${DATASOURCE_URL}
+    url: jdbc:postgresql://${DATASOURCE_URL}:${DATASOURCE_PORT}/${DATASOURCE_DB}
     username: ${DATASOURCE_USERNAME}
     password: ${DATASOURCE_PASSWORD}
 
-  # Email Configuration for Production
   mail:
     host: smtp.gmail.com
     port: 465
@@ -21,3 +20,16 @@ spring:
             enable: true
           ssl:
             enable: true
+app:
+  notification:
+    batch-size: ${NOTIFICATION_BATCH_SIZE}
+    enabled: ${NOTIFICATION_ENABLED}
+    cleanup:
+      enabled: ${NOTIFICATION_CLEANUP_ENABLED}
+      retention-days: ${NOTIFICATION_CLEANUP_RETENTION_DAYS}
+aws:
+  region: ${AWS_REGION}
+  accessKeyId: ${AWS_ACCESS_KEY_ID}
+  secretAccessKey: ${AWS_SECRET_ACCESS_KEY}
+  s3:
+    bucket: ${AWS_S3_BUCKET}

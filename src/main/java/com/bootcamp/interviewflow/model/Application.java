@@ -1,6 +1,8 @@
 package com.bootcamp.interviewflow.model;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import jakarta.persistence.Id;
 import jakarta.persistence.GeneratedValue;
@@ -12,18 +14,21 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.JoinColumn;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Entity
 @Table(name = "applications")
 @AllArgsConstructor
 @NoArgsConstructor
 @Data
+@Builder
 public class Application {
 
     @Id
@@ -42,6 +47,9 @@ public class Application {
 
     @Column(length = 255)
     private String position;
+
+    @Column(length = 255)
+    private String location;
 
     @Column(name = "apply_date", nullable = false)
     private LocalDateTime applyDate;
@@ -64,14 +72,6 @@ public class Application {
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
-    public Application(ApplicationStatus status, String companyName, String companyLink, String position, LocalDateTime applyDate, LocalDateTime interviewDate, Boolean emailNotificationsEnabled, User user) {
-        this.status = status;
-        this.companyName = companyName;
-        this.companyLink = companyLink;
-        this.position = position;
-        this.applyDate = applyDate;
-        this.interviewDate = interviewDate;
-        this.emailNotificationsEnabled = emailNotificationsEnabled;
-        this.user = user;
-    }
+    @OneToMany(mappedBy = "application", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Note> notes;
 }

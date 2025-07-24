@@ -30,7 +30,7 @@ class ValidationTest {
     @Test
     @DisplayName("Valid RegisterRequest should pass validation")
     void testValidRegisterRequest() {
-        RegisterRequest request = new RegisterRequest("JohnDoe123", "john@example.com", "StrongPass123!");
+        RegisterRequest request = new RegisterRequest("John Doe", "john@example.com", "StrongPass123!");
 
         Set<ConstraintViolation<RegisterRequest>> violations = validator.validate(request);
 
@@ -47,9 +47,8 @@ class ValidationTest {
         assertTrue(violations.isEmpty(), "Valid request should not have validation errors");
     }
 
-    // Username validation tests
     @ParameterizedTest
-    @ValueSource(strings = {"John", "JohnDoe", "User123", "Test456", "abc123", "Username1", "Player007"})
+    @ValueSource(strings = {"John", "JohnDoe", "User user", "John Doe", "Jane Doe", "Username user", "Player one"})
     @DisplayName("Valid usernames should pass validation")
     void testValidUsernames(String username) {
         RegisterRequest request = new RegisterRequest(username, "test@example.com", "StrongPass123!");
@@ -60,7 +59,7 @@ class ValidationTest {
     }
 
     @ParameterizedTest
-    @ValueSource(strings = {"Jane Doe", "Mary Ann Smith", "A B", "user-name", "Mary@Ann", "user_name", "John.Doe", "user!name", "user name"})
+    @ValueSource(strings = {"Jane-Doe", "Mary1AnnSmith", "A-B", "user-name", "Mary@Ann", "user_name", "John.Doe", "user!name", "user10name"})
     @DisplayName("Invalid usernames should fail validation")
     void testInvalidUsernames(String username) {
         RegisterRequest request = new RegisterRequest(username, "test@example.com", "StrongPass123!");
@@ -73,7 +72,7 @@ class ValidationTest {
     @Test
     @DisplayName("Username at max length (50 characters) should be valid")
     void testUsernameMaxLength() {
-        String maxLengthUsername = "A1".repeat(25); // 50 characters alternating letters and numbers
+        String maxLengthUsername = "A".repeat(50);   // 50 letters
         RegisterRequest request = new RegisterRequest(maxLengthUsername, "test@example.com", "StrongPass123!");
 
         Set<ConstraintViolation<RegisterRequest>> violations = validator.validate(request);
@@ -84,7 +83,7 @@ class ValidationTest {
     @Test
     @DisplayName("Username over max length (51 characters) should fail validation")
     void testUsernameOverMaxLength() {
-        String overMaxUsername = "A1".repeat(25) + "A"; // 51 characters
+        String overMaxUsername = "A".repeat(51);
         RegisterRequest request = new RegisterRequest(overMaxUsername, "test@example.com", "StrongPass123!");
 
         Set<ConstraintViolation<RegisterRequest>> violations = validator.validate(request);
@@ -96,7 +95,7 @@ class ValidationTest {
     @Test
     @DisplayName("Username at min length (2 characters) should be valid")
     void testUsernameMinLength() {
-        RegisterRequest request = new RegisterRequest("J1", "test@example.com", "StrongPass123!");
+        RegisterRequest request = new RegisterRequest("Jo", "test@example.com", "StrongPass123!");
 
         Set<ConstraintViolation<RegisterRequest>> violations = validator.validate(request);
 
@@ -123,7 +122,6 @@ class ValidationTest {
         assertFalse(violations.isEmpty(), "Blank username should fail validation");
     }
 
-    // Password validation tests
     @ParameterizedTest
     @ValueSource(strings = {"StrongPass123!", "MyP@ssw0rd", "Secure123$", "Valid123@"})
     @DisplayName("Valid strong passwords should pass validation")
@@ -149,9 +147,8 @@ class ValidationTest {
     @Test
     @DisplayName("Password at max length (255 characters) should be valid")
     void testPasswordMaxLength() {
-        // Create a 255-character password that meets strength requirements
-        String maxLengthPassword = "StrongPass123!" + "A".repeat(241); // 14 + 241 = 255
-        RegisterRequest request = new RegisterRequest("User123", "test@example.com", maxLengthPassword);
+        String maxLengthPassword = "StrongPass123!" + "A".repeat(241);
+        RegisterRequest request = new RegisterRequest("John Doe", "test@example.com", maxLengthPassword);
 
         Set<ConstraintViolation<RegisterRequest>> violations = validator.validate(request);
 
@@ -162,8 +159,8 @@ class ValidationTest {
     @DisplayName("Password over max length (256 characters) should fail validation")
     void testPasswordOverMaxLength() {
         // Create a 256-character password
-        String overMaxPassword = "StrongPass123!" + "A".repeat(242); // 14 + 242 = 256
-        RegisterRequest request = new RegisterRequest("User123", "test@example.com", overMaxPassword);
+        String overMaxPassword = "StrongPass123!" + "A".repeat(242);
+        RegisterRequest request = new RegisterRequest("John Doe", "test@example.com", overMaxPassword);
 
         Set<ConstraintViolation<RegisterRequest>> violations = validator.validate(request);
 
@@ -174,7 +171,7 @@ class ValidationTest {
     @Test
     @DisplayName("Password at min length (8 characters) should be valid if strong")
     void testPasswordMinLength() {
-        RegisterRequest request = new RegisterRequest("User123", "test@example.com", "Strong1!");
+        RegisterRequest request = new RegisterRequest("John Doe", "test@example.com", "Strong1!");
 
         Set<ConstraintViolation<RegisterRequest>> violations = validator.validate(request);
 
@@ -184,7 +181,7 @@ class ValidationTest {
     @Test
     @DisplayName("Password under min length (7 characters) should fail validation")
     void testPasswordUnderMinLength() {
-        RegisterRequest request = new RegisterRequest("User123", "test@example.com", "Short1!");
+        RegisterRequest request = new RegisterRequest("John Doe", "test@example.com", "Short1!");
 
         Set<ConstraintViolation<RegisterRequest>> violations = validator.validate(request);
 
@@ -215,11 +212,8 @@ class ValidationTest {
     @Test
     @DisplayName("Email over max length (256 characters) should fail validation")
     void testEmailOverMaxLength() {
-        // Create an email that's 256 characters (over the limit)
-        // Using "example.com" (11 chars) + "@" (1 char) = 12 chars for domain part
-        // So localpart should be 256 - 12 = 244 characters
         String localPart = "a".repeat(244);
-        String longEmail = localPart + "@example.com"; // 244 + 12 = 256 characters
+        String longEmail = localPart + "@example.com";
 
         RegisterRequest request = new RegisterRequest("User123", longEmail, "StrongPass123!");
 
@@ -280,7 +274,6 @@ class ValidationTest {
         assertFalse(violations.isEmpty(), "Multiple validation errors should be captured");
         assertTrue(violations.size() >= 3, "Should have at least 3 validation errors");
 
-        // Check that we have violations for all three fields
         assertTrue(violations.stream().anyMatch(v -> v.getPropertyPath().toString().equals("username")));
         assertTrue(violations.stream().anyMatch(v -> v.getPropertyPath().toString().equals("email")));
         assertTrue(violations.stream().anyMatch(v -> v.getPropertyPath().toString().equals("password")));
