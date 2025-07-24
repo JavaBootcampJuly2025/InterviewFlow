@@ -38,6 +38,9 @@ public record ApplicationListDTO(
         @Schema(description = "Enable reminder notifications for the interview?", example = "TRUE")
         Boolean emailNotificationEnabled,
 
+        @Schema(description = "ID of the attached resume file")
+        String resumeId,
+
         @Schema(description = "Timestamp when the application was last updated", example = "2025-07-18 12:15:00")
         @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")
         LocalDateTime updatedAt
