@@ -8,7 +8,6 @@ public interface NotificationService {
 
     void scheduleInterviewReminder(Application application, User user);
 
-    NotificationStats getStats();
 
     void cancelNotificationsForApplication(Long applicationId);
 

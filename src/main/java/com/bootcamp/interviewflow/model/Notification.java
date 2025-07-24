@@ -38,10 +38,6 @@ public class Notification {
     @Column(nullable = false, length = 20)
     private NotificationStatus status = NotificationStatus.PENDING;
 
-    @CreationTimestamp
-    @Column(name = "created_at", nullable = false, updatable = false)
-    private LocalDateTime createdAt;
-
     public Notification(Long applicationId, String recipientEmail, String subject,
                         String message, LocalDateTime scheduledTime) {
         this.applicationId = applicationId;

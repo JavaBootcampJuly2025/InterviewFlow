@@ -13,8 +13,8 @@ spring:
   mail:
     host: smtp.gmail.com
     port: 465
-    username: ${MAIL_USERNAME:interviewflowcorp@gmail.com}
-    password: ${MAIL_PASSWORD:gwtdkpzzvybetiza}
+    username: ${MAIL_USERNAME}
+    password: ${MAIL_PASSWORD}
     properties:
       mail:
         smtp:
@@ -27,5 +27,5 @@ spring:
 # Application-specific configuration for Development
 app:
   notification:
-    batch-size: 50
-    enabled: true
+    batch-size: ${NOTIFICATION_BATCH_SIZE:50}
+    enabled: ${NOTIFICATION_ENABLED:true}

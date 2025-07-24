@@ -16,17 +16,11 @@ import java.util.List;
 @Repository
 public interface NotificationRepository extends JpaRepository<Notification, Long> {
 
-    @Query("""
-        SELECT n FROM Notification n 
-        WHERE n.status = 'PENDING' 
-        AND n.scheduledTime <= :currentTime 
-        ORDER BY n.scheduledTime ASC
-        """)
-    Page<Notification> findDueNotifications(
-            @Param("currentTime") LocalDateTime currentTime,
+    Page<Notification> findByStatusAndScheduledTimeBeforeOrderByScheduledTimeAsc(
+            NotificationStatus status,
+            LocalDateTime currentTime,
             Pageable pageable
     );
-
 
     @Modifying
     @Query("UPDATE Notification n SET n.status = 'CANCELLED' WHERE n.applicationId = :applicationId AND n.status = 'PENDING'")

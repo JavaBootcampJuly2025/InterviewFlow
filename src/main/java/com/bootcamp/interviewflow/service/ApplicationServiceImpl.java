@@ -17,6 +17,7 @@ import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -78,17 +79,19 @@ public class ApplicationServiceImpl implements ApplicationService {
     }
 
     @Override
+    @Transactional
     public void delete(Long id, Long userId) {
-
+        Application application = findAndValidateOwnership(id, userId);
 
         // Cancel any scheduled notifications before deleting
-        notificationService.cancelNotificationsForApplication(id);
+        notificationService.cancelNotificationsForApplication(application.getId());
 
-        applicationRepository.deleteById(id);
-        log.info("Application {} deleted and notifications cancelled", id);
+        applicationRepository.delete(application);
+        log.info("Application {} deleted and notifications cancelled", application.getId());
     }
 
     @Override
+    @Transactional
     public ApplicationResponse partialUpdate(Long id, Long userId, UpdateApplicationRequest dto) {
         Application application = findAndValidateOwnership(id, userId);
 

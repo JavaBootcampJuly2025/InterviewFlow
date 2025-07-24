@@ -38,6 +38,7 @@ public class NotificationServiceImpl implements NotificationService {
     private int batchSize;
 
     @Override
+    @Transactional
     public void scheduleInterviewReminder(Application application, User user) {
         if (application.getInterviewDate() == null ||
                 !Boolean.TRUE.equals(application.getEmailNotificationsEnabled())) {
@@ -94,7 +95,11 @@ public class NotificationServiceImpl implements NotificationService {
         Page<Notification> dueNotifications;
 
         do {
-            dueNotifications = notificationRepository.findDueNotifications(now, pageable);
+            dueNotifications = notificationRepository.findByStatusAndScheduledTimeBeforeOrderByScheduledTimeAsc(
+                    NotificationStatus.PENDING,
+                    now,
+                    pageable
+            );
 
             for (Notification notification : dueNotifications.getContent()) {
                 processSingleNotification(notification);
@@ -188,16 +193,6 @@ public class NotificationServiceImpl implements NotificationService {
                 application.getPosition(),
                 application.getInterviewDate().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")),
                 application.getCompanyLink() != null ? "• Company Website: " + application.getCompanyLink() : ""
-        );
-    }
-
-    @Override
-    public NotificationStats getStats() {
-        return new NotificationStats(
-                notificationRepository.countByStatus(NotificationStatus.PENDING),
-                notificationRepository.countByStatus(NotificationStatus.SENT),
-                notificationRepository.countByStatus(NotificationStatus.FAILED),
-                notificationRepository.countByStatus(NotificationStatus.CANCELLED)
         );
     }
 }
