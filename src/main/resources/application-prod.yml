@@ -6,6 +6,27 @@ spring:
     url: jdbc:postgresql://${DATASOURCE_URL}:${DATASOURCE_PORT}/${DATASOURCE_DB}
     username: ${DATASOURCE_USERNAME}
     password: ${DATASOURCE_PASSWORD}
+
+  mail:
+    host: smtp.gmail.com
+    port: 465
+    username: ${MAIL_USERNAME}
+    password: ${MAIL_PASSWORD}
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+          ssl:
+            enable: true
+app:
+  notification:
+    batch-size: ${NOTIFICATION_BATCH_SIZE}
+    enabled: ${NOTIFICATION_ENABLED}
+    cleanup:
+      enabled: ${NOTIFICATION_CLEANUP_ENABLED}
+      retention-days: ${NOTIFICATION_CLEANUP_RETENTION_DAYS}
 aws:
   region: ${AWS_REGION}
   accessKeyId: ${AWS_ACCESS_KEY_ID}

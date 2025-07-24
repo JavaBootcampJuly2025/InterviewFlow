@@ -8,6 +8,29 @@ spring:
     url: jdbc:postgresql://${POSTGRES_HOST}:${POSTGRES_PORT}/${POSTGRES_DB}
     username: ${POSTGRES_USER}
     password: ${POSTGRES_PASSWORD}
+    
+  mail:
+    host: smtp.gmail.com
+    port: 465
+    username: ${MAIL_USERNAME}
+    password: ${MAIL_PASSWORD}
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+          ssl:
+            enable: true
+
+app:
+  notification:
+    batch-size: ${NOTIFICATION_BATCH_SIZE}
+    enabled: ${NOTIFICATION_ENABLED}
+    cleanup:
+      enabled: ${NOTIFICATION_CLEANUP_ENABLED}
+      retention-days: ${NOTIFICATION_CLEANUP_RETENTION_DAYS}
+
 minio:
   url: ${MINIO_URL}
   port: ${MINIO_PORT}
@@ -15,3 +38,4 @@ minio:
   accessKey: ${MINIO_ROOT_USER}
   secretKey: ${MINIO_ROOT_PASSWORD}
   bucket: ${MINIO_BUCKET}
+

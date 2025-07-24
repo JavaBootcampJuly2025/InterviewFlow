@@ -18,6 +18,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -32,6 +33,7 @@ public class ApplicationServiceImpl implements ApplicationService {
     private final ApplicationListMapper applicationListMapper;
     private final ApplicationMapper applicationMapper;
     private final UserRepository userRepository;
+    private final NotificationService notificationService;
 
     @Override
     public ApplicationResponse create(CreateApplicationRequest dto, Long userId) {
@@ -51,7 +53,15 @@ public class ApplicationServiceImpl implements ApplicationService {
                 .user(user)
                 .build();
 
-        return applicationMapper.toResponse(applicationRepository.save(app));
+        Application savedApp = applicationRepository.save(app);
+
+        if (savedApp.getInterviewDate() != null &&
+                Boolean.TRUE.equals(savedApp.getEmailNotificationsEnabled())) {
+            notificationService.scheduleInterviewReminder(savedApp, user);
+            log.info("Interview reminder scheduled for application {}", savedApp.getId());
+        }
+
+        return applicationMapper.toResponse(savedApp);
     }
 
     @Override
@@ -79,30 +89,70 @@ public class ApplicationServiceImpl implements ApplicationService {
 
     @Override
     public List<ApplicationListDTO> findAll() {
-        log.info("Fetching applications:");
+        log.info("Fetching all applications");
         List<Application> applications = applicationRepository.findAll();
         return applicationListMapper.toApplicationListDTOs(applications);
-
     }
 
     @Override
+    @Transactional
     public void delete(Long id, Long userId) {
-        findAndValidateOwnership(id, userId);
-        applicationRepository.deleteById(id);
+        Application application = findAndValidateOwnership(id, userId);
+
+        notificationService.cancelNotificationsForApplication(application.getId());
+
+        applicationRepository.delete(application);
+        log.info("Application {} deleted and notifications cancelled", application.getId());
     }
 
     @Override
+    @Transactional
     public ApplicationResponse partialUpdate(Long id, Long userId, UpdateApplicationRequest dto) {
         Application application = findAndValidateOwnership(id, userId);
-        Application updatedApp = applicationMapper.updateEntityFromDto(dto, application);
 
-        log.info("Application partially updated: {}", updatedApp);
-        return applicationMapper.toResponse(applicationRepository.save(updatedApp));
+        LocalDateTime originalInterviewDate = application.getInterviewDate();
+        Boolean originalNotificationEnabled = application.getEmailNotificationsEnabled();
+
+        Application updatedApp = applicationMapper.updateEntityFromDto(dto, application);
+        Application savedApp = applicationRepository.save(updatedApp);
+
+        handleNotificationScheduling(savedApp, originalInterviewDate, originalNotificationEnabled);
+
+        log.info("Application {} updated", savedApp.getId());
+        return applicationMapper.toResponse(savedApp);
+    }
+
+    private void handleNotificationScheduling(Application updatedApp,
+                                              LocalDateTime originalInterviewDate,
+                                              Boolean originalNotificationEnabled) {
+
+        LocalDateTime newInterviewDate = updatedApp.getInterviewDate();
+        Boolean newNotificationEnabled = updatedApp.getEmailNotificationsEnabled();
+
+        boolean interviewDateChanged = (originalInterviewDate == null && newInterviewDate != null) ||
+                (originalInterviewDate != null && !originalInterviewDate.equals(newInterviewDate)) ||
+                (originalInterviewDate != null && newInterviewDate == null);
+
+        boolean notificationSettingChanged = !Boolean.TRUE.equals(originalNotificationEnabled) &&
+                Boolean.TRUE.equals(newNotificationEnabled) ||
+                Boolean.TRUE.equals(originalNotificationEnabled) &&
+                        !Boolean.TRUE.equals(newNotificationEnabled);
+
+        if (interviewDateChanged || notificationSettingChanged) {
+
+            notificationService.cancelNotificationsForApplication(updatedApp.getId());
+
+            if (newInterviewDate != null && Boolean.TRUE.equals(newNotificationEnabled)) {
+                notificationService.scheduleInterviewReminder(updatedApp, updatedApp.getUser());
+                log.info("Interview reminder rescheduled for application {}", updatedApp.getId());
+            } else {
+                log.info("Interview reminder cancelled for application {} - conditions not met", updatedApp.getId());
+            }
+        }
     }
 
     private Application findAndValidateOwnership(Long id, Long userId) {
         return applicationRepository.findByIdAndUserId(id, userId)
                 .orElseThrow(() -> new ApplicationNotFoundException("Application with id " + id + " not found"));
     }
-
 }
