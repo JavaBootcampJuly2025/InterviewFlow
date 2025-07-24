@@ -22,6 +22,7 @@ import org.springframework.dao.EmptyResultDataAccessException;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
+import java.util.Arrays;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -63,7 +64,9 @@ class NotesServiceTest {
 
         Note note = Note.builder()
                 .id(1L)
+                .title("Test Title")
                 .content("Test note")
+                .tags("urgent,followup")
                 .application(application)
                 .createdAt(now)
                 .updatedAt(now)
@@ -73,9 +76,10 @@ class NotesServiceTest {
         when(applicationRepository.findById(100L)).thenReturn(Optional.of(application));
         when(noteRepository.save(any(Note.class))).thenReturn(note);
 
-        NoteResponse actual = service.create(new NoteRequest(100L, "Test note"));
+        NoteResponse actual = service.create(new NoteRequest(100L, "Test Title", "Test note", Arrays.asList("urgent", "followup")));
 
         assertEquals(note.getId(), actual.id());
+        assertEquals(note.getTitle(), actual.title());
         assertEquals(note.getContent(), actual.content());
         assertEquals(note.getApplication(), application);
         assertEquals(note.getCreatedAt(), actual.createdAt());
@@ -92,7 +96,7 @@ class NotesServiceTest {
         when(applicationRepository.findById(100L)).thenReturn(Optional.empty());
 
         var thrown = assertThrows(ApplicationNotFoundException.class,
-                () -> service.create(new NoteRequest(100L, "Test note")));
+                () -> service.create(new NoteRequest(100L, "Test Title", "Test note", Arrays.asList("urgent"))));
         assertTrue(thrown.getMessage().contains("Application with id 100 not found"));
 
         verify(applicationRepository, times(1)).findById(100L);
@@ -118,7 +122,9 @@ class NotesServiceTest {
 
         Note note = Note.builder()
                 .id(100L)
+                .title("Test Title")
                 .content("Test note")
+                .tags("urgent,followup")
                 .application(application)
                 .createdAt(now)
                 .updatedAt(now)
@@ -127,10 +133,11 @@ class NotesServiceTest {
         when(applicationRepository.findById(100L)).thenReturn(Optional.of(application));
         when(noteRepository.save(any(Note.class))).thenReturn(note);
 
-        NoteResponse actual = service.create(new NoteRequest(100L, "Test note"));
+        NoteResponse actual = service.create(new NoteRequest(100L, "Test Title", "Test note", Arrays.asList("urgent", "followup")));
 
         assertEquals(note.getId(), actual.id());
         assertEquals(note.getApplication().getId(), actual.applicationId());
+        assertEquals(note.getTitle(), actual.title());
         assertEquals(note.getContent(), actual.content());
         assertEquals(note.getCreatedAt(), actual.createdAt());
         assertEquals(note.getUpdatedAt(), actual.updatedAt());
@@ -172,7 +179,9 @@ class NotesServiceTest {
 
         Note noteOne = Note.builder()
                 .id(100L)
+                .title("Test Title One")
                 .content("Test note one")
+                .tags("urgent")
                 .application(application)
                 .createdAt(now)
                 .updatedAt(now)
@@ -180,7 +189,9 @@ class NotesServiceTest {
 
         Note noteTwo = Note.builder()
                 .id(101L)
+                .title("Test Title Two")
                 .content("Test note two")
+                .tags("followup")
                 .application(application)
                 .createdAt(now)
                 .updatedAt(now)
@@ -188,7 +199,9 @@ class NotesServiceTest {
 
         Note noteThree = Note.builder()
                 .id(102L)
+                .title("Test Title Three")
                 .content("Test note three")
+                .tags("urgent,followup")
                 .application(application)
                 .createdAt(now)
                 .updatedAt(now)
@@ -198,21 +211,27 @@ class NotesServiceTest {
         NoteResponse responseOne = new NoteResponse(
                 noteOne.getId(),
                 noteOne.getApplication().getId(),
+                noteOne.getTitle(),
                 noteOne.getContent(),
+                List.of("urgent"),
                 noteOne.getCreatedAt(),
                 noteOne.getUpdatedAt());
 
         NoteResponse responseTwo = new NoteResponse(
                 noteTwo.getId(),
                 noteTwo.getApplication().getId(),
+                noteTwo.getTitle(),
                 noteTwo.getContent(),
+                List.of("followup"),
                 noteTwo.getCreatedAt(),
                 noteTwo.getUpdatedAt());
 
         NoteResponse responseThree = new NoteResponse(
                 noteThree.getId(),
                 noteThree.getApplication().getId(),
+                noteThree.getTitle(),
                 noteThree.getContent(),
+                Arrays.asList("urgent", "followup"),
                 noteThree.getCreatedAt(),
                 noteThree.getUpdatedAt());
 

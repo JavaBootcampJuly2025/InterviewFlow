@@ -90,8 +90,8 @@ class ApplicationServiceImplTest {
         applications = List.of(app1, app2);
 
         dtos = List.of(
-                new ApplicationListDTO(1L, APPLIED, "Acme Corp", "https://acme.example", "Software Engineer", now, now, now, true, now),
-                new ApplicationListDTO(2L, REJECTED, "Globex", "https://globex.example", "Business Analyst", now, now, now, true, now)
+                new ApplicationListDTO(1L, APPLIED, "Acme Corp", "https://acme.example", "Software Engineer", "NY", now, now, now, true, now),
+                new ApplicationListDTO(2L, REJECTED, "Globex", "https://globex.example", "Business Analyst","NY", now, now, now, true, now)
         );
     }
 
@@ -144,6 +144,7 @@ class ApplicationServiceImplTest {
                 savedApp.getCompanyName(),
                 savedApp.getCompanyLink(),
                 savedApp.getPosition(),
+                savedApp.getLocation(),
                 savedApp.getApplyDate(),
                 savedApp.getCreatedAt(),
                 savedApp.getUpdatedAt(),
@@ -235,6 +236,7 @@ class ApplicationServiceImplTest {
                 "New Name",
                 "oldlink.com",
                 "Old Position",
+                "NY",
                 null,
                 null,
                 null,
@@ -290,6 +292,7 @@ class ApplicationServiceImplTest {
                 "New",
                 "old.com",
                 "NewPosition",
+                "NY",
                 null,
                 null,
                 null,
@@ -356,6 +359,7 @@ class ApplicationServiceImplTest {
                 "OldName",
                 "oldlink.com",
                 "OldPosition",
+                "NY",
                 null,
                 null,
                 null,
