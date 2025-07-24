@@ -9,4 +9,3 @@ spring:
 interviewFlow:
   frontend:
     frontendDomain: ${FRONTEND_URL}
-    frontendPort: ${FRONTEND_PORT}
