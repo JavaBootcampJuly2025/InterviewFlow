@@ -27,5 +27,8 @@ spring:
 # Application-specific configuration for Development
 app:
   notification:
-    batch-size: ${NOTIFICATION_BATCH_SIZE:50}
-    enabled: ${NOTIFICATION_ENABLED:true}
+    batch-size: ${NOTIFICATION_BATCH_SIZE}
+    enabled: ${NOTIFICATION_ENABLED}
+    cleanup:
+      enabled: ${NOTIFICATION_CLEANUP_ENABLED}
+      retention-days: ${NOTIFICATION_CLEANUP_RETENTION_DAYS}

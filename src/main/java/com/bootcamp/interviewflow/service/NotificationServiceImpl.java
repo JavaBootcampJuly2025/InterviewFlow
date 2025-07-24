@@ -37,6 +37,12 @@ public class NotificationServiceImpl implements NotificationService {
     @Value("${app.notification.batch-size}")
     private int batchSize;
 
+    @Value("${app.notification.cleanup.retention-days}")
+    private int retentionDays;
+
+    @Value("${app.notification.cleanup.enabled}")
+    private boolean cleanupEnabled;
+
     @Override
     @Transactional
     public void scheduleInterviewReminder(Application application, User user) {
@@ -110,6 +116,22 @@ public class NotificationServiceImpl implements NotificationService {
         if (processedCount > 0) {
             log.info("Processed {} notifications", processedCount);
         }
+    }
+
+    @Scheduled(cron = "0 0 2 * * *")// every day at 2am
+    @Transactional
+    public void cleanupOldSentNotifications() {
+        if (!cleanupEnabled) {
+            log.debug("Notification cleanup is disabled");
+            return;
+        }
+
+        LocalDateTime cutoffTime = LocalDateTime.now().minusDays(retentionDays);
+
+        // Delete old sent notifications
+        notificationRepository.deleteByStatusAndScheduledTimeBefore(
+                NotificationStatus.SENT, cutoffTime
+        );
     }
 
     private void processSingleNotification(Notification notification) {

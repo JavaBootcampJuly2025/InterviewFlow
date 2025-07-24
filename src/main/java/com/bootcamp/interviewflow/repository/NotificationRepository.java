@@ -26,7 +26,8 @@ public interface NotificationRepository extends JpaRepository<Notification, Long
     @Query("UPDATE Notification n SET n.status = 'CANCELLED' WHERE n.applicationId = :applicationId AND n.status = 'PENDING'")
     void cancelPendingNotificationsByApplicationId(@Param("applicationId") Long applicationId);
 
-    long countByStatus(NotificationStatus status);
-
     boolean existsByApplicationIdAndStatus(Long applicationId, NotificationStatus status);
+
+    @Modifying
+    void deleteByStatusAndScheduledTimeBefore(NotificationStatus status, LocalDateTime cutoffTime);
 }
