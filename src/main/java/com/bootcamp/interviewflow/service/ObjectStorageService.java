@@ -12,6 +12,17 @@ import java.util.UUID;
  */
 public interface ObjectStorageService {
 
+    String FAILED_TO_DELETE_FILE = "Failed to delete file";
+    String FAILED_TO_DOWNLOAD_FILE = "Failed to download file";
+    String FAILED_TO_READ_FILE = "Failed to read file";
+    String FAILED_TO_UPLOAD_FILE = "Failed to upload file";
+    String FILE_IS_REQUIRED = "File is required";
+    String MAX_FILE_SIZE_5_MB_IS_ALLOWED = "Max file size 5MB is allowed";
+    String NO_ACCESS_OR_FILE = "No access or file";
+    String ONLY_PDF_IS_ALLOWED = "Only PDF is allowed";
+    String USER_NOT_FOUND = "User not found";
+    int ALLOWED_SIZE = 5 * 1024 * 1024;
+
     /**
      * Uploads a file for a specific user.
      *

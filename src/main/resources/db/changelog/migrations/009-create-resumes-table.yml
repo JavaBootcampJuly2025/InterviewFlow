@@ -28,7 +28,7 @@ databaseChangeLog:
                   constraints:
                     nullable: false
               - column:
-                  name: file_size
+                  name: size
                   type: bigint
                   constraints:
                     nullable: false
