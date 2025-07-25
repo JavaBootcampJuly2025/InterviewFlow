@@ -12,3 +12,10 @@ spring:
 interviewFlow:
   frontend:
     frontendDomain: ${FRONTEND_URL}
+logging:
+  file:
+    name: logs/app.log
+    path: logs
+  level:
+    root: INFO
+    com.bootcamp: INFO

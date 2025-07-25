@@ -8,7 +8,6 @@ spring:
     url: jdbc:postgresql://${POSTGRES_HOST}:${POSTGRES_PORT}/${POSTGRES_DB}
     username: ${POSTGRES_USER}
     password: ${POSTGRES_PASSWORD}
-    
   mail:
     host: smtp.gmail.com
     port: 465
@@ -22,7 +21,6 @@ spring:
             enable: true
           ssl:
             enable: true
-
 app:
   notification:
     batch-size: ${NOTIFICATION_BATCH_SIZE}
@@ -30,7 +28,6 @@ app:
     cleanup:
       enabled: ${NOTIFICATION_CLEANUP_ENABLED}
       retention-days: ${NOTIFICATION_CLEANUP_RETENTION_DAYS}
-
 minio:
   url: ${MINIO_URL}
   port: ${MINIO_PORT}

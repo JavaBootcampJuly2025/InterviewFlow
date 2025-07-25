@@ -31,7 +31,10 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class ApplicationServiceImplTest {
@@ -93,8 +96,30 @@ class ApplicationServiceImplTest {
         applications = List.of(app1, app2);
 
         dtos = List.of(
-                new ApplicationListResponse(1L, APPLIED, "Acme Corp", "https://acme.example", "Software Engineer", "NY", now, now, now, true, now),
-                new ApplicationListResponse(2L, REJECTED, "Globex", "https://globex.example", "Business Analyst","NY", now, now, now, true, now)
+                new ApplicationListResponse(1L,
+                        APPLIED,
+                        "Acme Corp",
+                        "https://acme.example",
+                        "Software Engineer",
+                        "NY",
+                        now,
+                        now,
+                        now,
+                        true,
+                        "uuid",
+                        now),
+                new ApplicationListResponse(2L,
+                        REJECTED,
+                        "Globex",
+                        "https://globex.example",
+                        "Business Analyst",
+                        "NY",
+                        now,
+                        now,
+                        now,
+                        true,
+                        "uuid",
+                        now)
         );
     }
 
@@ -436,7 +461,7 @@ class ApplicationServiceImplTest {
         Sort sort = Sort.by(Sort.Direction.ASC, "companyName");
 
         List<Application> filteredApps = List.of(app1);
-        List<ApplicationListResponse> mappedDTOs = List.of(dtos.get(0));
+        List<ApplicationListResponse> mappedDTOs = List.of(dtos.getFirst());
 
         when(applicationRepository.findAllByUserIdAndStatus(userId, APPLIED, sort)).thenReturn(filteredApps);
         when(applicationListMapper.toApplicationListDTOs(filteredApps)).thenReturn(mappedDTOs);
